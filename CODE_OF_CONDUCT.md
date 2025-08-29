@@ -1,48 +1,48 @@
-# Código de Conduta para Colaboradores
+# Contributor Code of Conduct
 
-## Nosso Compromisso
+## Our Commitment
 
-Nós, como membros, contribuidores e líderes, nos comprometemos a fazer da participação em nossa comunidade uma experiência livre de assédio para todos, independentemente de idade, corpo, tamanho, deficiência visível ou invisível, etnia, características sexuais, identidade e expressão de gênero, nível de experiência, educação, status socioeconômico, nacionalidade, aparência pessoal, raça, religião ou identidade e orientação sexual.
+We, as members, contributors, and leaders, pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socioeconomic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-Comprometemo-nos a agir e interagir de maneiras que contribuam para uma comunidade aberta, acolhedora, diversificada, inclusiva e saudável.
+We commit to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
-## Nossos Padrões
+## Our Standards
 
-Exemplos de comportamento que contribuem para um ambiente positivo para a nossa comunidade incluem:
+Examples of behavior that contribute to a positive environment for our community include:
 
-* Demonstrar empatia e bondade para com outras pessoas
-* Respeitar opiniões, pontos de vista e experiências diferentes
-* Dar e aceitar feedback construtivo de forma graciosa
-* Assumir a responsabilidade e pedir desculpas àqueles afetados por nossos erros, e aprender com a experiência
-* Focar no que é melhor não apenas para nós como indivíduos, mas para a comunidade em geral
+* Demonstrating empathy and kindness toward other people
+* Respecting differing opinions, viewpoints, and experiences
+* Giving and gracefully accepting constructive feedback
+* Taking responsibility and apologizing to those affected by our mistakes, and learning from the experience
+* Focusing on what is best not just for us as individuals, but for the community overall
 
-Exemplos de comportamento inaceitável incluem:
+Examples of unacceptable behavior include:
 
-* O uso de linguagem ou imagens sexualizadas, e atenção ou avanços sexuais de qualquer tipo
-* Comentários insultuosos/depreciativos e ataques pessoais ou políticos (Trolling)
-* Assédio público ou privado
-* Publicar informações privadas de outras pessoas, como um endereço físico ou de e-mail, sem a sua permissão explícita
-* Outras condutas que poderiam ser razoavelmente consideradas inadequadas em um ambiente profissional
+* The use of sexualized language or imagery, and sexual attention or advances of any kind
+* Insulting/deprecating comments and personal or political attacks (Trolling)
+* Public or private harassment
+* Publishing others’ private information, such as a physical or email address, without their explicit permission
+* Other conduct which could reasonably be considered inappropriate in a professional setting
 
-## Aplicação das Nossas Responsabilidades
+## Enforcement of Our Responsibilities
 
-Os líderes da comunidade são responsáveis por esclarecer e aplicar nossos padrões de comportamento aceitável e tomarão ações corretivas apropriadas e justas em resposta a qualquer comportamento que considerem inadequado, ameaçador, ofensivo ou prejudicial.
+Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior they deem inappropriate, threatening, offensive, or harmful.
 
-Os líderes da comunidade têm o direito e a responsabilidade de remover, editar ou rejeitar comentários, commits, código, edições na wiki, issues e outras contribuições que não estejam alinhadas com este Código de Conduta, e comunicarão os motivos das decisões de moderação quando apropriado.
+Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned with this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
 
-## Escopo
+## Scope
 
-Este Código de Conduta se aplica dentro de todos os espaços da comunidade e também se aplica quando um indivíduo está representando oficialmente a comunidade em espaços públicos. Exemplos de representação da nossa comunidade incluem o uso de um endereço de e-mail oficial, a postagem através de uma conta oficial de mídia social ou atuar como um representante nomeado em um evento online ou offline.
+This Code of Conduct applies within all community spaces and also applies when an individual is officially representing the community in public spaces. Examples of representing our community include using an official e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event.
 
-## Aplicação
+## Enforcement
 
-Casos de comportamento abusivo, de assédio ou de outra forma inaceitável podem ser relatados aos líderes da comunidade responsáveis pela aplicação em **readowl25@gmail.com**. Todas as queixas serão revistas e investigadas prontamente e de forma justa.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at **readowl25@gmail.com**. All complaints will be reviewed and investigated promptly and fairly.
 
-Todos os líderes da comunidade são obrigados a respeitar a privacidade e a segurança do relator de qualquer incidente.
+All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 
-## Atribuição
+## Attribution
 
-Este Código de Conduta é adaptado do [Contributor Covenant][homepage], versão 2.1, disponível em [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html][v2.1].
+This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 2.1, available at [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html][v2.1].
 
 [homepage]: https://www.contributor-covenant.org
 [v2.1]: https://www.contributor-covenant.org/version/2/1/code_of_conduct.html

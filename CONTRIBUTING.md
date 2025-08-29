@@ -1,37 +1,37 @@
-# Guia de Contribuição para o Readowl
+# Contribution Guide for Readowl
 
-Ficamos muito felizes com seu interesse em contribuir com o Readowl! Toda ajuda é bem-vinda. Para garantir que o processo seja tranquilo para todos, por favor, leia este guia.
+We are very happy with your interest in contributing to Readowl! All help is welcome. To ensure the process is smooth for everyone, please read this guide.
 
-## Código de Conduta
+## Code of Conduct
 
-Este projeto e todos que participam dele são regidos pelo nosso [Código de Conduta](CODE_OF_CONDUCT.md). Ao participar, você concorda em seguir seus termos.
+This project and all its participants are governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to abide by its terms.
 
-## Como Posso Contribuir?
+## How Can I Contribute?
 
-### Reportando Bugs
+### Reporting Bugs
 
-Se você encontrar um bug, por favor, certifique-se de que ele já não foi reportado abrindo uma busca nas [Issues](https://github.com/SEU-USUARIO/SEU-REPOSITORIO/issues).
+If you find a bug, please make sure it hasn't already been reported by searching the [Issues](https://github.com/YOUR-USER/YOUR-REPO/issues).
 
-Se não houver um relatório existente, abra uma nova issue. Seja o mais detalhado possível. Inclua o seguinte:
+If there is no existing report, open a new issue. Be as detailed as possible. Include the following:
 
-* Uma descrição clara e concisa do que é o bug.
-* Passos para reproduzir o comportamento.
-* O que você esperava que acontecesse.
-* O que de fato aconteceu.
-* Capturas de tela, se aplicável.
+* A clear and concise description of the bug.
+* Steps to reproduce the behavior.
+* What you expected to happen.
+* What actually happened.
+* Screenshots, if applicable.
 
-### Sugerindo Melhorias
+### Suggesting Enhancements
 
-Se você tem uma ideia para uma nova funcionalidade ou uma melhoria, abra uma [issue](https://github.com/SEU-USUARIO/SEU-REPOSITORIO/issues) para que possamos discuti-la. Descreva sua ideia com clareza, explicando o problema que ela resolve e a solução que você propõe.
+If you have an idea for a new feature or improvement, open an [issue](https://github.com/YOUR-USER/YOUR-REPO/issues) so we can discuss it. Clearly describe your idea, explaining the problem it solves and the solution you propose.
 
-### Enviando um Pull Request (PR)
+### Submitting a Pull Request (PR)
 
-1.  **Faça um Fork** do repositório clicando no botão "Fork" no canto superior direito.
-2.  **Clone** o seu fork para a sua máquina local: `git clone https://github.com/SEU-USUARIO/readowl-repo.git`
-3.  **Crie uma Branch** para a sua modificação. Use um nome descritivo (ex: `git checkout -b feat/nova-autenticacao`).
-4.  **Faça suas alterações** no código.
-5.  **Adicione e Commite** suas alterações. Consulte o [Padrão de commits](../README.md#padrão-de-commits) no README para saber como escrever sua mensagem de commit.
-6.  **Envie (Push)** suas alterações para a sua branch: `git push origin <branch-name>`
-7.  **Abra um Pull Request** no repositório original do Readowl. Descreva claramente o que seu PR faz e por quê.
+1.  **Fork** the repository by clicking the "Fork" button in the top right corner.
+2.  **Clone** your fork to your local machine: `git clone https://github.com/YOUR-USER/readowl-repo.git`
+3.  **Create a Branch** for your modification. Use a descriptive name (e.g., `git checkout -b feat/new-authentication`).
+4.  **Make your changes** to the code.
+5.  **Add and Commit** your changes. See the [Commit Guidelines](../README.md#padrão-de-commits) in the README for how to write your commit message.
+6.  **Push** your changes to your branch: `git push origin <branch-name>`
+7.  **Open a Pull Request** in the original Readowl repository. Clearly describe what your PR does and why.
 
-Aguarde a revisão do seu PR. Podemos pedir algumas alterações antes de aprová-lo. Agradecemos sua paciência e sua contribuição!
+Wait for your PR to be reviewed. We may request some changes before approving it. Thank you for your patience and your contribution!
