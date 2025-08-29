@@ -2,212 +2,229 @@
 
 -----
 
-Projeto web de uma plataforma de publicação e leitura de livros, focado em fomentar a literatura amadora no Brasil e aproximar leitores de escritores iniciantes.  
-Desenvolvido utilizando **React**, **Vite** e **Tailwind CSS**.
+A web platform for publishing and reading books, focused on promoting amateur literature in Brazil and connecting readers with aspiring writers.  
+Developed using **Next.js**, **TypeScript**, and **Tailwind CSS**.
 
 -----
 
-## 📋 Sobre o Projeto
+## 📋 About the Project
 
-O **Readowl** nasce da necessidade de criar um espaço para acolher escritores iniciantes e fortalecer a cultura literária no Brasil.  
-A plataforma busca solucionar problemas comuns em outros sistemas, como a divulgação ineficiente e interfaces confusas, oferecendo um ambiente confiável para autores publicarem suas obras gratuitamente e receberem feedback.
+**Readowl** was created to provide a welcoming space for new writers and strengthen the literary culture in Brazil.  
+The platform aims to solve common issues found in other systems, such as inefficient promotion and confusing interfaces, by offering a reliable environment for authors to publish their works for free and receive feedback.
 
-### 👥 Equipe do Projeto
+### 👥 Project Team
 
-| Nome | Função |
+| Name | Role |
 |---|---|
-| Alexandre Monteiro Londe | Desenvolvedor |
-| Gabriel Lucas Silva Seabra | Desenvolvedor |
-| Jussie Lopes da Silva | Desenvolvedor |
-| Luiz Alberto Cury Andalécio | Desenvolvedor |
-| Vitor Gabriel Resende Lopes Oliveira | Desenvolvedor |
+| Luiz Alberto Cury Andalécio | Author & Main Developer (Next Project) |
+| Alexandre Monteiro Londe | Contributor (React project) |
+| Gabriel Lucas Silva Seabra | Contributor (React project) |
+| Jussie Lopes da Silva | Contributor (React project) |
+| Vitor Gabriel Resende Lopes Oliveira | Contributor (React project) |
 
-*Tabela adaptada do documento "PP - LabESOF"*
+*The contributors above are developers from a separate pure React project who provide indirect support and insights to the development of this Next.js project.*
 
-### 🎯 Funcionalidades Principais
 
-- Cadastro e login de usuários com autenticação segura e recuperação de senha.
-- Criação, visualização, edição e exclusão de livros, volumes e capítulos.
-- Sistema de busca avançada e filtros por gênero, popularidade e data.
-- Biblioteca pessoal para favoritar obras e receber notificações.
-- Interação através de avaliações, curtidas e comentários em livros e capítulos.
-- Painel de administração para gerenciamento de usuários e moderação de conteúdo.
+### 🎯 Main Features
 
-### 🛠️ Tecnologias Utilizadas
+- User registration and login with secure authentication and password recovery.
+- Create, view, edit, and delete books, volumes, and chapters.
+- Advanced search system with filters by genre, popularity, and date.
+- Personal library to favorite works and receive notifications.
+- Interaction through ratings, likes, and comments on books and chapters.
+- Admin panel for user management and content moderation.
 
-- **Interface e Estrutura**:
-    - Next.js (React + roteamento nativo)
-    - TypeScript
-- **Estilização**:
-    - Tailwind CSS
-- **Gerenciamento de Dados e Formulários**:
-    - TanStack Query
-    - React Hook Form
-- **Editor de Texto**:
-    - TipTap
-- **Ambiente**:
-    - Git
-    - npm
-    - VS Code
+### 🛠️ Technologies Used
 
-### 📁 Estrutura do Projeto (Sugestão)
+#### **Frontend**
+- **Next.js**: React framework for server-side rendering, routing, and API routes.
+- **Next Router**: Built-in routing for navigation (Home, Book, Profile, etc.).
+- **Tailwind CSS**: Fast, responsive styling following the visual identity.
+- **TanStack Query**: Backend communication, caching, and data updates.
+- **React Hook Form**: All forms (login, registration, publishing).
+- **TipTap**: Rich text editor for authors to write chapters.
 
-- `public/` – Imagens, fontes e arquivos estáticos.
-- `src/` – Código-fonte da aplicação.
-    - `app/` – Rotas e páginas do Next.js.
-    - `assets/` – Arquivos de mídia e estilos globais.
-    - `components/` – Componentes React reutilizáveis.
-    - `hooks/` – Hooks personalizados.
-    - `services/` – Lógica de comunicação com a API.
-    - `styles/` – CSS das páginas da aplicação.
-    - `utils/` – Funções utilitárias.
+#### **Backend**
+- **Node.js (Next.js API Routes)**: Server and business logic.
+- **TypeScript**: Static typing to prevent bugs.
+- **Prisma**: ORM for PostgreSQL database communication.
+- **Zod**: Consistent data validation (front and back).
+- **JWT + Bcrypt.js**: Authentication and password security.
+- **Multer + Cloudinary**: Upload and storage for book covers and profile photos.
+- **Nodemailer**: Email sending for password recovery.
+
+#### **Database**
+- **PostgreSQL**: Data storage.
+
+#### **Environment**
+- **Docker**: Containerization for development and deployment.
+- **Git**: Version control.
+- **VS Code**: Recommended editor.
+
+**VS Code Extensions:** Prisma, ESLint, Prettier - Code formatter, Tailwind CSS IntelliSense, EchoAPI
+
+**Docker Database URL:**
+```env
+DATABASE_URL="postgresql://docker:docker@localhost:5432/readowl?schema=public"
+```
+
+**Dev script example:**
+```json
+"dev": "node --loader ts-node/esm --watch src/server.ts"
+```
+
+### 📁 Suggested Project Structure
+
+- `public/` – Images, fonts, and static files.
+- `src/` – Application source code.
+    - `app/` – Next.js routes and pages.
+    - `assets/` – Media files and global styles.
+    - `components/` – Reusable React components.
+    - `hooks/` – Custom hooks.
+    - `services/` – API communication logic.
+    - `styles/` – Application CSS.
+    - `utils/` – Utility functions.
 
 -----
 
-## 📓 Padrão de Commits
+## 📓 Commit Convention
 
-Este repositório adota uma variação do padrão [Conventional Commits](https://www.conventionalcommits.org/), adaptada para integração com o Jira. Essa abordagem facilita a rastreabilidade das tarefas, mantém o histórico de commits claro e organizado, e contribui para a automação de versões e geração de changelogs.
+This repository follows a variation of the [Conventional Commits](https://www.conventionalcommits.org/) standard. This approach helps keep the commit history clear and organized, and contributes to version automation and changelog generation.
 
-### ✔️ Formato
+### ✔️ Format
 
 ```bash
-<ID da task no Jira> <tipo>(escopo):<ENTER>
-<mensagem breve sobre o que o commit faz>
+<type>(scope):<ENTER>
+<short message describing what the commit does>
 ```
 
-### 📍 O que é o "tipo"?
+### 📍 What is the "type"?
 
-    * `feat`: Nova funcionalidade
-    * `fix`: Correção de bugs
-    * `docs`: Alterações na documentação
-    * `style`: Ajustes de estilização (css, cores, imagens, etc.)
-    * `refactor`: Refatoração de código sem mudança de comportamento
-    * `perf`: Melhorias de performance
-    * `test`: Criação ou modificação de testes
-    * `build`: Mudanças que afetam o build (dependências, scripts)
-    * `ci`: Configurações de integração contínua
+    * `feat`: New feature
+    * `fix`: Bug fix
+    * `docs`: Documentation changes
+    * `style`: Styling adjustments (css, colors, images, etc.)
+    * `refactor`: Code refactoring without behavior change
+    * `perf`: Performance improvements
+    * `test`: Creating or modifying tests
+    * `build`: Changes that affect the build (dependencies, scripts)
+    * `ci`: Continuous integration configurations
 
-### 📍 O que é o "escopo"?
+### 📍 What is the "scope"?
 
-Define o título do commit referente à parte do projeto afetada, como um módulo (`criptografia`), uma página (`login-page`), ou uma feature (`carrossel`).
+Defines the part of the project affected by the commit, such as a module (`encryption`), a page (`login-page`), or a feature (`carousel`).
 
-### 📝 Exemplo
+### 📝 Example
 
 ```bash
-git commit -am "RO-25 refactor(criptografia):
-> Aprimora a indentação."
+git commit -am "refactor(encryption):
+> Improves indentation."
 
-git commit -am "RO-12 fix(login-page):
-> Corrige bug de login nulo."
+git commit -am "fix(login-page):
+> Fixes null login bug."
 
-git commit -am "RO-47 feat(carrossel):
-> Implementa o carrossel na página inicial."
+git commit -am "feat(carousel):
+> Implements carousel on the home page."
 ```
 
 -----
 
-## 🪢 Padrão de Branches
+## 🪢 Branching Convention
 
-Este documento descreve o padrão de versionamento e a organização das branches do projeto Readowl, utilizando Git em conjunto com o Jira para um fluxo de trabalho mais organizado e rastreável.
+This document describes the versioning and branch organization standard for the Readowl project, using Git for a more organized and traceable workflow.
 
-## Índice
+## Index
 
-1.  [Integração com o Jira](https://www.google.com/search?q=%231-integra%C3%A7%C3%A3o-com-o-jira)
-2.  [Padrão para Nomenclatura de Branches](https://www.google.com/search?q=%232-padr%C3%A3o-para-nomenclatura-de-branches)
-3.  [Branches Locais vs. Remotas (Origin)](https://www.google.com/search?q=%233-branches-locais-vs-remotas-origin)
-4.  [Fluxo de Desenvolvimento](https://www.google.com/search?q=%234-fluxo-de-desenvolvimento)
-5.  [Padrão de Commits](https://www.google.com/search?q=%235-padr%C3%A3o-de-commits)
-6.  [Processo de Pull Request (PR)](https://www.google.com/search?q=%236-processo-de-pull-request-pr)
+1.  [Branch Naming Convention](https://www.google.com/search?q=%231-branch-naming-convention)
+2.  [Local vs. Remote Branches (Origin)](https://www.google.com/search?q=%232-local-vs-remote-branches-origin)
+3.  [Development Workflow](https://www.google.com/search?q=%233-development-workflow)
+4.  [Commit Convention](https://www.google.com/search?q=%234-commit-convention)
+5.  [Pull Request (PR) Process](https://www.google.com/search?q=%235-pull-request-pr-process)
 
 -----
 
-### 1. Integração com o Jira
+### 1. Branch Naming Convention
 
-Para garantir que nosso trabalho no código-fonte esteja sempre conectado às tarefas planejadas no Jira, utilizamos um sistema de rastreamento simples. Cada tarefa no Jira possui um identificador único (ID), como `RO-17`, `RO-25`, etc.
+Every new branch created for task development should strictly follow the pattern below to ensure consistency and clarity about the purpose of each branch.
 
-É **obrigatório** que cada branch e commit relacionado a uma tarefa comece com o ID correspondente, pois isso permite que o Jira identifique e vincule automaticamente as branches e os commits à tarefa, facilitando o acompanhamento do progresso e a revisão do trabalho realizado.
+**Pattern:** `<short-lowercase-description-with-hyphens>`
 
-### 2. Padrão para Nomenclatura de Branches
+The description should be short and use hyphens to separate words.
 
-Toda nova branch criada para o desenvolvimento de uma tarefa deve seguir estritamente o padrão abaixo para garantir consistência e clareza sobre o propósito de cada branch.
+**Branch name examples:**
 
-**Padrão:** `<ID da task>-<nome descritivo em minusculo>`
+- `landing-page`
+- `backend-configuration`
+- `login-form`
 
-O nome descritivo deve ser curto e usar hífens para separar as palavras.
+**Command to create a branch:**
 
-**Exemplos de nomes de branch:**
-
-- `RO-17-landing-page`
-- `RO-12-configuracao-de-backend`
-- `RO-25-formulario-de-login`
-
-**Comando para criar a branch:**
-
-Para criar uma nova branch a partir da `dev` e já mudar para ela, utilize o comando:
+To create a new branch from `dev` and switch to it:
 
 ```bash
-git checkout -b RO-17-landing-page
+git checkout -b landing-page
 ```
 
-### 3. Branches Locais vs. Remotas (Origin)
+### 2. Local vs. Remote Branches (Origin)
 
-É fundamental entender a diferença entre uma branch em sua máquina (local) e a branch no repositório remoto (origin).
+It's important to understand the difference between a branch on your machine (local) and the branch on the remote repository (origin).
 
-- **Branch Local:** É uma versão do repositório que reside exclusivamente no seu computador. É nela que você trabalha, desenvolve o código, testa e faz commits.
-- **Branch Remota (origin):** É a versão da branch que está armazenada no servidor central (como GitHub, GitLab, etc.). Ela serve como um ponto de sincronização para todos os membros da equipe.
+- **Local Branch:** A version of the repository that exists only on your computer. This is where you work, develop code, test, and make commits.
+- **Remote Branch (origin):** The version of the branch stored on the central server (like GitHub, GitLab, etc.). It serves as a synchronization point for all team members.
 
-Embora a sua branch local e a branch remota correspondente tenham o **mesmo nome** (ex: `RO-17-landing-page`), elas são entidades diferentes. Você desenvolve na sua branch local, e quando deseja compartilhar seu progresso ou fazer um backup, você envia seus commits para a branch remota com o comando `git push`.
+Although your local branch and the corresponding remote branch have the **same name** (e.g., `landing-page`), they are different entities. You develop on your local branch, and when you want to share your progress or back up your work, you push your commits to the remote branch using `git push`.
 
-**Fluxo básico:**
+**Basic workflow:**
 
-1. Você cria a branch `RO-17-landing-page` **localmente**.
-2. Você desenvolve e faz seus commits nessa branch local.
-3. Você envia suas alterações para o servidor remoto com `git push -u origin RO-17-landing-page`.
+1. You create the `landing-page` branch **locally**.
+2. You develop and commit on this local branch.
+3. You push your changes to the remote repository with `git push`.
 
-> OBS: O parâmetro `-u` (ou `--set-upstream`) faz com que sua branch local seja vinculada à branch remota recém-criada, facilitando futuros comandos `git push` e `git pull` sem precisar especificar o nome da branch.
+> Note: The `-u` (or `--set-upstream`) parameter links your local branch to the newly created remote branch, making future `git push` and `git pull` commands easier.
 
-### 4. Fluxo de Desenvolvimento
+### 3. Development Workflow
 
-1. **Sincronize sua branch `dev` local:**
+1. **Sync your local `dev` branch:**
         ```bash
         git checkout dev
         git pull origin dev
         ```
-2. **Crie a branch da sua tarefa:**
-        Crie sua branch local a partir da `dev` atualizada, seguindo o padrão de nomenclatura.
+2. **Create your task branch:**
+        Create your local branch from the updated `dev`, following the naming convention.
         ```bash
-        git checkout -b RO-25-formulario-de-login
+        git checkout -b login-form
         ```
-3. **Desenvolva e faça commits:**
-        Trabalhe no código e faça commits claros e concisos. Lembre-se de seguir o padrão de commits.
+3. **Develop and commit:**
+        Work on the code and make clear, concise commits. Remember to follow the commit convention.
         ```bash
         git add .
-        git commit -m "RO-25 feat(login-form):
-        > Adiciona validação de campos"
+        git commit -m "feat(login-form):
+        > Adds field validation"
         ```
-4. **Envie seu trabalho para o repositório remoto:**
-        Faça o push dos seus commits para a branch remota de mesmo nome.
+4. **Push your work to the remote repository:**
+        Push your commits to the remote branch with the same name.
         ```bash
-        git push origin -u RO-25-formulario-de-login
+        git push origin -u login-form
         ```
 
-### 5. Mantenha o Padrão de Commits
+### 4. Follow the Commit Convention
 
-[Consulte o padrão de commits detalhado acima](#padrão-de-commits) para garantir que suas mensagens estejam claras, rastreáveis e referenciem sempre o ID da task correspondente.
+[See the detailed commit convention above](#commit-convention) to ensure your messages are clear, traceable, and always reference the relevant part of the project.
 
-### 6. Processo de Pull Request (PR)
+### 5. Pull Request (PR) Process
 
-O Pull Request (PR) é o mecanismo para revisar e integrar o código de uma branch em outra.
+A Pull Request (PR) is the mechanism for reviewing and integrating code from one branch into another.
 
-- **Ao finalizar uma tarefa:**
-        Quando o desenvolvimento na branch da sua tarefa (ex: `RO-25-formulario-de-login`) estiver concluído e testado, você deve abrir um **Pull Request** da sua branch para a branch `dev`.
-        Isso serve para:
-        1. Permitir a revisão do código (Code Review) por outros membros da equipe.
-        2. Manter um registro histórico de todas as alterações integradas.
-        3. Disponibilizar o código da tarefa na `dev` para que outros desenvolvedores possam acessá-lo, caso necessário.
+- **When finishing a task:**
+        When development on your task branch (e.g., `login-form`) is complete and tested, you should open a **Pull Request** from your branch to the `dev` branch.
+        This serves to:
+        1. Allow code review by other team members.
+        2. Keep a historical record of all integrated changes.
+        3. Make the task's code available in `dev` for other developers if needed.
 
-- **Ao final de uma Sprint:**
-        A branch `main` é a nossa branch de produção e deve conter apenas código estável e testado. Portanto, as atualizações na `main` ocorrem apenas no final de cada ciclo de desenvolvimento (Sprint).
-        Ao final da sprint, um **Pull Request** será aberto da branch `dev` para a branch `main`, contendo todas as funcionalidades e correções desenvolvidas durante o ciclo.
+- **At the end of a Sprint:**
+        The `main` branch is the production branch and should only contain stable, tested code. Updates to `main` occur only at the end of each development cycle (Sprint).
+        At the end of the sprint, a **Pull Request** will be opened from the `dev` branch to the `main` branch, containing all features and fixes developed during the cycle.
 
 -----
+

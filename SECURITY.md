@@ -1,25 +1,25 @@
-# Política de Segurança do Readowl
+# Readowl Security Policy
 
-A segurança do nosso projeto é uma prioridade. Agradecemos o esforço da comunidade em descobrir e relatar vulnerabilidades de forma responsável.
+The security of our project is a top priority. We appreciate the community's effort in responsibly discovering and reporting vulnerabilities.
 
-## Versões Suportadas
+## Supported Versions
 
-No momento, apenas a versão mais recente na branch `main` está recebendo ativamente atualizações de segurança.
+Currently, only the latest version on the `main` branch is actively receiving security updates.
 
-| Versão | Suportada          |
-| ------- | ------------------ |
-| latest  | :white_check_mark: |
+| Version | Supported           |
+| ------- | ------------------- |
+| latest  | :white_check_mark:  |
 
-## Como Reportar uma Vulnerabilidade
+## How to Report a Vulnerability
 
-**Por favor, não reporte vulnerabilidades de segurança através de issues públicas no GitHub.**
+**Please do not report security vulnerabilities through public GitHub issues.**
 
-Em vez disso, envie um e-mail para **readowl25@gmail.com**.
+Instead, send an email to **readowl25@gmail.com**.
 
-Inclua o máximo de informações possível no seu relatório:
-* Tipo de vulnerabilidade (ex: Cross-Site Scripting, SQL Injection, etc.).
-* Descrição detalhada do problema.
-* Passos para reproduzir a vulnerabilidade.
-* Potencial impacto.
+Include as much information as possible in your report:
+* Type of vulnerability (e.g., Cross-Site Scripting, SQL Injection, etc.).
+* Detailed description of the issue.
+* Steps to reproduce the vulnerability.
+* Potential impact.
 
-Você receberá uma resposta dentro de 48 horas para confirmar o recebimento do seu relatório. Faremos o nosso melhor para corrigir o problema o mais rápido possível e manteremos você informado sobre o progresso.
+You will receive a response within 48 hours to confirm receipt of your report. We will do our best to fix the issue as quickly as possible and keep you informed of our progress.
