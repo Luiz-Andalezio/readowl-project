@@ -18,8 +18,8 @@ const Header: React.FC = () => {
           <a href="#" className="hover:text-white">Contato</a>
         </div>
         <div className="flex items-center space-x-4">
-          <Button variant="secondary">Logar</Button>
-          <Button variant="primary">Cadastrar</Button>
+          <Button variant="primary">Logar</Button>
+          <Button variant="secondary">Cadastrar</Button>
         </div>
       </nav>
     </header>
