@@ -1,4 +1,4 @@
-import { User as PrismaUser, Role, Book } from '@prisma/client';
+import { User as PrismaUser, Role, /*Book*/ } from '@prisma/client';
 
 // Enum de roles para uso no frontend/backend
 export enum AppRole {
@@ -14,6 +14,6 @@ export type ClientSafeUser = Omit<PrismaUser, 'password' | 'createdAt' | 'update
 
 // Exemplo de tipo com relações (caso use no futuro)
 export type UserWithBooks = SafeUser & {
-  books: Book[];
-  followedBooks: Book[];
+  //books: Book[];
+  //followedBooks: Book[];
 };
