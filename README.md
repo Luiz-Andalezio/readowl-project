@@ -1,4 +1,4 @@
-# 🦉 Readowl (Frontend)
+# 🦉 Readowl
 
 -----
 
