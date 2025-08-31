@@ -6,20 +6,24 @@ import Button from "@/components/ui/Button";
 import GoogleButton from "@/components/ui/GoogleButton";
 
 import { useState } from "react";
+import MagicNotification, { MagicNotificationProps } from "@/components/ui/MagicNotification";
 import { signIn } from "next-auth/react";
 
 function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<{ email?: string; password?: string } | null>(null);
+  const [toasts, setToasts] = useState<MagicNotificationProps[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setLoading(true);
     const res = await signIn("credentials", {
       redirect: false,
@@ -27,11 +31,19 @@ function Login() {
       password: form.password,
     });
     if (res?.error) {
-      setError("Usuário ou senha inválidos.");
+      setError({ email: "Usuário ou senha inválidos.", password: "Usuário ou senha inválidos." });
+      pushToast({ message: 'Credenciais inválidas.', icon: '🔐', bgClass: 'bg-red-600/80' });
     } else {
-      window.location.href = "/home";
+      pushToast({ message: 'Login realizado!', icon: '✅', bgClass: 'bg-green-600/80' });
+      setTimeout(() => { window.location.href = "/home"; }, 400); // permite mostrar feedback
     }
     setLoading(false);
+  };
+
+  const removeToast = (id: string) => setToasts(t => t.filter(n => n.id !== id));
+  const pushToast = (partial: Omit<MagicNotificationProps, 'id' | 'onClose'>) => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts(t => [...t, { id, duration: 5000, ...partial, onClose: removeToast }]);
   };
 
   return (
@@ -41,24 +53,40 @@ function Login() {
           <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={64} height={64} />
           <span className="text-2xl font-bold text-white mt-2">Readowl</span>
         </div>
-        <form onSubmit={handleSubmit}>
+        <GoogleButton onClick={() => signIn("google")}></GoogleButton>
+        <hr />
+        <form onSubmit={handleSubmit} className="mt-4">
           <InputWithIcon
             placeholder="Email"
-            icon={<Image src="/img/svg/auth/person.svg" alt="User icon" className="opacity-50" width={25} height={25}/>} 
+            icon={<Image src="/img/svg/auth/person.svg" alt="User icon" className="opacity-50" width={25} height={25} />}
             name="email"
             autoComplete="username"
             value={form.email}
             onChange={handleChange}
+            error={error?.email}
+            hideErrorText
           />
           <InputWithIcon
             placeholder="Senha"
-            icon={<Image src="/img/svg/auth/key.svg" alt="Passkey icon" className="opacity-50" width={25} height={25} />} 
-            type="password"
+            icon={<Image src="/img/svg/auth/key.svg" alt="Passkey icon" className="opacity-50" width={25} height={25} />}
+            type={showPassword ? "text" : "password"}
             name="password"
             autoComplete="current-password"
             value={form.password}
             onChange={handleChange}
+            error={error?.password}
+            hideErrorText
+            rightIcon={
+              <span onClick={() => setShowPassword(v => !v)}>
+                <Image src={showPassword ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Mostrar senha" width={22} height={22} />
+              </span>
+            }
           />
+          <div className="fixed top-4 right-4 flex flex-col gap-3 z-50 w-full max-w-sm">
+            {toasts.map(t => (
+              <MagicNotification key={t.id} {...t} onClose={removeToast} />
+            ))}
+          </div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <input id="remember" type="checkbox" className="mr-2 accent-readowl-purple" />
@@ -66,17 +94,13 @@ function Login() {
             </div>
             <Link href="#" className="text-readowl-purple-extralight underline hover:text-white text-sm">Esqueci minha senha</Link>
           </div>
-          {error && <div className="text-red-400 text-sm mb-2">{error}</div>}
           <Button type="submit" variant="primary" className="w-full mb-2" disabled={loading}>{loading ? "Logando..." : "Logar"}</Button>
-          <GoogleButton onClick={() => signIn("google")}/>
-          <br />
-          <hr />
         </form>
-        <div className="text-center mt-4">
+        <div className="text-center mt-1">
           <span className="text-white text-sm">Quero criar uma conta. </span>
           <Link href="/register" className="text-readowl-purple-extralight underline hover:text-white text-sm">Cadastrar</Link>
         </div>
-        <div className="text-center mt-2">
+        <div className="text-center mt-1">
           <Link href="/landing" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
         </div>
       </div>
