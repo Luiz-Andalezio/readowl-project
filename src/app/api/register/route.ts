@@ -2,45 +2,54 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcrypt";
 
+// Handles POST requests for user registration
 export async function POST(req: NextRequest) {
-  const { name, email, password } = await req.json();
+    // Parse the request body to extract user data
+    const { name, email, password } = await req.json();
 
-  // Validação básica
-  if (!name || !email || !password) {
-    const errors: { name?: string; email?: string; password?: string } = {};
-    if (!name) errors.name = "Nome de usuário é obrigatório.";
-    if (!email) errors.email = "Email é obrigatório.";
-    if (!password) errors.password = "Senha é obrigatória.";
-    return NextResponse.json({ error: errors }, { status: 400 });
-  }
+    // Basic validation: check if all required fields are present
+    if (!name || !email || !password) {
+        const errors: { name?: string; email?: string; password?: string } = {};
+        if (!name) errors.name = "Username is required.";
+        if (!email) errors.email = "Email is required.";
+        if (!password) errors.password = "Password is required.";
+        // Return error response if any field is missing
+        return NextResponse.json({ error: errors }, { status: 400 });
+    }
 
-  // Validação de formato de email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return NextResponse.json({ error: { email: "Formato de email inválido." } }, { status: 400 });
-  }
+    // Email format validation using regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        // Return error if email format is invalid
+        return NextResponse.json({ error: { email: "Invalid email format." } }, { status: 400 });
+    }
 
-  // Validação de senha forte (mínimo 6 caracteres)
-  if (password.length < 6) {
-    return NextResponse.json({ error: { password: "A senha deve ter pelo menos 6 caracteres." } }, { status: 400 });
-  }
+    // Password strength validation: minimum 6 characters
+    if (password.length < 6) {
+        // Return error if password is too short
+        return NextResponse.json({ error: { password: "Password must be at least 6 characters long." } }, { status: 400 });
+    }
 
-  // Verifica se o email já existe
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) {
-    return NextResponse.json({ error: { email: "Já existe uma conta com este email." } }, { status: 400 });
-  }
+    // Check if a user with the same email already exists in the database
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+        // Return error if email is already registered
+        return NextResponse.json({ error: { email: "An account with this email already exists." } }, { status: 400 });
+    }
 
-  const hashedPassword = await hash(password, 10);
+    // Hash the password before saving to the database for security
+    const hashedPassword = await hash(password, 10);
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role: "USER",
-    },
-  });
+    // Create the new user in the database with the provided data
+    const user = await prisma.user.create({
+        data: {
+            name,
+            email,
+            password: hashedPassword,
+            role: "USER", // Default role assigned to new users
+        },
+    });
 
-  return NextResponse.json({ id: user.id, email: user.email, name: user.name });
+    // Return the created user's basic information (excluding password)
+    return NextResponse.json({ id: user.id, email: user.email, name: user.name });
 }

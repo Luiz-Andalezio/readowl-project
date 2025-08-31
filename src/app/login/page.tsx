@@ -10,37 +10,49 @@ import MagicNotification, { MagicNotificationProps } from "@/components/ui/Magic
 import { signIn } from "next-auth/react";
 
 function Login() {
+  // State for form fields
   const [form, setForm] = useState({ email: "", password: "" });
+  // State to indicate loading during authentication
   const [loading, setLoading] = useState(false);
+  // State for error messages for each field
   const [error, setError] = useState<{ email?: string; password?: string } | null>(null);
+  // State for toast notifications
   const [toasts, setToasts] = useState<MagicNotificationProps[]>([]);
+  // State to toggle password visibility
   const [showPassword, setShowPassword] = useState(false);
 
+  // Handles input changes and resets error state
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError(null);
   };
 
+  // Handles form submission and authentication logic
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    // Attempt to sign in with credentials
     const res = await signIn("credentials", {
       redirect: false,
       email: form.email,
       password: form.password,
     });
     if (res?.error) {
+      // Show error if authentication fails
       setError({ email: "Usuário ou senha inválidos.", password: "Usuário ou senha inválidos." });
       pushToast({ message: 'Credenciais inválidas.', icon: '🔐', bgClass: 'bg-red-600/80' });
     } else {
+      // Show success and redirect after short delay
       pushToast({ message: 'Login realizado!', icon: '✅', bgClass: 'bg-green-600/80' });
-      setTimeout(() => { window.location.href = "/home"; }, 400); // permite mostrar feedback
+      setTimeout(() => { window.location.href = "/home"; }, 400); // Allows feedback to be shown
     }
     setLoading(false);
   };
 
+  // Removes a toast notification by id
   const removeToast = (id: string) => setToasts(t => t.filter(n => n.id !== id));
+  // Adds a new toast notification
   const pushToast = (partial: Omit<MagicNotificationProps, 'id' | 'onClose'>) => {
     const id = Math.random().toString(36).slice(2);
     setToasts(t => [...t, { id, duration: 5000, ...partial, onClose: removeToast }]);
@@ -49,13 +61,17 @@ function Login() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-readowl-purple-extralight">
       <div className="bg-readowl-purple-medium rounded-xl shadow-lg p-8 w-full max-w-md">
+        {/* Logo and title */}
         <div className="flex flex-col items-center mb-6">
           <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={64} height={64} />
           <span className="text-2xl font-bold text-white mt-2">Readowl</span>
         </div>
+        {/* Google authentication button */}
         <GoogleButton onClick={() => signIn("google")}></GoogleButton>
         <hr />
+        {/* Login form */}
         <form onSubmit={handleSubmit} className="mt-4">
+          {/* Email input */}
           <InputWithIcon
             placeholder="Email"
             icon={<Image src="/img/svg/auth/person.svg" alt="User icon" className="opacity-50" width={25} height={25} />}
@@ -66,6 +82,7 @@ function Login() {
             error={error?.email}
             hideErrorText
           />
+          {/* Password input with show/hide toggle */}
           <InputWithIcon
             placeholder="Senha"
             icon={<Image src="/img/svg/auth/key.svg" alt="Passkey icon" className="opacity-50" width={25} height={25} />}
@@ -78,15 +95,17 @@ function Login() {
             hideErrorText
             rightIcon={
               <span onClick={() => setShowPassword(v => !v)}>
-                <Image src={showPassword ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Mostrar senha" width={22} height={22} />
+                <Image src={showPassword ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Show password" width={22} height={22} />
               </span>
             }
           />
+          {/* Toast notifications container */}
           <div className="fixed top-4 right-4 flex flex-col gap-3 z-50 w-full max-w-sm">
             {toasts.map(t => (
               <MagicNotification key={t.id} {...t} onClose={removeToast} />
             ))}
           </div>
+          {/* Remember me and forgot password */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <input id="remember" type="checkbox" className="mr-2 accent-readowl-purple" />
@@ -94,12 +113,17 @@ function Login() {
             </div>
             <Link href="#" className="text-readowl-purple-extralight underline hover:text-white text-sm">Esqueci minha senha</Link>
           </div>
-          <Button type="submit" variant="primary" className="w-full mb-2" disabled={loading}>{loading ? "Logando..." : "Logar"}</Button>
+          {/* Submit button */}
+          <Button type="submit" variant="primary" className="w-full mb-2" disabled={loading}>
+            {loading ? "Logando..." : "Logar"}
+          </Button>
         </form>
+        {/* Registration link */}
         <div className="text-center mt-1">
           <span className="text-white text-sm">Quero criar uma conta. </span>
           <Link href="/register" className="text-readowl-purple-extralight underline hover:text-white text-sm">Cadastrar</Link>
         </div>
+        {/* Back to landing page link */}
         <div className="text-center mt-1">
           <Link href="/landing" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
         </div>

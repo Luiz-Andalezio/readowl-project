@@ -1,19 +1,19 @@
-import { User as PrismaUser, Role, /*Book*/ } from '@prisma/client';
+import { User as PrismaUser, Role /*, Book*/ } from '@prisma/client';
 
-// Enum de roles para uso no frontend/backend
+// Enum for user roles, used both in frontend and backend
 export enum AppRole {
   USER = 'USER',
   ADMIN = 'ADMIN',
 }
 
-// Tipo seguro para uso interno (sem senha)
+// Type for internal use, excludes the password field for safety
 export type SafeUser = Omit<PrismaUser, 'password'>;
 
-// Tipo seguro para expor ao cliente (sem senha, createdAt, updatedAt, emailVerified)
+// Type for exposing user data to the client, excludes sensitive and unnecessary fields
 export type ClientSafeUser = Omit<PrismaUser, 'password' | 'createdAt' | 'updatedAt' | 'emailVerified'>;
 
-// Exemplo de tipo com relações (caso use no futuro)
+// Example type for a user with related books (uncomment and use if you add relations in the future)
 export type UserWithBooks = SafeUser & {
-  //books: Book[];
-  //followedBooks: Book[];
+  // books: Book[]; // List of books owned by the user
+  // followedBooks: Book[]; // List of books followed by the user
 };

@@ -8,7 +8,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button: React.FC<ButtonProps> = ({ children, className, variant = 'primary', ...props }) => {
   const baseStyle = "font-semibold py-2 px-6 rounded-full border-2 transition-colors duration-300";
-  
+
   const styles = {
     primary: "bg-readowl-purple-light text-white font-semibold py-2 px-6 rounded-full border-4 border-readowl-purple hover:bg-readowl-purple transition-colors duration-300",
     secondary: "bg-readowl-purple-extralight text-readowl-purple font-semibold py-2 px-6 rounded-full border-4 border-readowl-purple hover:bg-readowl-purple hover:text-white transition-colors duration-300",

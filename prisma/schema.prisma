@@ -15,15 +15,15 @@ enum Role {
 
 // Modelo de Usuário
 model User {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  password      String?  // Nullable: será null para contas Google
-  image         String?  // URL da imagem de perfil
-  description   String?
-  role          Role     @default(USER)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String? // Nullable: será null para contas Google
+  image       String? // URL da imagem de perfil
+  description String?
+  role        Role     @default(USER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relacionamentos futuros (exemplo)
   // books         Book[]   @relation("UserBooks")
@@ -37,18 +37,18 @@ model User {
 
 // Modelos auxiliares para NextAuth
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
