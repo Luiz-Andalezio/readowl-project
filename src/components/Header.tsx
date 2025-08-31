@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Button from './ui/Button';
 
 const Header: React.FC = () => {
@@ -22,8 +23,12 @@ const Header: React.FC = () => {
           <a href="#" className="hover:text-white">Contato</a>
         </div>
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="primary">Logar</Button>
-          <Button variant="secondary">Cadastrar</Button>
+          <Link href="/login">
+            <Button variant="primary">Logar</Button>
+          </Link>
+          <Link href="/register">
+            <Button variant="secondary">Cadastrar</Button>
+          </Link>
         </div>
         {/* Mobile menu button */}
         <div className="md:hidden flex items-center">
@@ -33,7 +38,7 @@ const Header: React.FC = () => {
             className="text-readowl-purple-extralight focus:outline-none"
           >
             <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+              <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
@@ -42,8 +47,12 @@ const Header: React.FC = () => {
       {menuOpen && (
         <div className="md:hidden bg-readowl-purple-medium shadow-lg px-6 py-4">
           <div className="flex flex-col space-y-2 mb-4">
-            <Button variant="primary" className="w-full">Logar</Button>
-            <Button variant="secondary" className="w-full">Cadastrar</Button>
+            <Link href="/login">
+              <Button variant="primary" className="w-full">Logar</Button>
+            </Link>
+            <Link href="/register">
+              <Button variant="secondary" className="w-full">Cadastrar</Button>
+            </Link>
           </div>
           <div className="flex flex-col space-y-2 text-readowl-purple-extralight">
             <a href="#" className="hover:text-white">Sobre</a>
