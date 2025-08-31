@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 const GithubIcon = () => (
   <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -8,8 +9,8 @@ const GithubIcon = () => (
 
 const MailIcon = () => (
   <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
-    <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-    <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5" fill="none" />
   </svg>
 );
 
@@ -26,8 +27,13 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="flex justify-center mb-4">
-          {/* Use uma versão do logo que contraste bem com o fundo, como uma branca */}
-          <img src="/img/mascot/logo.png" alt="Readowl Logo" className="h-16 w-auto" />
+          <Image
+            src="/img/mascot/logo.png"
+            alt="Readowl Logo"
+            width={64}
+            height={64}
+            className="h-16 w-auto"
+          />
         </div>
 
         <div className="flex justify-center space-x-6 mb-6">

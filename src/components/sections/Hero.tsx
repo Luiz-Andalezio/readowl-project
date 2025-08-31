@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import Button from '../ui/Button';
 
 const Hero: React.FC = () => {
@@ -6,7 +7,14 @@ const Hero: React.FC = () => {
     <section className="bg-readowl-purple-extralight py-20">
       <div className="container mx-auto px-6 flex flex-col md:flex-row items-center">
         <div className="md:w-1/2 flex justify-center mb-10 md:mb-0">
-          <img src="/img/mascot/body.png" alt="Mascote Readowl" className="w-64 h-auto" />
+          <Image
+            src="/img/mascot/body.png"
+            alt="Mascote Readowl"
+            width={256}
+            height={256}
+            className="w-64 h-auto"
+            priority
+          />
         </div>
 
         <div className="md:w-1/2 text-center md:text-left">

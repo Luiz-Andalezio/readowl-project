@@ -1,11 +1,10 @@
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import Hero from '@/components/sections/hero';
-import Purpose from '@/components/sections/purpose';
-import HowItHelps from '@/components/sections/howItHelps';
-import HowToPost from '@/components/sections/howToPost';
-import Features from '@/components/sections/features';
-import Testimonials from '@/components/sections/testimonials';
+import Hero from '@/components/sections/Hero';
+import Purpose from '@/components/sections/Purpose';
+import HowItHelps from '@/components/sections/HowItHelps';
+import HowToPost from '@/components/sections/HowToPost';
+import Features from '@/components/sections/Features';
+import Testimonials from '@/components/sections/Testimonials';
 
 function App() {
   return (
@@ -19,7 +18,6 @@ function App() {
         <Features />
         <Testimonials />
       </main>
-      <Footer />
     </div>
   );
 }
