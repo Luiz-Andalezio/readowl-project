@@ -67,7 +67,7 @@ function Login() {
           <span className="text-2xl font-bold text-white mt-2">Readowl</span>
         </div>
         {/* Google authentication button */}
-        <GoogleButton onClick={() => signIn("google")}></GoogleButton>
+        <GoogleButton onClick={() => signIn("google", { callbackUrl: "/home" })}></GoogleButton>
         <hr />
         {/* Login form */}
         <form onSubmit={handleSubmit} className="mt-4">

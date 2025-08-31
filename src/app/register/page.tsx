@@ -111,7 +111,7 @@ function Register() {
                 </div>
 
                 {/* Google sign-in button */}
-                <GoogleButton onClick={() => signIn("google")}></GoogleButton>
+                <GoogleButton onClick={() => signIn("google", { callbackUrl: "/home" })}></GoogleButton>
                 <hr />
                 {/* Registration form */}
                 <form onSubmit={handleSubmit} className="mt-4">
