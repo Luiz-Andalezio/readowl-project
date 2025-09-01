@@ -5,7 +5,7 @@ import DevTools from "@/components/dev/DevTools";
 import FloatingNavbar from "@/components/ui/FloatingNavbar";
 
 
-export default async function Home() {
+export default async function Notifications() {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/login?callbackUrl=/home");
 

@@ -8,7 +8,7 @@ const HowToPost: React.FC = () => {
           Como postar uma história
         </h2>
         <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-          {/* Passo 1 */}
+          {/* Step 1 */}
           <div className="flex-1">
             <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 rounded-full bg-readowl-purple-light text-white text-2xl font-bold">
               1
@@ -21,7 +21,7 @@ const HowToPost: React.FC = () => {
             </p>
           </div>
 
-          {/* Passo 2 */}
+          {/* Step 2 */}
           <div className="flex-1">
             <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 rounded-full bg-readowl-purple-light text-white text-2xl font-bold">
               2
@@ -34,7 +34,7 @@ const HowToPost: React.FC = () => {
             </p>
           </div>
 
-          {/* Passo 3 */}
+          {/* Step 3 */}
           <div className="flex-1">
             <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 rounded-full bg-readowl-purple-light text-white text-2xl font-bold">
               3

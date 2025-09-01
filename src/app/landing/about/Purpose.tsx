@@ -8,7 +8,7 @@ const Purpose: React.FC = () => {
           Nosso Propósito
         </h2>
         <div className="flex flex-col md:flex-row gap-12">
-          {/* Coluna "Por que o Readowl existe?" */}
+          {/* Column "Why does Readowl exist?" */}
           <div className="md:w-1/2 text-left">
             <h3 className="text-2xl font-semibold text-readowl-purple mb-4">
               Por que o Readowl existe?
@@ -24,7 +24,7 @@ const Purpose: React.FC = () => {
             </p>
           </div>
 
-          {/* Coluna "Quem somos?" */}
+          {/* Column "Who are we?" */}
           <div className="md:w-1/2 text-left">
             <h3 className="text-2xl font-semibold text-readowl-purple mb-4">
               Quem somos?

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Button from './ui/Button';
+import Button from '../../../components/ui/Button';
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
