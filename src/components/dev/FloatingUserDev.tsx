@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { signOut } from "next-auth/react";
-import Link from "next/link";
 
 interface FloatingUserDevPanelProps {
   user: {
@@ -16,7 +15,6 @@ interface FloatingUserDevPanelProps {
   };
 }
 
-// Pequeno helper para pegar iniciais
 function getInitials(name: string) {
   return name
     .split(/\s+/)

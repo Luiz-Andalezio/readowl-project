@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import FloatingUserDev from "./FloatingUserDev";
 
-// TopBar minimalista: converte a barra em um pequeno botão/flutuante estilizado (dev mood)
 export default async function TopBar() {
 	const session = await getServerSession(authOptions);
 

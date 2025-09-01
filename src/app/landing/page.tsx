@@ -1,15 +1,15 @@
-import Header from '@/components/Header';
-import Hero from '@/components/sections/Hero';
-import Purpose from '@/components/sections/Purpose';
-import HowItHelps from '@/components/sections/HowItHelps';
-import HowToPost from '@/components/sections/HowToPost';
-import Features from '@/components/sections/Features';
-import Testimonials from '@/components/sections/Testimonials';
+import LandingHeader from '@/app/landing/about/LandingHeader';
+import Hero from '@/app/landing/about/Hero';
+import Purpose from '@/app/landing/about/Purpose';
+import HowItHelps from '@/app/landing/about/HowItHelps';
+import HowToPost from '@/app/landing/about/HowToPost';
+import Features from '@/app/landing/about/Features';
+import Testimonials from '@/app/landing/about/Testimonials';
 
 function App() {
   return (
     <div className="bg-white">
-      <Header />
+      <LandingHeader />
       <main>
         <Hero />
         <Purpose />
