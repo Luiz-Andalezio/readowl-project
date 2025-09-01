@@ -125,7 +125,7 @@ function Login() {
         </div>
         {/* Back to landing page link */}
         <div className="text-center mt-1">
-          <Link href="/landing" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
+          <Link href="/" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
         </div>
       </div>
     </div>

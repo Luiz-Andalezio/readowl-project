@@ -192,7 +192,7 @@ function Register() {
                 </div>
                 {/* Link to landing page */}
                 <div className="text-center mt-2">
-                    <Link href="/landing" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
+                    <Link href="/" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
                 </div>
             </div>
         </div>
