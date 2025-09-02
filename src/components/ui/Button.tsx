@@ -1,4 +1,3 @@
-// filepath: src/components/ui/Button.tsx
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -7,7 +6,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button: React.FC<ButtonProps> = ({ children, className, variant = 'primary', ...props }) => {
-  const baseStyle = "font-semibold py-2 px-6 rounded-full border-2 transition-colors duration-300";
+  const baseStyle = "font-yusei text-lg py-2 px-6 rounded-full border-2 transition-colors duration-300";
 
   const styles = {
     primary: "bg-readowl-purple-light text-white font-semibold py-2 px-6 rounded-full border-3 border-readowl-purple hover:bg-readowl-purple transition-colors duration-300",

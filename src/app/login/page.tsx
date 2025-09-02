@@ -114,9 +114,11 @@ function Login() {
             <Link href="#" className="text-readowl-purple-extralight underline hover:text-white text-sm">Esqueci minha senha</Link>
           </div>
           {/* Submit button */}
-          <Button type="submit" variant="primary" className="w-full mb-2" disabled={loading}>
-            {loading ? "Logando..." : "Logar"}
-          </Button>
+          <div className="flex justify-center">
+            <Button type="submit" variant="primary" className="md:w-1/2 text-center" disabled={loading}>
+              {loading ? "Logando..." : "Logar"}
+            </Button>
+          </div>
         </form>
         {/* Registration link */}
         <div className="text-center mt-1">
