@@ -3,15 +3,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Modal from './Modal';
 import ButtonWithIcon from './ButtonWithIcon';
+import { createBookSchema, BOOK_TITLE_MAX, BOOK_SYNOPSIS_MAX, BOOK_FREQ_MAX, BOOK_GENRES_MASTER, BOOK_COVER_MIN_WIDTH, BOOK_COVER_MIN_HEIGHT, BOOK_COVER_RATIO, BOOK_COVER_RATIO_TOLERANCE } from '@/types/book';
 
 interface CreateBookFormProps {
     availableGenres?: string[]; // optional preset list; can be empty to allow on-the-fly create
     redirectAfter?: string; // path to redirect after success
 }
 
-const TITLE_MAX = 200;
-const SYNOPSIS_MAX = 1000;
-const FREQ_MAX = 50;
 
 interface ValidationErrors {
     title?: string;
@@ -22,13 +20,11 @@ interface ValidationErrors {
     submit?: string;
 }
 
-// Lista oficial de gêneros
-const defaultGenres = [
-    'Ação', 'Adulto', 'Alta Fantasia', 'Aventura', 'Autoajuda', 'Baixa Fantasia', 'Biografia', 'Biopunk', 'Ciência', 'Comédia', 'Cyberpunk', 'Dieselpunk', 'Distopia', 'Documentário', 'Drama', 'Ecchi', 'Educativo', 'Espacial', 'Esportes', 'Fantasia', 'Fantasia Sombria', 'Fantasia Urbana', 'Fatos Reais', 'Ficção Científica', 'Ficção Histórica', 'Filosófico', 'Futurístico', 'GameLit', 'Gótico', 'Harém', 'Histórico', 'Horror', 'Isekai', 'LitRPG', 'Lírico', 'Mecha', 'Militar', 'Mistério', 'Não-Humano', 'Pós-Apocalíptico', 'Político', 'Psicológico', 'Romance', 'Sátira', 'Seinen', 'Shonen', 'Shoujo', 'Slice of Life', 'Sobrenatural', 'Steampunk', 'Suspense', 'Terror', 'Tragédia', 'Vida Escolar', 'Zumbi'
-].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+// Lista oficial de gêneros (origem centralizada em /types/book)
+const defaultGenres = [...BOOK_GENRES_MASTER].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-const aspectTolerance = 0.02; // 2%
-const expectedRatio = 1440 / 1920; // 0.75
+const aspectTolerance = BOOK_COVER_RATIO_TOLERANCE;
+const expectedRatio = BOOK_COVER_RATIO; // 0.75
 
 export default function CreateBookForm({ availableGenres, redirectAfter = '/library' }: CreateBookFormProps) {
     const [title, setTitle] = useState('');
@@ -75,7 +71,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
         img.onload = () => {
             if (cancelled) return;
             const ratio = img.width / img.height;
-            const ok = Math.abs(ratio - expectedRatio) < aspectTolerance && img.width >= 1440 && img.height >= 1920;
+            const ok = Math.abs(ratio - expectedRatio) < aspectTolerance && img.width >= BOOK_COVER_MIN_WIDTH && img.height >= BOOK_COVER_MIN_HEIGHT;
             setCoverValid(ok);
             setCoverLoading(false);
         };
@@ -86,24 +82,36 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
 
     const validate = useCallback((): ValidationErrors => {
         const v: ValidationErrors = {};
-        if (!title.trim()) v.title = 'É necessário um Título.';
-        else if (title.length > TITLE_MAX) v.title = 'Máximo de 200 caracteres.';
-
-        if (!synopsis.trim()) v.synopsis = 'É nececssário uma Sinopse.';
-        else if (synopsis.length > SYNOPSIS_MAX) v.synopsis = 'Máximo de 1000 caracteres.';
-
-        if (releaseFrequency && releaseFrequency.length > FREQ_MAX) v.releaseFrequency = 'Máximo de 50 caracteres.';
-
-        if (!selectedGenres.length) v.genres = 'Selecione pelo menos um gênero.';
-
+        // Base schema validation (ignora cover ratio - tratamos manualmente)
+        const parsed = createBookSchema.safeParse({
+            title: title.trim(),
+            synopsis: synopsis.trim(),
+            releaseFrequency: releaseFrequency.trim() || undefined,
+            coverUrl: coverUrl.trim() || undefined,
+            genres: selectedGenres
+        });
+        if (!parsed.success) {
+            const issues = parsed.error.issues;
+            for (const issue of issues) {
+                const path = issue.path[0];
+                if (!path) continue;
+                switch (path) {
+                    case 'title': v.title = issue.message; break;
+                    case 'synopsis': v.synopsis = issue.message; break;
+                    case 'releaseFrequency': v.releaseFrequency = issue.message; break;
+                    case 'coverUrl': v.coverUrl = issue.message; break;
+                    case 'genres': v.genres = issue.message; break;
+                }
+            }
+        }
+        // Cover specific async dimension validation messages override generic ones
         if (!coverUrl.trim()) {
             v.coverUrl = 'É necessário uma URL da capa.';
         } else if (coverValid === false) {
-            v.coverUrl = 'A proporção ou tamanho é inválido (mínimo 1440x1920, proporção 2:3).';
+            v.coverUrl = `A proporção ou tamanho é inválido (mínimo ${BOOK_COVER_MIN_WIDTH}x${BOOK_COVER_MIN_HEIGHT}, proporção 3:4).`;
         } else if (coverValid !== true) {
             v.coverUrl = 'Validando capa, aguarde...';
         }
-
         return v;
     }, [title, synopsis, releaseFrequency, coverUrl, coverValid, selectedGenres]);
 
@@ -112,7 +120,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
         setErrors(validate());
     }, [title, synopsis, releaseFrequency, coverUrl, coverValid, selectedGenres, validate]);
 
-    const canSubmit = Object.keys(errors).length === 0 && title && synopsis && selectedGenres.length > 0 && coverValid === true;
+    const canSubmit = Object.keys(errors).length === 0 && !!title.trim() && !!synopsis.trim() && selectedGenres.length > 0 && coverValid === true;
 
     const handleSubmit = async () => {
         setAttemptedSubmit(true);
@@ -159,7 +167,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={coverUrl} alt="Preview capa" className="object-cover w-full h-full" />
                         ) : (
-                            <span className="text-xs opacity-70 select-none px-4">Insira a URL da imagem para ver a capa aqui (proporção 2:3, mín 1440x1920)</span>
+                            <span className="text-xs opacity-70 select-none px-4">Insira a URL da imagem para ver a capa aqui (proporção 3:4, mín {BOOK_COVER_MIN_WIDTH}x{BOOK_COVER_MIN_HEIGHT})</span>
                         )}
                         {coverLoading && <div className="absolute inset-0 flex items-center justify-center bg-white/60 text-readowl-purple font-semibold text-sm">Carregando...</div>}
                     </div>
@@ -185,7 +193,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                             <input
                                 type="text"
                                 value={title}
-                                maxLength={TITLE_MAX}
+                                maxLength={BOOK_TITLE_MAX}
                                 onChange={e => setTitle(e.target.value)}
                                 onBlur={() => setTouchedTitle(true)}
                                 className={`w-full rounded-full bg-white border-2 pl-4 pr-4 py-2 focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple placeholder-readowl-purple/50 transition ${errors.title && (touchedTitle || attemptedSubmit) ? 'border-red-400' : 'border-white/60'}`}
@@ -194,7 +202,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                         </div>
                         <div className="flex justify-between text-xs mt-1 text-white/80">
                             {errors.title && (touchedTitle || attemptedSubmit) ? <span className="text-red-300">{errors.title}</span> : <span />}
-                            <span>{title.length}/{TITLE_MAX}</span>
+                            <span>{title.length}/{BOOK_TITLE_MAX}</span>
                         </div>
                     </div>
 
@@ -206,7 +214,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                         <div className="relative">
                             <textarea
                                 value={synopsis}
-                                maxLength={SYNOPSIS_MAX}
+                                maxLength={BOOK_SYNOPSIS_MAX}
                                 onChange={e => setSynopsis(e.target.value)}
                                 onBlur={() => setTouchedSynopsis(true)}
                                 className={`w-full rounded-2xl bg-white border-2 pl-4 pr-4 py-3 h-80 resize-none focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple placeholder-readowl-purple/50 leading-relaxed transition ${errors.synopsis && (touchedSynopsis || attemptedSubmit) ? 'border-red-400' : 'border-white/60'}`}
@@ -215,7 +223,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                         </div>
                         <div className="flex justify-between text-xs mt-1 text-white/80">
                             {errors.synopsis && (touchedSynopsis || attemptedSubmit) ? <span className="text-red-300">{errors.synopsis}</span> : <span />}
-                            <span>{synopsis.length}/{SYNOPSIS_MAX}</span>
+                            <span>{synopsis.length}/{BOOK_SYNOPSIS_MAX}</span>
                         </div>
                     </div>
 
@@ -228,7 +236,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                             <input
                                 type="text"
                                 value={releaseFrequency}
-                                maxLength={FREQ_MAX}
+                                maxLength={BOOK_FREQ_MAX}
                                 onChange={e => setReleaseFrequency(e.target.value)}
                                 onBlur={() => setTouchedFrequency(true)}
                                 className={`w-full rounded-full bg-white border-2 pl-4 pr-4 py-2 focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple placeholder-readowl-purple/50 transition ${errors.releaseFrequency && (touchedFrequency || attemptedSubmit) ? 'border-red-400' : 'border-white/60'}`}
@@ -237,7 +245,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                         </div>
                         <div className="flex justify-between text-xs mt-1 text-white/80">
                             {errors.releaseFrequency && (touchedFrequency || attemptedSubmit) ? <span className="text-red-300">{errors.releaseFrequency}</span> : <span />}
-                            <span>{releaseFrequency.length}/{FREQ_MAX}</span>
+                            <span>{releaseFrequency.length}/{BOOK_FREQ_MAX}</span>
                         </div>
                     </div>
                 </div>
@@ -299,7 +307,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
 
             {/* Help Modal */}
             <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title="Como adicionar a capa" widthClass="max-w-lg">
-                <p>Para adicionar a capa, hospede sua imagem em um site como <strong>imgur.com</strong>, clique com o botão direito na imagem, selecione <em>Copiar endereço da imagem</em> e cole o link no campo. A imagem deve ter <strong>mínimo 1440px de largura por 1920px de altura</strong> e proporção aproximada de 2:3.</p>
+                <p>Para adicionar a capa, hospede sua imagem em um site como <strong>imgur.com</strong>, clique com o botão direito na imagem, selecione <em>Copiar endereço da imagem</em> e cole o link no campo. A imagem deve ter <strong>mínimo {BOOK_COVER_MIN_WIDTH}px de largura por {BOOK_COVER_MIN_HEIGHT}px de altura</strong> e proporção aproximada de 3:4.</p>
                 <p>Dica: Use imagens em formato JPG ou PNG otimizadas.</p>
             </Modal>
 
