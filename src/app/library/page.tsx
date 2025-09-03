@@ -4,11 +4,20 @@ import { redirect } from "next/navigation";
 import DevTools from "@/components/dev/DevTools";
 import FloatingNavbar from "@/components/ui/FloatingNavbar";
 import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
+import BookCarousel from "@/components/ui/BookCarousel";
+import { prisma } from "@/lib/prisma";
 import Link from 'next/link';
 
 export default async function Library() {
     const session = await getServerSession(authOptions);
-    if (!session) redirect("/login?callbackUrl=/home");
+    if (!session?.user) redirect("/login?callbackUrl=/library");
+
+    // Load books authored by current user
+    const myBooks = await prisma.book.findMany({
+        where: { authorId: session.user.id },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, title: true, coverUrl: true }
+    });
 
     return (
         <>
@@ -25,6 +34,14 @@ export default async function Library() {
                             Registrar uma obra
                         </ButtonWithIcon>
                     </Link>
+                </div>
+                <div className="px-4 md:px-10 max-w-7xl mx-auto">
+                    <BookCarousel
+                        books={myBooks}
+                        title="Minha Autoria!"
+                        iconSrc="/img/svg/book/author.svg"
+                        itemsPerView={5}
+                    />
                 </div>
             </main>
         </>

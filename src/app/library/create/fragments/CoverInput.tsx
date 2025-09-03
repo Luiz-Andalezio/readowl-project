@@ -19,7 +19,7 @@ export const CoverInput: React.FC<CoverInputProps> = ({ coverUrl, coverValid, co
   return (
     <div>
       <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-        <Image src="/img/svg/library/book1.svg" alt="Capa" width={18} height={18} className="opacity-80" />
+        <Image src="/img/svg/book/book2.svg" alt="Capa" width={18} height={18} className="opacity-80" />
         URL da Capa
         <button type="button" aria-label="Ajuda capa" onClick={onHelp} className="w-5 h-5 rounded-full bg-readowl-purple-dark text-white text-xs flex items-center justify-center">?</button>
       </label>
