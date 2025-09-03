@@ -15,7 +15,7 @@ export default async function Library() {
     // Load books authored by current user
     const myBooks = await prisma.book.findMany({
         where: { authorId: session.user.id },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' }, // oldest first per requirement
         select: { id: true, title: true, coverUrl: true }
     });
 
