@@ -1,189 +1,265 @@
 "use client";
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
 
-export interface CarouselBook {
-  id: string;
-  title: string;
-  coverUrl: string | null;
-}
+export interface CarouselBook { id: string; title: string; coverUrl: string | null; }
+interface BookCarouselProps { books: CarouselBook[]; title: string; iconSrc: string; itemsPerView?: number; }
 
-interface BookCarouselProps {
-  books: CarouselBook[];
-  title: string;
-  iconSrc: string;
-  itemsPerView?: number; // default 5
-}
+const FALLBACK_COVER = '/img/svg/library/book1.svg';
 
-// Use an existing asset as fallback (adjust if you add a dedicated placeholder later)
-const FALLBACK_COVER = "/img/svg/library/book1.svg";
+function smoothScroll(el: HTMLElement, left: number, prefersReduced: boolean) {
+  el.scrollTo({ left, behavior: prefersReduced ? 'auto' : 'smooth' });
+}
 
 export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSrc, itemsPerView = 5 }) => {
-  const [startIndex, setStartIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const containerRef = useRef<HTMLDivElement | null>(null); // whole carousel (arrows + track)
-  const trackWrapperRef = useRef<HTMLDivElement | null>(null); // wraps the visible book items
-  const leftBtnRef = useRef<HTMLButtonElement | null>(null);
-  const rightBtnRef = useRef<HTMLButtonElement | null>(null);
-  const [layout, setLayout] = useState<{ headerWidth: number | null; arrowTop: number; leftPad: number; rightPad: number }>({ headerWidth: null, arrowTop: 0, leftPad: 0, rightPad: 0 });
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [cardWidth, setCardWidth] = useState(0);
+  const [gap, setGap] = useState(18);
+  const [visibleCount, setVisibleCount] = useState(itemsPerView);
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const canScroll = books.length > itemsPerView;
-  const n = books.length;
+  const computeLayout = useCallback(() => {
+    if (!scrollRef.current) return;
+    const w = scrollRef.current.clientWidth;
+    let target = itemsPerView;
+    if (w < 420) target = Math.min(3, itemsPerView);
+    else if (w < 640) target = Math.min(3, itemsPerView);
+    else if (w < 900) target = Math.min(4, itemsPerView);
+    else target = itemsPerView;
+    const baseGap = w < 480 ? 10 : w < 640 ? 14 : w < 900 ? 18 : 22;
+    const available = w - baseGap * (target - 1) - 4;
+    const rawWidth = available / target;
+    const clamped = Math.max(100, Math.min(rawWidth, 190));
+    setCardWidth(clamped);
+    setGap(baseGap);
+    setVisibleCount(target);
+  }, [itemsPerView]);
 
-  const visible = useMemo(() => {
-    if (n === 0) return [] as CarouselBook[];
-    if (!canScroll) return books; // show all if fewer than itemsPerView
-    const arr: CarouselBook[] = [];
-    for (let i = 0; i < itemsPerView; i++) arr.push(books[(startIndex + i + n) % n]);
-    return arr;
-  }, [books, startIndex, canScroll, itemsPerView, n]);
-
-  const step = useCallback((delta: 1 | -1) => {
-    if (!canScroll) return;
-    setDirection(delta);
-    if (!prefersReducedMotion) {
-      setAnimating(true);
-      // end animation shortly after
-      setTimeout(() => setAnimating(false), 260);
-    }
-    setStartIndex(idx => (idx + delta + n) % n);
-  }, [canScroll, n, prefersReducedMotion]);
-
-  const prev = useCallback(() => step(-1), [step]);
-  const next = useCallback(() => step(1), [step]);
-
-  // Keyboard navigation when focused / hovered
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') { prev(); }
-      else if (e.key === 'ArrowRight') { next(); }
-    };
-    el.addEventListener('keydown', handler);
-    return () => el.removeEventListener('keydown', handler);
-  }, [prev, next]);
-
-  // Measure widths and compute arrow vertical center relative to cover (ignoring title text height).
-  useEffect(() => {
-    const measure = () => {
-      if (!trackWrapperRef.current) return;
-      const trackW = trackWrapperRef.current.offsetWidth;
-      const leftW = leftBtnRef.current?.offsetWidth || 0;
-      const rightW = rightBtnRef.current?.offsetWidth || 0;
-
-      // Find first cover container
-      let arrowTop = 0;
-      if (containerRef.current) {
-        const coverEl = containerRef.current.querySelector('[data-cover]') as HTMLElement | null;
-        if (coverEl) {
-          const rect = coverEl.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
-            // center of cover relative to container top
-          arrowTop = rect.top - containerRect.top + rect.height / 2;
-        }
-      }
-
-      let headerWidth = trackW + leftW + rightW;
-      if (typeof window !== 'undefined') headerWidth = Math.min(headerWidth, window.innerWidth - 24);
-      setLayout({ headerWidth, arrowTop, leftPad: leftW + 4, rightPad: rightW + 4 });
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (trackWrapperRef.current) ro.observe(trackWrapperRef.current);
-    if (typeof window !== 'undefined') window.addEventListener('resize', measure);
+    computeLayout();
+    const ro = new ResizeObserver(() => computeLayout());
+    if (scrollRef.current) ro.observe(scrollRef.current);
+    if (typeof window !== 'undefined') window.addEventListener('resize', computeLayout);
     return () => {
       ro.disconnect();
-      if (typeof window !== 'undefined') window.removeEventListener('resize', measure);
+      if (typeof window !== 'undefined') window.removeEventListener('resize', computeLayout);
     };
-  }, [visible.length]);
+  }, [computeLayout]);
+
+  const updateArrows = useCallback(() => {
+    const el = scrollRef.current; if (!el) return;
+    setCanPrev(el.scrollLeft > 4);
+    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    const snap = cardWidth + gap;
+    if (snap > 0) {
+      const idx = Math.round(el.scrollLeft / snap);
+      if (idx !== activeIndex) setActiveIndex(Math.min(books.length - 1, Math.max(0, idx)));
+    }
+  }, [activeIndex, books.length, cardWidth, gap]);
+
+  useEffect(() => { updateArrows(); }, [books.length, cardWidth, updateArrows]);
+
+  const scrollByCards = useCallback((dir: number) => {
+    const el = scrollRef.current; if (!el) return;
+    const delta = dir * (cardWidth + gap);
+    smoothScroll(el, el.scrollLeft + delta, prefersReducedMotion);
+  }, [cardWidth, gap, prefersReducedMotion]);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const el = scrollRef.current; if (!el) return;
+    const snap = cardWidth + gap;
+    smoothScroll(el, index * snap, prefersReducedMotion);
+  }, [cardWidth, gap, prefersReducedMotion]);
+
+  useEffect(() => {
+    const el = containerRef.current; if (!el) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); scrollByCards(-1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); scrollByCards(1); }
+    };
+    el.addEventListener('keydown', onKey);
+    return () => el.removeEventListener('keydown', onKey);
+  });
+
+  useEffect(() => {
+    const el = scrollRef.current; if (!el) return;
+    let isDown = false; let startX = 0; let startLeft = 0; let lastT = 0;
+    const onDown = (e: PointerEvent) => {
+      if (e.button !== 0) return; // only primary button
+      isDown = true; startX = e.clientX; startLeft = el.scrollLeft; lastT = performance.now();
+      el.setPointerCapture(e.pointerId);
+      el.classList.add('dragging');
+      setPaused(true);
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!isDown) return; e.preventDefault();
+      const dx = e.clientX - startX; el.scrollLeft = startLeft - dx; updateArrows();
+      lastT = performance.now();
+    };
+    const onUp = (e: PointerEvent) => {
+      if (!isDown) return; isDown = false; el.releasePointerCapture(e.pointerId); el.classList.remove('dragging');
+      const dx = e.clientX - startX; const dt = performance.now() - lastT;
+      const velocity = Math.abs(dx) / dt;
+      if (velocity > 0.45 || Math.abs(dx) > cardWidth * 0.4) { scrollByCards(dx < 0 ? 1 : -1); }
+      else {
+        const snap = cardWidth + gap; const index = Math.round(el.scrollLeft / snap);
+        smoothScroll(el, index * snap, prefersReducedMotion);
+      }
+      setTimeout(() => setPaused(false), 800); // small delay after drag
+    };
+    const onWheel = (e: WheelEvent) => {
+      if (!e.shiftKey) return; // only custom when shift pressed
+      const el = scrollRef.current; if (!el) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY; // horizontal scroll via vertical wheel
+      updateArrows();
+    };
+    el.addEventListener('pointerdown', onDown, { passive: true });
+    el.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    el.addEventListener('scroll', updateArrows, { passive: true });
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      el.removeEventListener('pointerdown', onDown);
+      el.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      el.removeEventListener('scroll', updateArrows);
+      el.removeEventListener('wheel', onWheel);
+    };
+  }, [cardWidth, gap, prefersReducedMotion, updateArrows, scrollByCards]);
+
+  // Autoplay (pausa no hover / interação)
+  useEffect(() => {
+    if (prefersReducedMotion) return; // respeita redução de movimento
+    if (books.length <= 1) return; // nada a fazer se <=1
+    if (paused) return; // pausado
+    const interval = setInterval(() => {
+      const el = scrollRef.current; if (!el) return;
+      const snap = cardWidth + gap; if (snap <= 0) return;
+      const idx = Math.round(el.scrollLeft / snap);
+      if (idx >= books.length - 1) {
+        smoothScroll(el, 0, prefersReducedMotion);
+      } else {
+        scrollByCards(1);
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [books.length, cardWidth, gap, paused, prefersReducedMotion, scrollByCards]);
+
+  // Hover pause handlers
+  useEffect(() => {
+    const el = scrollRef.current; if (!el) return;
+    const enter = () => setPaused(true);
+    const leave = () => setPaused(false);
+    el.addEventListener('mouseenter', enter);
+    el.addEventListener('mouseleave', leave);
+    return () => {
+      el.removeEventListener('mouseenter', enter);
+      el.removeEventListener('mouseleave', leave);
+    };
+  }, []);
 
   return (
-    <section className="mt-8 w-full">
-      <div
-        className="flex items-center gap-2 bg-readowl-purple-medium rounded-full px-4 sm:px-5 py-2 text-white font-yusei text-lg select-none shadow mx-auto transition-width duration-200"
-        style={layout.headerWidth ? { width: layout.headerWidth } : undefined}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={iconSrc} alt="Icone" className="w-5 h-5 opacity-90" />
-        <h2 className="text-sm sm:text-base md:text-lg font-yusei tracking-wide">{title}</h2>
+    <section className="mt-8 w-full" ref={containerRef} tabIndex={0} aria-roledescription="carousel">
+      <div className="relative">
+        <div className="flex items-center justify-center gap-2 bg-readowl-purple-medium rounded-full px-6 sm:px-8 py-2 text-white font-yusei text-lg select-none shadow mx-auto max-w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={iconSrc} alt="Icone" className="w-5 h-5 opacity-90" />
+          <h2 className="text-sm sm:text-base md:text-lg font-yusei tracking-wide">{title}</h2>
+        </div>
       </div>
 
-      {n === 0 && (
-        <div className="text-sm text-readowl-purple mt-6 px-2">Nenhum livro encontrado.</div>
-      )}
+      {books.length === 0 && <div className="text-sm text-readowl-purple mt-6 px-2">Nenhum livro encontrado.</div>}
 
-      {n > 0 && (
-        <div
-          ref={containerRef}
-          tabIndex={0}
-          className="relative mt-5 outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark rounded-lg mx-auto w-fit"
-          style={{ paddingLeft: layout.leftPad, paddingRight: layout.rightPad }}
-        >
+      {books.length > 0 && (
+  <div className="relative mt-5">
           <button
             aria-label="Anterior"
-            onClick={prev}
-            disabled={!canScroll}
-            ref={leftBtnRef}
-            style={layout.arrowTop ? { top: layout.arrowTop, transform: 'translateY(-50%)' } : undefined}
-            className={clsx(
-              'group absolute left-0 z-10 p-1.5 rounded-full transition disabled:opacity-25 disabled:cursor-not-allowed active:scale-90 text-readowl-purple-dark',
-              !layout.arrowTop && 'invisible'
-            )}
+            disabled={!canPrev}
+            onClick={() => scrollByCards(-1)}
+            className={clsx('absolute z-20 left-0 top-1/2 -translate-y-1/2 pl-1 pr-2 py-2 text-readowl-purple-dark transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple', !canPrev && 'opacity-30 cursor-not-allowed')}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/svg/generics/chevron-left.svg" alt="Anterior" className="w-25 h-25" />
+            <img src="/img/svg/generics/chevron-left.svg" alt="Anterior" className="w-7 h-7 pointer-events-none select-none" />
           </button>
 
-          <div ref={trackWrapperRef} className="relative overflow-hidden">
-            <div className={clsx(
-              'flex justify-center gap-4 sm:gap-5',
-              !prefersReducedMotion && animating && (direction === 1 ? 'animate-slide-left' : 'animate-slide-right')
-            )}>
-              {visible.map((b, idx) => (
-                <div key={`${b.id}-${b.title}`} className="flex flex-col items-center w-[165px] sm:w-[170px] md:w-[176px] select-none">
-                  <Link href={`/books/${b.id}`} className="group block relative w-full">
-                    <div
-                      data-cover={idx === 0 ? 'true' : undefined}
-                      className="w-full aspect-[3/4] overflow-hidden rounded-lg shadow-md ring-1 ring-readowl-purple-light/40 group-hover:ring-readowl-purple group-hover:shadow-lg transition-colors"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={b.coverUrl || FALLBACK_COVER}
-                        alt={b.title}
-                        className="w-full h-full object-cover transition-transform duration-500 ease-out will-change-transform group-hover:scale-110"
-                        loading="lazy"
-                      />
-                      <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition" />
+            <div
+              ref={scrollRef}
+              className="hide-scrollbar relative mx-9 flex overflow-x-auto scroll-smooth select-none cursor-grab active:cursor-grabbing"
+              style={{ gap }}
+            >
+              {books.map(b => (
+                <Link
+                  key={b.id}
+                  href={`/books/${b.id}`}
+                  aria-label={b.title}
+                  className="group relative flex-shrink-0 rounded-lg overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark"
+                  style={{ width: cardWidth, aspectRatio: '3 / 4' }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={b.coverUrl || FALLBACK_COVER}
+                    alt={b.title}
+                    draggable={false}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07]"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 flex flex-col justify-end">
+                    <div className="pointer-events-none mt-auto w-full px-2 pb-1 pt-8 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+                      <p className="text-[11px] sm:text-xs font-medium text-white leading-snug drop-shadow-md line-clamp-2">{b.title}</p>
                     </div>
-                  </Link>
-                  <Link href={`/books/${b.id}`} className="mt-2 text-[11px] text-center leading-tight text-readowl-purple-dark hover:underline line-clamp-3">
-                    {b.title}
-                  </Link>
-                </div>
+                  </div>
+                </Link>
               ))}
             </div>
-          </div>
 
           <button
             aria-label="Próximo"
-            onClick={next}
-            disabled={!canScroll}
-            ref={rightBtnRef}
-            style={layout.arrowTop ? { top: layout.arrowTop, transform: 'translateY(-50%)' } : undefined}
-            className={clsx(
-              'group absolute right-0 z-10 p-1.5 rounded-full transition disabled:opacity-25 disabled:cursor-not-allowed active:scale-90 text-readowl-purple-dark',
-              !layout.arrowTop && 'invisible'
-            )}
+            disabled={!canNext}
+            onClick={() => scrollByCards(1)}
+            className={clsx('absolute z-20 right-0 top-1/2 -translate-y-1/2 pr-1 pl-2 py-2 text-readowl-purple-dark transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple', !canNext && 'opacity-30 cursor-not-allowed')}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/svg/generics/chevron-right.svg" alt="Próximo" className="w-25 h-25" />
+            <img src="/img/svg/generics/chevron-right.svg" alt="Próximo" className="w-7 h-7 pointer-events-none select-none" />
           </button>
         </div>
       )}
+
+      {books.length > 0 && (
+        (() => {
+          const pages = Math.max(1, books.length > visibleCount ? (books.length - visibleCount + 1) : 1);
+          const activePage = Math.min(pages - 1, activeIndex);
+          return (
+            <div className="mt-4 flex justify-center gap-2 flex-wrap" aria-label="Indicadores de posição">
+              {Array.from({ length: pages }).map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`Ir para posição ${i + 1}`}
+                  aria-current={i === activePage}
+                  onClick={() => scrollToIndex(i)}
+                  className={clsx('h-2.5 rounded-full transition-all', i === activePage ? 'bg-readowl-purple w-5' : 'bg-readowl-purple-light/50 w-2 hover:bg-readowl-purple-light/80')}
+                />
+              ))}
+            </div>
+          );
+        })()
+      )}
+
+      <style jsx global>{`
+        .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { scroll-snap-type: x mandatory; }
+        .hide-scrollbar > a { scroll-snap-align: center; }
+  .hide-scrollbar.dragging { cursor: grabbing; }
+  .hide-scrollbar > a { transition: transform 0.4s ease; }
+  @media (prefers-reduced-motion: reduce) { .hide-scrollbar > a { transition: none; } }
+      `}</style>
     </section>
   );
 };

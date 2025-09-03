@@ -141,9 +141,9 @@ export default function Navbar() {
         <>
             {/* Main navigation bar */}
             <nav
-                className={`fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center justify-start ${open ? "pt-4 pb-4" : "py-2"
-                    } rounded-3xl shadow-xl border border-readowl-purple-light/30 bg-readowl-purple-medium w-16 ${transitionsReady
-                        ? "transition-[padding,height] duration-400"
+                className={`fixed left-2 sm:left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center justify-start ${open ? "pt-3 pb-3 sm:pt-4 sm:pb-4" : "py-1.5 sm:py-2"
+                    } rounded-2xl sm:rounded-3xl shadow-xl border border-readowl-purple-light/30 bg-readowl-purple-medium w-14 sm:w-16 ${transitionsReady
+                        ? "transition-[padding,height,width] duration-400"
                         : "transition-none"
                     }`}
                 aria-label="Navigation bar"
@@ -154,7 +154,7 @@ export default function Navbar() {
                     onMouseEnter={() => handleEnter("logo")}
                     onMouseLeave={() => handleLeave("logo")}
                     aria-label={open ? "Collapse menu" : "Expand menu"}
-                    className={`relative w-12 h-12 flex items-center justify-center rounded-2xl hover:brightness-110 ${open ? '' : 'mt-2'}`}
+                    className={`relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-2xl hover:brightness-110 ${open ? '' : 'mt-1 sm:mt-2'}`}
                     tabIndex={-1}
                 >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -210,7 +210,7 @@ export default function Navbar() {
                                     <img
                                         src={session!.user!.image!}
                                         alt="Avatar"
-                                        className="w-10 h-10 rounded-full object-cover ring-2 ring-readowl-purple-light/70"
+                                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-readowl-purple-light/70"
                                     />
                                 ) : (
                                     // Show icon for other items
@@ -218,7 +218,7 @@ export default function Navbar() {
                                     <img
                                         src={item.icon}
                                         alt={item.label}
-                                        className="w-7 h-7"
+                                        className="w-6 h-6 sm:w-7 sm:h-7"
                                     />
                                 )}
                                 {/* Tooltip for navigation item */}
