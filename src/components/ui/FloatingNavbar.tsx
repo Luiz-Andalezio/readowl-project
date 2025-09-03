@@ -201,7 +201,7 @@ export default function Navbar() {
                                 aria-label={item.label}
                                 className={`relative w-12 h-12 flex items-center justify-center rounded-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-readowl-purple-light/60 ${active
                                         ? "bg-readowl-purple-dark/40 ring-2 ring-readowl-purple-light/70"
-                                        : "bg-readowl-purple-light/20 hover:bg-readowl-purple-light/35"
+                                        : "hover:bg-readowl-purple-light/35"
                                     }`}
                             >
                                 {isAccount ? (

@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import Button from '../../../components/ui/Button';
+import Button from '@/components/ui/Button';
 
 const Hero: React.FC = () => {
   return (
@@ -40,7 +40,7 @@ const Hero: React.FC = () => {
               <Button variant="primary">Iniciar Leitura</Button>
             </Link>
             <Link href="/create">
-            <Button variant="primary">Criar uma nova obra</Button>
+              <Button variant="primary">Criar uma nova obra</Button>
             </Link>
           </div>
         </div>
