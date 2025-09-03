@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import Button from '../../../components/ui/Button';
+import Button from '@/components/ui/Button';
 
 const Hero: React.FC = () => {
   return (

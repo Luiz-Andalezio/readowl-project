@@ -16,11 +16,11 @@ const ButtonWithIcon: React.FC<ButtonProps> = ({
     iconAlt = 'Ícone',
     ...props
 }) => {
-    const baseStyle = "font-yusei py-2 px-6 rounded-full border-2 transition-colors duration-300 flex items-center justify-between gap-2";
+    const baseStyle = "font-yusei py-2 px-6 rounded-full border-4 transition-colors duration-300 flex items-center justify-between gap-2";
 
     const styles = {
-        primary: "bg-readowl-purple-light text-white border-3 border-readowl-purple hover:bg-readowl-purple",
-        secondary: "bg-readowl-purple-extralight text-readowl-purple border-3 border-readowl-purple hover:bg-readowl-purple hover:text-white",
+        primary: "bg-readowl-purple-medium text-white border-4 border-readowl-purple hover:bg-readowl-purple-light shadow-md",
+        secondary: "bg-readowl-purple-extralight text-readowl-purple border-4 border-readowl-purple hover:bg-white shadow-md"
     } as const;
 
     return (
