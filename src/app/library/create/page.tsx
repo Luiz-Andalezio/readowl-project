@@ -3,7 +3,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
 import FloatingNavbar from '@/components/ui/FloatingNavbar';
 import DevTools from '@/components/dev/DevTools';
-import CreateBookForm from '@/components/ui/CreateBookForm';
+import CreateBookForm from '@/app/library/create/fragments/CreateBookForm';
 
 export default async function CreateBookPage() {
     const session = await getServerSession(authOptions);
