@@ -16,11 +16,11 @@ export type SafeBook = Omit<Book, 'updatedAt'> & { genres: Pick<Genre, 'id' | 'n
 
 // Zod schema for create request (shared client/server)
 export const createBookSchema = z.object({
-  title: z.string().trim().min(1, 'Título é obrigatório').max(BOOK_TITLE_MAX),
-  synopsis: z.string().trim().min(1, 'Sinopse é obrigatória').max(BOOK_SYNOPSIS_MAX),
+  title: z.string().trim().min(1, 'É necessário um título').max(BOOK_TITLE_MAX),
+  synopsis: z.string().trim().min(1, 'É necessário uma sinopse').max(BOOK_SYNOPSIS_MAX),
   releaseFrequency: z.string().trim().max(BOOK_FREQ_MAX).optional().or(z.literal('').transform(() => undefined)),
   coverUrl: z.string().pipe(z.url({ message: 'URL inválida' })),
-  genres: z.array(z.string().min(1)).min(1, 'Selecione pelo menos um gênero'),
+  genres: z.array(z.string().min(1)).min(1, 'Selecione ao menos um gênero'),
 });
 
 export type CreateBookInput = z.infer<typeof createBookSchema>;
@@ -33,7 +33,7 @@ export function normalizeCreateBookInput(data: CreateBookInput): CreateBookInput
     synopsis: data.synopsis.trim(),
     releaseFrequency: data.releaseFrequency?.trim() || undefined,
     coverUrl: data.coverUrl.trim(),
-  genres: Array.from(new Set(data.genres.map((g: string) => g.trim()))),
+    genres: Array.from(new Set(data.genres.map((g: string) => g.trim()))),
   };
 }
 
