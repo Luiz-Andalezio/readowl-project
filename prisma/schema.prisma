@@ -13,6 +13,13 @@ enum Role {
   ADMIN
 }
 
+// Enum para status de livro
+enum Status {
+  ONGOING    // Em andamento
+  COMPLETED  // Concluído
+  HIATUS     // Hiato / Pausado
+}
+
 // Modelo de Usuário
 model User {
   id          String   @id @default(cuid())
@@ -33,6 +40,39 @@ model User {
   emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
+
+  // Relacionamentos com livros
+  books   Book[] @relation("AuthorBooks")
+}
+
+// Modelo de Gênero literário
+model Genre {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  books Book[]  @relation("BookGenres")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Modelo de Livro
+model Book {
+  id              String    @id @default(cuid())
+  title           String    @db.VarChar(200)
+  synopsis        String    @db.VarChar(1000)
+  releaseFrequency String?  @db.VarChar(50)
+  coverUrl        String?
+  status          Status    @default(ONGOING)
+  views           Int       @default(0)
+  lastUpdate      DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Autor
+  authorId String
+  author   User      @relation("AuthorBooks", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Gêneros
+  genres   Genre[]   @relation("BookGenres")
 }
 
 // Modelos auxiliares para NextAuth

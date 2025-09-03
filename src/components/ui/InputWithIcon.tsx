@@ -4,7 +4,7 @@ interface InputWithIconProps extends React.InputHTMLAttributes<HTMLInputElement>
   icon: React.ReactNode;
   error?: string;
   rightIcon?: React.ReactNode;
-  hideErrorText?: boolean; // não mostra a mensagem, apenas estiliza o input
+  hideErrorText?: boolean;
 }
 
 const InputWithIcon: React.FC<InputWithIconProps> = ({ icon, className = "", error, rightIcon, hideErrorText, ...props }) => (

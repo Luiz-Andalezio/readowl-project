@@ -181,9 +181,11 @@ function Register() {
                         ))}
                     </div>
                     {/* Submit button */}
-                    <Button type="submit" variant="secondary" className="w-full mb-2" disabled={loading}>
-                        {loading ? "Cadastrando..." : "Cadastrar"}
-                    </Button>
+                    <div className="flex justify-center">
+                        <Button type="submit" variant="secondary" className="md:w-1/2 text-center" disabled={loading}>
+                            {loading ? "Cadastrando..." : "Cadastrar"}
+                        </Button>
+                    </div>
                 </form>
                 {/* Link to login page */}
                 <div className="text-center mt-1">
@@ -192,7 +194,7 @@ function Register() {
                 </div>
                 {/* Link to landing page */}
                 <div className="text-center mt-2">
-                    <Link href="/landing" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
+                    <Link href="/" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
                 </div>
             </div>
         </div>
