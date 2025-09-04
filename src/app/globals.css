@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+body { overflow-x: hidden; background: #F0EAFF; }
+
 @keyframes shake {
 	0% { transform: translateX(0); }
 	20% { transform: translateX(-6px); }

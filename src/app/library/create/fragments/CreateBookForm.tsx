@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/ui/Modal';
 import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
+import Image from 'next/image';
 import { CoverInput } from './CoverInput';
 import { BasicFields } from './BasicFields';
 import { GenreSelector } from './GenreSelector';
@@ -155,7 +156,17 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
 
     return (
         <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium rounded-3xl p-8 shadow-2xl mt-10">
-            <h1 className="text-3xl font-yusei text-center mb-8 text-white">Cadastrar Novo Livro</h1>
+            <div className="flex items-center justify-center gap-3 mb-8">
+                <Image
+                    src="/img/svg/book/checkbook.svg"
+                    alt="Livro"
+                    width={50}
+                    height={50}
+                    className="w-10 h-10 mt-0.4"
+                    aria-hidden="true"
+                />
+                <h1 className="text-3xl font-yusei text-center font-semibold text-white">CADASTRAR NOVO LIVRO</h1>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <CoverInput
                     coverUrl={coverUrl}
