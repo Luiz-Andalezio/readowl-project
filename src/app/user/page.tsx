@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import FloatingNavbar from "@/components/ui/FloatingNavbar";
+import FloatingNavbar from "@/components/ui/Navbar";
 
 
 export default async function Account() {
