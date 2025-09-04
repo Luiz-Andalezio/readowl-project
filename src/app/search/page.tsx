@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import FloatingNavbar from "@/components/ui/Navbar";
+import Navbar from "@/components/ui/Navbar";
 
 
 export default async function Search() {
@@ -10,7 +10,7 @@ export default async function Search() {
 
     return (
         <>
-            <FloatingNavbar />
+            <Navbar />
             <main className="min-h-screen flex flex-col bg-readowl-purple-extralight">
             </main>
         </>

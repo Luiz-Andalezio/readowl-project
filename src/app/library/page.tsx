@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import FloatingNavbar from "@/components/ui/Navbar";
+import Navbar from "@/components/ui/Navbar";
 import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
 import BookCarousel from "@/components/ui/BookCarousel";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +20,7 @@ export default async function Library() {
 
     return (
         <>
-            <FloatingNavbar />
+            <Navbar />
             <main className="min-h-screen bg-readowl-purple-extralight">
                 <div className="flex justify-center items-start pt-8">
                     <Link href="/library/create">

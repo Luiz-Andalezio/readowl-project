@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
-import FloatingNavbar from '@/components/ui/Navbar';
+import Navbar from '@/components/ui/Navbar';
 import CreateBookForm from '@/app/library/create/fragments/CreateBookForm';
 
 export default async function CreateBookPage() {
@@ -10,7 +10,7 @@ export default async function CreateBookPage() {
 
     return (
         <>
-            <FloatingNavbar />
+            <Navbar />
             <main className="min-h-screen bg-readowl-purple-extralight pt-4 pb-20">
                 <div className="flex justify-center items-start">
                     <CreateBookForm />
