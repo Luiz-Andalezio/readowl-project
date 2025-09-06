@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Footer from '@/components/sections/Footer';
 import Providers from "@/components/ui/Providers";
+import Navbar from "@/components/ui/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
       </head>
   <body className={`${geistSans.variable} ${geistMono.variable} ${yuseiMagic.variable} antialiased`}>        
         <Providers>
+          <Navbar />
           {children}
         </Providers>
         <Footer />

@@ -11,7 +11,7 @@ export default async function Account() {
     return (
         <>
             <Navbar />
-            <main className="min-h-screen flex flex-col bg-readowl-purple-extralight">
+            <main className="min-h-screen flex flex-col">
             </main>
         </>
     );

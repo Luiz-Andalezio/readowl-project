@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/ui/Navbar";
 
 
-export default async function Search() {
+export default async function Home() {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/login?callbackUrl=/home");
 

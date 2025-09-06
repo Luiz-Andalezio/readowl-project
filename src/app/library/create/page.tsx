@@ -11,7 +11,7 @@ export default async function CreateBookPage() {
     return (
         <>
             <Navbar />
-            <main className="min-h-screen bg-readowl-purple-extralight pt-4 pb-20">
+            <main className="min-h-screen pt-4 pb-20">
                 <div className="flex justify-center items-start">
                     <CreateBookForm />
                 </div>
