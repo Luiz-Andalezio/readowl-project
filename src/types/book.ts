@@ -1,4 +1,4 @@
-import { Book, Genre } from '@prisma/client';
+import { Book, Genre, User } from '@prisma/client';
 import { z } from 'zod';
 
 // Centralized limits
@@ -13,6 +13,12 @@ export const BOOK_GENRES_MASTER: readonly string[] = [
 
 // Safe types (omit volatile fields or internals if needed)
 export type SafeBook = Omit<Book, 'updatedAt'> & { genres: Pick<Genre, 'id' | 'name'>[] };
+
+// Book with relations used widely in the UI
+export type BookWithAuthorAndGenres = Book & {
+  author: Pick<User, 'id' | 'name' | 'image' | 'role'>;
+  genres: Pick<Genre, 'id' | 'name'>[];
+};
 
 // Zod schema for create request (shared client/server)
 export const createBookSchema = z.object({

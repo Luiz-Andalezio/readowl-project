@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState, useEffect, useCallback } from 'react'; // Core React + hooks
 import Link from 'next/link';
+import { slugify } from '@/lib/slug';
 import clsx from 'clsx';
 
 // Minimal data needed to render a book card
@@ -9,7 +10,7 @@ export interface CarouselBook { id: string; title: string; coverUrl: string | nu
 interface BookCarouselProps { books: CarouselBook[]; title: string; iconSrc: string; itemsPerView?: number; }
 
 // Fallback image used when a book has no cover
-const FALLBACK_COVER = '/img/svg/library/book1.svg';
+const FALLBACK_COVER = '/img/svg/navbar/book1.svg';
 
 // Helper to scroll horizontally honoring user reduced‑motion preference
 function smoothScroll(el: HTMLElement, left: number, prefersReduced: boolean) {
@@ -31,6 +32,8 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
     const [cardWidth, setCardWidth] = useState(0);
     const [gap, setGap] = useState(18);
     const [visibleCount, setVisibleCount] = useState(itemsPerView);
+    // Whether content is wider than the viewport and can scroll
+    const [isScrollable, setIsScrollable] = useState(false);
     // Respect prefers-reduced-motion to avoid smooth animations & autoplay movement
     const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -72,6 +75,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
         const el = scrollRef.current; if (!el) return;
         setCanPrev(el.scrollLeft > 4); // small threshold to hide prev near start
         setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); // near end hide next
+        setIsScrollable(el.scrollWidth > el.clientWidth + 4);
         const snap = cardWidth + gap;  // snap distance between cards
         if (snap > 0) {
             const idx = Math.round(el.scrollLeft / snap); // nearest snapped index
@@ -109,31 +113,47 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
     useEffect(() => {
         const el = scrollRef.current; if (!el) return;
         // Pointer drag state
-        let isDown = false; let startX = 0; let startLeft = 0; let lastT = 0;
+    let isDown = false; let startX = 0; let startY = 0; let startLeft = 0; let lastT = 0; let didDrag = false;
+        const DRAG_THRESHOLD = 6; // pixels before we treat as drag and cancel click
         const onDown = (e: PointerEvent) => {
+            if (!isScrollable) return;
             if (e.button !== 0) return; // only primary button
-            isDown = true; startX = e.clientX; startLeft = el.scrollLeft; lastT = performance.now();
+            isDown = true; startX = e.clientX; startY = e.clientY; startLeft = el.scrollLeft; lastT = performance.now(); didDrag = false;
             el.setPointerCapture(e.pointerId); // ensure we keep getting events outside bounds
-            el.classList.add('dragging');
-            setPaused(true); // pause autoplay while dragging
+            setPaused(true); // pause autoplay while interacting
         };
         const onMove = (e: PointerEvent) => {
-            if (!isDown) return; e.preventDefault();
-            const dx = e.clientX - startX; el.scrollLeft = startLeft - dx; updateArrows();
+            if (!isDown) return;
+            const dx = e.clientX - startX; const dy = e.clientY - startY;
+            if (!didDrag && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
+                return; // ignore micro movements so clicks still work
+            }
+            if (!didDrag) { didDrag = true; el.classList.add('dragging'); }
+            e.preventDefault();
+            el.scrollLeft = startLeft - dx; updateArrows();
             lastT = performance.now(); // track last movement time for velocity
         };
         const onUp = (e: PointerEvent) => {
             if (!isDown) return; isDown = false; el.releasePointerCapture(e.pointerId); el.classList.remove('dragging');
-            const dx = e.clientX - startX; const dt = performance.now() - lastT; // distance & delta time
-            const velocity = Math.abs(dx) / dt; // simple velocity heuristic
-            // Swipe heuristic: velocity OR distance threshold triggers a page shift
-            if (velocity > 0.45 || Math.abs(dx) > cardWidth * 0.4) { scrollByCards(dx < 0 ? 1 : -1); }
-            else {
-                // Otherwise snap back to nearest card
-                const snap = cardWidth + gap; const index = Math.round(el.scrollLeft / snap);
-                smoothScroll(el, index * snap, prefersReducedMotion);
+            if (didDrag) {
+                const dx = e.clientX - startX; const dt = performance.now() - lastT; // distance & delta time
+                const velocity = Math.abs(dx) / dt; // simple velocity heuristic
+                // Swipe heuristic: velocity OR distance threshold triggers a page shift
+                if (velocity > 0.45 || Math.abs(dx) > cardWidth * 0.4) { scrollByCards(dx < 0 ? 1 : -1); }
+                else {
+                    // Otherwise snap back to nearest card
+                    const snap = cardWidth + gap; const index = Math.round(el.scrollLeft / snap);
+                    smoothScroll(el, index * snap, prefersReducedMotion);
+                }
+            } else {
+                // Not a drag: manually trigger click on the anchor under pointer
+                const node = document.elementFromPoint(e.clientX, e.clientY) as Element | null;
+                const anchor = node?.closest('a');
+                if (anchor && el.contains(anchor)) {
+                    (anchor as HTMLAnchorElement).click();
+                }
             }
-            setTimeout(() => setPaused(false), 800); // small delay after drag end for stability
+            setTimeout(() => setPaused(false), 800); // small delay after interaction end for stability
         };
         const onWheel = (e: WheelEvent) => {
             if (!e.shiftKey) return; // only custom behavior when user holds Shift
@@ -155,7 +175,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
             el.removeEventListener('scroll', updateArrows);
             el.removeEventListener('wheel', onWheel);
         };
-    }, [cardWidth, gap, prefersReducedMotion, updateArrows, scrollByCards]);
+    }, [cardWidth, gap, prefersReducedMotion, updateArrows, scrollByCards, isScrollable]);
 
     // Autoplay (pausa no hover / interação)
     // Autoplay cycle: every 4s move forward, loop to start. Disabled when:
@@ -219,13 +239,16 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
 
                     <div
                         ref={scrollRef}
-                        className="hide-scrollbar relative mx-9 flex overflow-x-auto scroll-smooth select-none cursor-grab active:cursor-grabbing"
+                        className={clsx(
+                            'hide-scrollbar relative mx-9 flex overflow-x-auto scroll-smooth select-none',
+                            isScrollable ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
+                        )}
                         style={{ gap }}
                     >
-                        {books.map(b => (
+            {books.map(b => (
                             <Link
                                 key={b.id}
-                                href={`/books/${b.id}`}
+                href={`/library/books/${slugify(b.title)}`}
                                 aria-label={b.title}
                                 className="group relative flex-shrink-0 rounded-lg overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark"
                                 style={{ width: cardWidth, aspectRatio: '3 / 4' }}
