@@ -3,9 +3,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Modal from '@/components/ui/Modal';
 import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
-import { BOOK_GENRES_MASTER, BOOK_COVER_MIN_WIDTH, BOOK_COVER_MIN_HEIGHT, BOOK_COVER_RATIO, BOOK_COVER_RATIO_TOLERANCE, BOOK_STATUS, BOOK_STATUS_LABEL, updateBookSchema } from '@/types/book';
+import { BOOK_GENRES_MASTER, BOOK_COVER_RATIO, BOOK_COVER_RATIO_TOLERANCE, BOOK_STATUS, updateBookSchema, BOOK_COVER_MIN_WIDTH, BOOK_COVER_MIN_HEIGHT } from '@/types/book';
 import { slugify } from '@/lib/slug';
 import { signIn } from 'next-auth/react';
+import CoverAndStatus from './CoverAndStatus';
+import BasicFieldsEdit from './BasicFieldsEdit';
+import GenreSelectorEdit from './GenreSelectorEdit';
 
 type Genre = { id: string; name: string };
 type Author = { id: string; name: string | null; image: string | null; role: string };
@@ -152,105 +155,45 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                     <h1 className="text-3xl font-yusei text-center font-semibold text-white">Editar obra: {book.title}</h1>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                    {/* Cover */}
-                    <div>
-                        <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                            <Image src="/img/svg/book/book2.svg" alt="Capa" width={18} height={18} className="opacity-80" />
-                            URL da Capa
-                            <button type="button" onClick={() => setHelpOpen(true)} className="w-5 h-5 rounded-full bg-readowl-purple-dark text-white text-xs flex items-center justify-center">?</button>
-                        </label>
-                        <div className={`relative w-full aspect-[3/4] rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden text-center text-readowl-purple-dark bg-white ${coverValid === false ? 'border-red-400' : 'border-none'}`}>
-                            {coverUrl && coverValid !== null && !coverLoading ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={coverUrl} alt="Preview capa" className="object-cover w-full h-full" />
-                            ) : (
-                                <span className="text-xs opacity-70 select-none px-4">Insira a URL da imagem para ver a capa aqui <br />(proporção 3:4, mín {BOOK_COVER_MIN_WIDTH}x{BOOK_COVER_MIN_HEIGHT})</span>
-                            )}
-                            {coverLoading && <div className="absolute inset-0 flex items-center justify-center bg-white/60 text-readowl-purple font-semibold text-sm">Carregando...</div>}
-                        </div>
-                        <input type="url" placeholder="https://..." value={coverUrl} onChange={e => setCoverUrl(e.target.value.trim())} onBlur={() => setTouched(t => ({ ...t, cover: true }))} className="mt-2.5 w-full rounded-full bg-white focus:ring-readowl-purple-dark px-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50" />
-                        {errors.coverUrl && (touched.cover || attemptedSubmit) && <p className="text-xs text-red-300 mt-1">{errors.coverUrl}</p>}
+                    <CoverAndStatus
+                        coverUrl={coverUrl}
+                        coverValid={coverValid}
+                        coverLoading={coverLoading}
+                        errors={{ coverUrl: errors.coverUrl }}
+                        touched={touched.cover}
+                        attemptedSubmit={attemptedSubmit}
+                        onChange={(v) => setCoverUrl(v)}
+                        onBlur={() => setTouched(t => ({ ...t, cover: true }))}
+                        onHelp={() => setHelpOpen(true)}
+                        status={status}
+                        onStatus={(s) => setStatus(s)}
+                    />
 
-                        {/* Compact Status Dropdown with icons, below cover input, no label */}
-                        <div className="mt-3">
-                            <div className="relative inline-block">
-                                <select value={status} onChange={(e) => setStatus(e.target.value as typeof BOOK_STATUS[number])} className="appearance-none pr-8 pl-10 py-1.5 text-sm rounded-full bg-white border-2 border-white/60 focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple">
-                                    {BOOK_STATUS.map(s => (
-                                        <option key={s} value={s}>{BOOK_STATUS_LABEL[s]}</option>
-                                    ))}
-                                </select>
-                                {/* Left icon changes with status */}
-                                <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={
-                                        status === 'ONGOING' ? '/img/svg/book/status/active.svg'
-                                            : status === 'COMPLETED' ? '/img/svg/book/status/finished.svg'
-                                                : status === 'PAUSED' ? '/img/svg/book/status/paused.svg'
-                                                    : '/img/svg/book/status/hiatus.svg'
-                                    } alt="Status" className="w-5 h-5" />
-                                </span>
-                                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-readowl-purple">▼</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Basic fields */}
-                    <div className="lg:col-span-2">
-                        <div>
-                            <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                                <Image src="/img/svg/book/titlecase.svg" alt="Título" width={18} height={18} className="opacity-80" />
-                                Título
-                            </label>
-                            <input type="text" value={title} onChange={e => setTitle(e.target.value)} onBlur={() => setTouched(t => ({ ...t, title: true }))} className={`w-full rounded-full bg-white border-2 pl-4 pr-4 py-2 focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple placeholder-readowl-purple/50 transition ${errors.title && (touched.title || attemptedSubmit) ? 'border-red-400' : 'border-white/60'}`} placeholder="Título da obra" />
-                            {errors.title && (touched.title || attemptedSubmit) && <p className="text-xs text-red-300 mt-1">{errors.title}</p>}
-                        </div>
-
-                        <div>
-                            <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                                <Image src="/img/svg/book/text.svg" alt="Sinopse" width={18} height={18} className="opacity-80" />
-                                Sinopse
-                            </label>
-                            <textarea value={synopsis} onChange={e => setSynopsis(e.target.value)} onBlur={() => setTouched(t => ({ ...t, synopsis: true }))} className={`w-full rounded-2xl bg-white border-2 pl-4 pr-4 py-3 h-80 resize-none focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple placeholder-readowl-purple/50 leading-relaxed transition ${errors.synopsis && (touched.synopsis || attemptedSubmit) ? 'border-red-400' : 'border-white/60'}`} placeholder="Descreva brevemente a história..." />
-                            {errors.synopsis && (touched.synopsis || attemptedSubmit) && <p className="text-xs text-red-300 mt-1">{errors.synopsis}</p>}
-                        </div>
-
-                        <div>
-                            <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                                <Image src="/img/svg/book/date.svg" alt="Frequência" width={18} height={18} className="opacity-80" />
-                                Frequência de Lançamento (opcional)
-                            </label>
-                            <input type="text" value={releaseFrequency} onChange={e => setReleaseFrequency(e.target.value)} onBlur={() => setTouched(t => ({ ...t, frequency: true }))} className={`w-full rounded-full bg-white border-2 pl-4 pr-4 py-2 focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple placeholder-readowl-purple/50 transition ${errors.releaseFrequency && (touched.frequency || attemptedSubmit) ? 'border-red-400' : 'border-white/60'}`} placeholder="Ex: 1 capítulo por semana." />
-                            {errors.releaseFrequency && (touched.frequency || attemptedSubmit) && <p className="text-xs text-red-300 mt-1">{errors.releaseFrequency}</p>}
-                        </div>
-
-                        {/* Status moved under cover; no extra block here */}
-                    </div>
+                    <BasicFieldsEdit
+                        title={title}
+                        synopsis={synopsis}
+                        releaseFrequency={releaseFrequency}
+                        errors={{ title: errors.title, synopsis: errors.synopsis, releaseFrequency: errors.releaseFrequency }}
+                        touched={{ title: touched.title, synopsis: touched.synopsis, frequency: touched.frequency }}
+                        attemptedSubmit={attemptedSubmit}
+                        onTitle={(v) => setTitle(v)}
+                        onSynopsis={(v) => setSynopsis(v)}
+                        onFrequency={(v) => setReleaseFrequency(v)}
+                        onBlurTitle={() => setTouched(t => ({ ...t, title: true }))}
+                        onBlurSynopsis={() => setTouched(t => ({ ...t, synopsis: true }))}
+                        onBlurFrequency={() => setTouched(t => ({ ...t, frequency: true }))}
+                    />
                 </div>
 
                 {/* Genres */}
-                <div className="lg:col-span-3 w-full mt-4">
-                    <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                        <Image src="/img/svg/book/label.svg" alt="Gêneros" width={18} height={18} className="opacity-80" />
-                        Gêneros
-                    </label>
-                    <div className="w-full bg-readowl-purple-extradark/70 rounded-xl border border-white/10 p-3 max-h-48 overflow-y-auto">
-                        <div className="relative">
-                            <input type="text" value={genreFilter} onChange={e => setGenreFilter(e.target.value)} placeholder="Buscar gênero..." className="w-full rounded-full bg-white border-2 border-white/60 focus:ring-2 focus:ring-readowl-purple-dark pl-4 pr-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50 mb-3" />
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                            {filteredGenres.map(g => {
-                                const checked = selectedGenres.includes(g);
-                                return (
-                                    <label key={g} className={`flex items-center justify-center px-2 py-1 rounded-md cursor-pointer text-[11px] font-medium select-none transition border border-white/10 whitespace-pre-line text-center leading-tight min-h-[34px] ${checked ? 'bg-readowl-purple-extradark text-white ring-2 ring-white/30' : 'bg-readowl-purple-light text-white/90 hover:bg-readowl-purple-dark'}`}>
-                                        <input type="checkbox" checked={checked} onChange={() => toggleGenre(g)} className="hidden" />
-                                        {g}
-                                    </label>
-                                );
-                            })}
-                        </div>
-                    </div>
-                    {errors.genres && <p className="text-xs text-red-300 mt-1">{errors.genres}</p>}
-                </div>
+                <GenreSelectorEdit
+                    filteredGenres={filteredGenres}
+                    genreFilter={genreFilter}
+                    onFilter={(v) => setGenreFilter(v)}
+                    selectedGenres={selectedGenres}
+                    toggleGenre={toggleGenre}
+                    error={errors.genres}
+                />
 
                 {errors.submit && <p className="text-sm text-red-300 mt-6 text-center">{errors.submit}</p>}
 
