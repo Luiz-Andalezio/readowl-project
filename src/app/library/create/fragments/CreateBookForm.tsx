@@ -1,7 +1,6 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/ui/Modal';
-import MagicNotification from '@/components/ui/MagicNotification';
 import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
 import Image from 'next/image';
 import { CoverInput } from './CoverInput';
@@ -51,7 +50,6 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
     const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [successModal, setSuccessModal] = useState(false);
-    const [toasts, setToasts] = useState<{ id: string; message: string }[]>([]);
 
     const genres = useMemo(() => (availableGenres && availableGenres.length > 0 ? availableGenres : defaultGenres), [availableGenres]);
 
@@ -152,8 +150,6 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
             setSuccessModal(true);
         } catch (e) {
             setErrors(prev => ({ ...prev, submit: (e as Error).message }));
-            const id = Math.random().toString(36).slice(2);
-            setToasts((t) => [...t, { id, message: (e as Error).message }]);
         } finally {
             setSubmitting(false);
         }
@@ -262,12 +258,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                                 </div>
                         </Modal>
 
-                        {/* Notifications */}
-                                    <div className="fixed top-4 right-4 space-y-2 z-50">
-                                        {toasts.map(t => (
-                                            <MagicNotification key={t.id} id={t.id} message={t.message} onClose={(id) => setToasts((x) => x.filter(n => n.id !== id))} />
-                                        ))}
-                                    </div>
+                        {/* Notifications removed for create flow as requested */}
         </div>
     );
 }

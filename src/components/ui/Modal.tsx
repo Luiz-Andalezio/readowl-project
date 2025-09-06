@@ -43,7 +43,7 @@ export default function Modal({
 
 	return (
 		<div
-			className="fixed inset-0 z-[100] flex items-center justify-center"
+			className="fixed inset-0 z-[150] flex items-center justify-center"
 			aria-modal="true"
 			role="dialog"
 			aria-label={title || ariaLabel || "Modal"}

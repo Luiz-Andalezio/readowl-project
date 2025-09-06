@@ -28,7 +28,7 @@ const MagicNotification: React.FC<MagicNotificationProps> = ({ id, icon, message
 
     return (
         <div
-            className={`w-full max-w-sm text-white flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl border border-white/10 backdrop-blur-md relative overflow-hidden transition-all duration-450 ${bgClass || bgFallback} ${exiting ? 'animate-magic-out' : 'animate-magic-in'}`}
+            className={`relative z-[200] w-full max-w-sm text-white flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl border border-white/10 overflow-hidden transition-all duration-450 ${bgClass || bgFallback} ${exiting ? 'animate-magic-out' : 'animate-magic-in'}`}
             role="alert"
         >
             <div className="text-xl select-none leading-none mt-[2px]">{icon || '🦉'}</div>

@@ -5,7 +5,6 @@ import Modal from '@/components/ui/Modal';
 import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
 import { BOOK_GENRES_MASTER, BOOK_COVER_MIN_WIDTH, BOOK_COVER_MIN_HEIGHT, BOOK_COVER_RATIO, BOOK_COVER_RATIO_TOLERANCE, BOOK_STATUS, BOOK_STATUS_LABEL, updateBookSchema } from '@/types/book';
 import { slugify } from '@/lib/slug';
-import MagicNotification from '@/components/ui/MagicNotification';
 import { signIn } from 'next-auth/react';
 
 type Genre = { id: string; name: string };
@@ -59,7 +58,6 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
     const [helpOpen, setHelpOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [successOpen, setSuccessOpen] = useState(false);
-    const [toasts, setToasts] = useState<{ id: string; message: string }[]>([]);
 
     const genres = useMemo(() => [...BOOK_GENRES_MASTER], []);
     const filteredGenres = useMemo(() => genres.filter(g => g.toLowerCase().includes(genreFilter.toLowerCase())), [genreFilter, genres]);
@@ -141,8 +139,6 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
             setSuccessOpen(true);
         } catch (e) {
             setErrors(prev => ({ ...prev, submit: (e as Error).message }));
-            const id = Math.random().toString(36).slice(2);
-            setToasts((t) => [...t, { id, message: (e as Error).message }]);
         } finally {
             setSubmitting(false);
         }
@@ -315,12 +311,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                 </Modal>
             </div>
 
-            {/* Notifications */}
-            <div className="fixed top-4 right-4 space-y-2 z-50">
-                {toasts.map(t => (
-                    <MagicNotification key={t.id} id={t.id} message={t.message} onClose={(id) => setToasts((x) => x.filter(n => n.id !== id))} />
-                ))}
-            </div>
+            {/* Notifications removed for edit flow as requested */}
 
             {/* Danger zone - delete button below purple card */}
             <div className="w-full max-w-6xl mx-auto mt-4 flex justify-end">
@@ -408,8 +399,6 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                             } catch (e) {
                                 const msg = (e as Error).message;
                                 setErrors(prev => ({ ...prev, submit: msg }));
-                                const id = Math.random().toString(36).slice(2);
-                                setToasts((t) => [...t, { id, message: msg }]);
                             } finally {
                                 setSubmitting(false);
                             }
