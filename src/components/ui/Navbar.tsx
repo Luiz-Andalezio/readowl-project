@@ -63,7 +63,7 @@ export default function FloatingNavbar() {
                 <div className="mx-auto max-w-7xl pl-2 pr-3 sm:px-6">
                     <div className="flex h-14 sm:h-16 items-center gap-3 sm:gap-4">
                         {/* Logo */}
-                        <button onClick={() => go('/')} className="flex items-center gap-2 group">
+                        <button onClick={() => go('/home')} className="flex items-center gap-2 group">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src="/img/mascot/logo.png" alt="Logo" className="h-9 w-9 sm:h-10 sm:w-10 object-contain drop-shadow" />
                             <span className="hidden md:inline text-white font-yusei tracking-wide text-sm sm:text-base group-hover:opacity-90">Readowl</span>
