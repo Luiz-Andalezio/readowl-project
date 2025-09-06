@@ -21,7 +21,7 @@ export default async function Library() {
     return (
         <>
             <Navbar />
-            <main className="min-h-screen bg-readowl-purple-extralight">
+            <main className="min-h-screen">
                 <div className="flex justify-center items-start pt-8">
                     <Link href="/library/create">
                         <ButtonWithIcon

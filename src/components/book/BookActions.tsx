@@ -1,0 +1,76 @@
+"use client";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
+import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
+import { BookWithAuthorAndGenres } from "@/types/book";
+import React from "react";
+
+type Props = {
+    book: BookWithAuthorAndGenres;
+    className?: string;
+};
+
+export default function BookActions({ book, className }: Props) {
+    const { data: session } = useSession();
+    const [following, setFollowing] = React.useState(false);
+
+    const isOwner = session?.user?.id === book.authorId;
+    const isAdmin = session?.user?.role === "ADMIN";
+
+    // Base style for the "Seguir" button
+    const baseStyle =
+        "flex-1 text-left font-yusei text-lg font-semibold py-2 px-6 rounded-full border-2 transition-colors duration-300 flex items-center justify-start gap-2 w-full";
+
+    return (
+        <div
+            className={`flex flex-col h-full justify-center items-center md:items-end gap-3 mt-4 md:mt-0 min-w-0 ${className || ""}`}
+        >
+            {(isOwner || isAdmin) && (
+                <div className="flex flex-col gap-3 w-full justify-center items-center mt-7 max-w-[340px] mx-auto md:mx-0 md:w-[340px] md:self-end min-w-0">
+                    <ButtonWithIcon
+                        className="w-full justify-center items-center"
+                        iconUrl="/img/svg/navbar/book1.svg"
+                        variant="primary"
+                        onClick={() => { }}
+                    >
+                        Editar obra
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                        className="w-full justify-center items-center"
+                        iconUrl="/img/svg/book/chapter.svg"
+                        variant="primary"
+                        onClick={() => { }}
+                    >
+                        Adicionar capítulo
+                    </ButtonWithIcon>
+                </div>
+            )}
+            {/* Follow / Start row */}
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full max-w-[340px] mx-auto md:mx-0 md:w-[340px] md:self-end min-w-0">
+                <button
+                    onClick={() => setFollowing((v) => !v)}
+                    className={`${baseStyle} ${following
+                            ? "bg-readowl-purple-dark text-readowl-purple-light border-readowl-purple shadow-md"
+                            : "bg-readowl-purple-light text-white border-readowl-purple hover:bg-readowl-purple-hover shadow-md"
+                        }`}
+                >
+                    <Image
+                        src="/img/svg/book/bookmark-purple.svg"
+                        alt={following ? "Seguindo" : "Seguir"}
+                        width={20}
+                        height={20}
+                        className={following ? "invert-0" : "invert-[100%] brightness-0"}
+                    />
+                    {following ? "Seguindo" : "Seguir"}
+                </button>
+                <ButtonWithIcon
+                    className="flex-1 w-full justify-center items-center"
+                    iconUrl="/img/svg/navbar/book1.svg"
+                    onClick={() => { }}
+                >
+                    Iniciar
+                </ButtonWithIcon>
+            </div>
+        </div>
+    );
+}

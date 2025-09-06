@@ -59,7 +59,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-readowl-purple-extralight">
+    <div className="min-h-screen flex flex-col justify-center items-center">
       <div className="bg-readowl-purple-medium rounded-xl shadow-lg p-8 w-full max-w-md">
         {/* Logo and title */}
         <div className="flex flex-col items-center mb-6">
