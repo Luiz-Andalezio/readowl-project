@@ -47,7 +47,10 @@ export default function BookHeader({ book, mode }: Props) {
                         <div className="mt-2 font-semibold flex md:text-xl text-white/90 flex-wrap">
                             {icon('/img/svg/book/label.svg', 'Gêneros')}
                             <span className="whitespace-normal break-words leading-snug">
-                                {book.genres.map(g => g.name).join(', ')}
+                                {book.genres
+                                    .map(g => g.name)
+                                    .sort((a, b) => a.localeCompare(b))
+                                    .join(', ')}
                             </span>
                         </div>
                     </>
