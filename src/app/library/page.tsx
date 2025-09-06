@@ -22,7 +22,7 @@ export default async function Library() {
         <>
             <Navbar />
             <main className="min-h-screen">
-                <div className="flex justify-center items-start pt-8">
+                <div className="flex justify-center items-start">
                     <Link href="/library/create">
                         <ButtonWithIcon
                             variant="primary"

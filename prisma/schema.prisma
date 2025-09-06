@@ -17,7 +17,8 @@ enum Role {
 enum Status {
   ONGOING    // Em andamento
   COMPLETED  // Concluído
-  HIATUS     // Hiato / Pausado
+  HIATUS     // Hiato
+  PAUSED     // Pausado
 }
 
 // Modelo de Usuário

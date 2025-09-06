@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
 import { BookWithAuthorAndGenres } from "@/types/book";
 import React from "react";
+import { useRouter } from "next/navigation";
+import { slugify } from "@/lib/slug";
 
 type Props = {
     book: BookWithAuthorAndGenres;
@@ -13,6 +15,7 @@ type Props = {
 export default function BookActions({ book, className }: Props) {
     const { data: session } = useSession();
     const [following, setFollowing] = React.useState(false);
+    const router = useRouter();
 
     const isOwner = session?.user?.id === book.authorId;
     const isAdmin = session?.user?.role === "ADMIN";
@@ -31,7 +34,7 @@ export default function BookActions({ book, className }: Props) {
                         className="w-full justify-center items-center"
                         iconUrl="/img/svg/navbar/book1.svg"
                         variant="primary"
-                        onClick={() => { }}
+                        onClick={() => router.push(`/library/books/${slugify(book.title)}/edit`)}
                     >
                         Editar obra
                     </ButtonWithIcon>

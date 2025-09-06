@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { BookWithAuthorAndGenres } from '@/types/book';
+import { BookWithAuthorAndGenres, BookStatus } from '@/types/book';
 
 type Props = {
     book: BookWithAuthorAndGenres;
@@ -19,10 +19,11 @@ const icon = (src: string, alt: string) => (
     />
 );
 
-const statusLabelMap: Record<string, string> = {
-    ONGOING: 'Ativa',
-    COMPLETED: 'Finalizada',
+const statusLabelMap: Record<BookStatus, string> = {
+    ONGOING: 'Em andamento',
+    COMPLETED: 'Concluído',
     HIATUS: 'Hiato',
+    PAUSED: 'Pausado',
 };
 
 export default function BookHeader({ book, mode }: Props) {
@@ -82,7 +83,13 @@ export default function BookHeader({ book, mode }: Props) {
                             <dd>{book.releaseFrequency || '—'}</dd>
                         </div>
                         <div className="flex items-center">
-                            {icon('/img/svg/book/status/active.svg', 'Ativo')}
+                            {icon(
+                                book.status === 'ONGOING' ? '/img/svg/book/status/active.svg'
+                                : book.status === 'COMPLETED' ? '/img/svg/book/status/finished.svg'
+                                : book.status === 'PAUSED' ? '/img/svg/book/status/paused.svg'
+                                : '/img/svg/book/status/hiatus.svg',
+                                'Status'
+                            )}
                             <dt className="sr-only">Status</dt>
                             <dd>
                                 {statusLabelMap[book.status] || statusLabelMap.ONGOING}

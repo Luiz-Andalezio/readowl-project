@@ -1,9 +1,11 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { compare } from "bcrypt";
 import prisma from "@/lib/prisma";
+import type { JWT } from "next-auth/jwt";
+import { AppRole } from "@/types/user";
 
 const missingGoogle = !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET;
 if (missingGoogle) {
@@ -47,15 +49,25 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   callbacks: {
     async session({ session, token }) {
-      if (session.user && token.sub && token.role) {
+      const t = token as JWT & { role?: AppRole; authProvider?: string; stepUpAt?: number };
+      if (session.user && token.sub && t.role) {
         session.user.id = token.sub;
-        session.user.role = token.role;
+        session.user.role = t.role;
       }
+      // Expose step-up info and provider to client session
+      (session as { authProvider?: string; stepUpAt?: number }).authProvider = t.authProvider;
+      (session as { authProvider?: string; stepUpAt?: number }).stepUpAt = t.stepUpAt;
       return session;
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
+    async jwt({ token, user, account }) {
+      // Persist role on token after initial login
+      if (user && (user as NextAuthUser & { role: AppRole }).role) {
+        (token as JWT & { role?: AppRole }).role = (user as NextAuthUser & { role: AppRole }).role;
+      }
+      // When a sign-in occurs (including reauthentication), mark provider and step-up timestamp
+      if (account && account.provider) {
+        (token as JWT & { authProvider?: string; stepUpAt?: number }).authProvider = account.provider;
+        (token as JWT & { authProvider?: string; stepUpAt?: number }).stepUpAt = Date.now();
       }
       return token;
     },

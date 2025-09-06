@@ -8,9 +8,7 @@ import BookActions from '../../../../components/book/BookActions';
 import BookTabs from '../../../../components/book/BookTabs';
 import type { BookWithAuthorAndGenres } from '@/types/book';
 
-interface PageProps {
-  params: { slug: string };
-}
+interface PageProps { params: Promise<{ slug: string }> }
 
 async function getBookBySlug(slug: string) {
   // No slug column yet; derive from title for SSR match.
@@ -19,7 +17,8 @@ async function getBookBySlug(slug: string) {
 }
 
 export default async function BookPage({ params }: PageProps) {
-  const book = (await getBookBySlug(params.slug)) as BookWithAuthorAndGenres | null;
+  const { slug } = await params;
+  const book = (await getBookBySlug(slug)) as BookWithAuthorAndGenres | null;
   if (!book) return notFound();
 
   return (
@@ -78,7 +77,8 @@ export default async function BookPage({ params }: PageProps) {
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: PageProps) {
-  const book = await getBookBySlug(params.slug);
+  const { slug } = await params;
+  const book = await getBookBySlug(slug);
   if (!book) return {};
   return {
     title: `${book.title} | Readowl`,

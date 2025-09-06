@@ -1,6 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/ui/Modal';
+import MagicNotification from '@/components/ui/MagicNotification';
 import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
 import Image from 'next/image';
 import { CoverInput } from './CoverInput';
@@ -50,6 +51,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
     const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [successModal, setSuccessModal] = useState(false);
+    const [toasts, setToasts] = useState<{ id: string; message: string }[]>([]);
 
     const genres = useMemo(() => (availableGenres && availableGenres.length > 0 ? availableGenres : defaultGenres), [availableGenres]);
 
@@ -123,6 +125,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
         setErrors(validate());
     }, [title, synopsis, releaseFrequency, coverUrl, coverValid, selectedGenres, validate]);
 
+    const untouched = !title && !synopsis && !releaseFrequency && !coverUrl && selectedGenres.length === 0;
     const canSubmit = Object.keys(errors).length === 0 && !!title.trim() && !!synopsis.trim() && selectedGenres.length > 0 && coverValid === true;
 
     const handleSubmit = async () => {
@@ -149,13 +152,15 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
             setSuccessModal(true);
         } catch (e) {
             setErrors(prev => ({ ...prev, submit: (e as Error).message }));
+            const id = Math.random().toString(36).slice(2);
+            setToasts((t) => [...t, { id, message: (e as Error).message }]);
         } finally {
             setSubmitting(false);
         }
     };
 
     return (
-        <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium rounded-3xl p-8 shadow-2xl mt-10">
+        <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium rounded-3xl p-8 shadow-2xl">
             <div className="flex items-center justify-center gap-3 mb-8">
                 <Image
                     src="/img/svg/book/checkbook.svg"
@@ -208,7 +213,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
             <div className="mt-4 flex items-center justify-center gap-6">
                 <ButtonWithIcon
                     variant="secondary"
-                    onClick={() => setConfirmCancelOpen(true)}
+                    onClick={() => untouched ? window.location.assign(redirectAfter) : setConfirmCancelOpen(true)}
                     iconUrl="/img/svg/generics/cancel2.svg"
                 >Cancelar</ButtonWithIcon>
                 <ButtonWithIcon
@@ -235,7 +240,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
             </Modal>
 
             {/* Confirm Save */}
-            <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar registro" widthClass="max-w-sm" >
+                        <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar registro" widthClass="max-w-sm" >
                 <p>Deseja salvar este novo livro?</p>
                 <div className="flex gap-3 justify-end mt-6">
                     <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
@@ -243,13 +248,26 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 </div>
             </Modal>
 
-            {/* Success Modal */}
-            <Modal open={successModal} onClose={() => { setSuccessModal(false); window.location.href = redirectAfter; }} title="Livro criado!" widthClass="max-w-sm" >
-                <p>Seu livro foi criado com sucesso.</p>
-                <div className="flex justify-end mt-6">
-                    <button onClick={() => { setSuccessModal(false); window.location.href = redirectAfter; }} className="px-4 py-2 rounded-full text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Ir para biblioteca</button>
-                </div>
-            </Modal>
+                        {/* Success Modal with stay to create another */}
+                        <Modal open={successModal} onClose={() => { setSuccessModal(false); window.location.href = redirectAfter; }} title="Livro criado!" widthClass="max-w-sm" >
+                                <p>Seu livro foi criado com sucesso.</p>
+                                <div className="flex justify-end mt-6 gap-3">
+                                        <button onClick={() => {
+                                                // reset to create another
+                                                setSuccessModal(false);
+                                                setTitle(''); setSynopsis(''); setReleaseFrequency(''); setCoverUrl(''); setSelectedGenres([]);
+                                                setCoverValid(null); setAttemptedSubmit(false);
+                                        }} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Criar outro</button>
+                                        <button onClick={() => { setSuccessModal(false); window.location.href = redirectAfter; }} className="px-4 py-2 rounded-full text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Ir para biblioteca</button>
+                                </div>
+                        </Modal>
+
+                        {/* Notifications */}
+                                    <div className="fixed top-4 right-4 space-y-2 z-50">
+                                        {toasts.map(t => (
+                                            <MagicNotification key={t.id} id={t.id} message={t.message} onClose={(id) => setToasts((x) => x.filter(n => n.id !== id))} />
+                                        ))}
+                                    </div>
         </div>
     );
 }
