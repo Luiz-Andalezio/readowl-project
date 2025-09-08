@@ -213,6 +213,14 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
         };
     }, []);
 
+    // Reusable 3-line clamp style (with ellipsis) for titles
+    const clamp3: React.CSSProperties = {
+        display: '-webkit-box',
+        WebkitLineClamp: 3,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+    };
+
     return (
         <section className="mt-8 w-full" ref={containerRef} tabIndex={0} aria-roledescription="carousel">
             <div className="relative">
@@ -263,7 +271,13 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                                 />
                                 <div className="absolute inset-0 flex flex-col justify-end">
                                     <div className="pointer-events-none mt-auto w-full px-2 pb-1 pt-8 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
-                                        <p className="text-[11px] sm:text-xs font-medium text-white leading-snug drop-shadow-md line-clamp-2">{b.title}</p>
+                                        <p
+                                            title={b.title}
+                                            className="text-[11px] sm:text-xs font-medium text-white leading-snug drop-shadow-md text-center"
+                                            style={clamp3}
+                                        >
+                                            {b.title}
+                                        </p>
                                     </div>
                                 </div>
                             </Link>

@@ -59,12 +59,11 @@ model Genre {
 model Book {
   id              String    @id @default(cuid())
   title           String    @db.VarChar(200)
-  synopsis        String    @db.VarChar(1000)
+  synopsis        String    @db.VarChar(2000)
   releaseFrequency String?  @db.VarChar(50)
   coverUrl        String?
   status          Status    @default(ONGOING)
   views           Int       @default(0)
-  lastUpdate      DateTime  @default(now())
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

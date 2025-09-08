@@ -34,7 +34,7 @@ export default function BookHeader({ book, mode }: Props) {
             <div className="min-w-0">
                 {isTitleGenres ? (
                     <>
-                        <h1 className="font-yusei font-bold text-5xl md:text-5xl leading-normal break-words flex items-center gap-3 pb-1">
+                        <h1 className="font-yusei font-bold text-5xl md:text-5xl leading-normal break-words pb-1">
                             {/* <Image
                                 src="/img/svg/book/book2.svg"
                                 alt="Livro"
@@ -43,7 +43,7 @@ export default function BookHeader({ book, mode }: Props) {
                                 className="inline-block mr-1 align-text-bottom shrink-0 w-10 h-10 md:w-12 md:h-12 mt-2"
                                 priority
                             /> */}
-                            <span>{book.title}</span>
+                            <span className="whitespace-normal break-words">{book.title}</span>
                         </h1>
                         <div className="mt-2 font-semibold flex md:text-xl text-white/90 flex-wrap">
                             {icon('/img/svg/book/label.svg', 'Gêneros')}

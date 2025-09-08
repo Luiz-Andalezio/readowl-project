@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 // Centralized limits
 export const BOOK_TITLE_MAX = 200;
-export const BOOK_SYNOPSIS_MAX = 1000;
+export const BOOK_SYNOPSIS_MAX = 2000;
 export const BOOK_FREQ_MAX = 50;
 
 // Master genre list (single source of truth)
