@@ -30,7 +30,7 @@ export default function RatingBox({ bookId }: Props) {
     const display = hover || myScore;
 
     return (
-        <div className="relative bg-readowl-purple-light border-2 text-white border-readowl-purple shadow-md rounded-xl p-4 text-center" data-bookid={bookId}>
+    <div className="relative bg-readowl-purple-light border-2 text-white border-readowl-purple shadow-md p-4 text-center" data-bookid={bookId}>
             <div className="mb-2 text-white font-bold text-4xl">AVALIE ESTA OBRA</div>
             <div className="inline-flex items-center gap-3 select-none">
                 {Array.from({ length: 5 }).map((_, i) => {

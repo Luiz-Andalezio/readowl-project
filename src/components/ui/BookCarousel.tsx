@@ -224,7 +224,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
     return (
         <section className="mt-8 w-full" ref={containerRef} tabIndex={0} aria-roledescription="carousel">
             <div className="relative">
-                <div className="flex items-center justify-center gap-2 bg-readowl-purple-medium rounded-full px-6 sm:px-8 py-2 text-white font-yusei text-lg select-none shadow mx-auto max-w-full">
+                <div className="flex items-center justify-center gap-2 bg-readowl-purple-medium px-6 sm:px-8 py-2 text-white font-yusei text-lg select-none shadow mx-auto max-w-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={iconSrc} alt="Icone" className="w-5 h-5 opacity-90" />
                     <h2 className="text-sm sm:text-base md:text-lg font-yusei tracking-wide">{title}</h2>
@@ -258,7 +258,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                                 key={b.id}
                 href={`/library/books/${slugify(b.title)}`}
                                 aria-label={b.title}
-                                className="group relative flex-shrink-0 rounded-lg overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark"
+                                className="group relative flex-shrink-0 overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark"
                                 style={{ width: cardWidth, aspectRatio: '3 / 4' }}
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -309,7 +309,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                                 aria-label={`Ir para posição ${i + 1}`}
                                 aria-current={i === activePage}
                                 onClick={() => scrollToIndex(i)}
-                                className={clsx('h-2.5 rounded-full transition-all', i === activePage ? 'bg-readowl-purple w-5' : 'bg-readowl-purple-light/50 w-2 hover:bg-readowl-purple-light/80')}
+                                className={clsx('h-2.5 transition-all', i === activePage ? 'bg-readowl-purple w-5' : 'bg-readowl-purple-light/50 w-2 hover:bg-readowl-purple-light/80')}
                             />
                         ))}
                     </div>

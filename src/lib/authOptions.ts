@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions, User as NextAuthUser } from "next-auth";
+import { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -18,18 +18,18 @@ export const authOptions: NextAuthOptions = {
     ...(missingGoogle
       ? []
       : [
-        GoogleProvider({
-          clientId: process.env.GOOGLE_CLIENT_ID as string,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-          authorization: {
-            params: {
-              prompt: "consent",
-              access_type: "offline",
-              response_type: "code",
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+            authorization: {
+              params: {
+                prompt: "consent",
+                access_type: "offline",
+                response_type: "code",
+              },
             },
-          },
-        }),
-      ]),
+          }),
+        ]),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -76,6 +76,3 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
 };
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };

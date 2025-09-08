@@ -60,7 +60,7 @@ function Login() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center">
-      <div className="bg-readowl-purple-medium rounded-xl shadow-lg p-8 w-full max-w-md">
+  <div className="bg-readowl-purple-medium shadow-lg p-8 w-full max-w-md">
         {/* Logo and title */}
         <div className="flex flex-col items-center mb-6">
           <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={64} height={64} />

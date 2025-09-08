@@ -10,7 +10,7 @@ const HowToPost: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-8 md:gap-12">
           {/* Step 1 */}
           <div className="flex-1">
-            <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 rounded-full bg-readowl-purple-light text-white text-2xl font-bold">
+            <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 bg-readowl-purple-light text-white text-2xl font-bold">
               1
             </div>
             <h3 className="text-xl font-semibold text-readowl-purple mb-2">
@@ -23,7 +23,7 @@ const HowToPost: React.FC = () => {
 
           {/* Step 2 */}
           <div className="flex-1">
-            <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 rounded-full bg-readowl-purple-light text-white text-2xl font-bold">
+            <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 bg-readowl-purple-light text-white text-2xl font-bold">
               2
             </div>
             <h3 className="text-xl font-semibold text-readowl-purple mb-2">
@@ -36,7 +36,7 @@ const HowToPost: React.FC = () => {
 
           {/* Step 3 */}
           <div className="flex-1">
-            <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 rounded-full bg-readowl-purple-light text-white text-2xl font-bold">
+            <div className="flex items-center justify-center h-16 w-16 mx-auto mb-4 bg-readowl-purple-light text-white text-2xl font-bold">
               3
             </div>
             <h3 className="text-xl font-semibold text-readowl-purple mb-2">

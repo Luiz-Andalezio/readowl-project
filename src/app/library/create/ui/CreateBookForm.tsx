@@ -156,7 +156,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
     };
 
     return (
-        <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium rounded-3xl p-8 shadow-2xl">
+    <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium p-8 shadow-2xl">
             <div className="flex items-center justify-center gap-3 mb-8">
                 <Image
                     src="/img/svg/book/checkbook.svg"
@@ -230,8 +230,8 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
             <Modal open={confirmCancelOpen} onClose={() => setConfirmCancelOpen(false)} title="Cancelar criação do livro?" widthClass="max-w-sm" >
                 <p>Você perderá todos os dados preenchidos.</p>
                 <div className="flex gap-3 justify-end mt-6">
-                    <button onClick={() => setConfirmCancelOpen(false)} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
-                    <a href={redirectAfter} className="px-4 py-2 rounded-full text-sm bg-red-500 text-white hover:bg-red-600">Descartar</a>
+                    <button onClick={() => setConfirmCancelOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
+                    <a href={redirectAfter} className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600">Descartar</a>
                 </div>
             </Modal>
 
@@ -239,8 +239,8 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                         <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar registro" widthClass="max-w-sm" >
                 <p>Deseja salvar este novo livro?</p>
                 <div className="flex gap-3 justify-end mt-6">
-                    <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
-                    <button disabled={submitting} onClick={handleSubmit} className="px-4 py-2 rounded-full text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
+                    <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
+                    <button disabled={submitting} onClick={handleSubmit} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
                 </div>
             </Modal>
 
@@ -253,8 +253,8 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                                                 setSuccessModal(false);
                                                 setTitle(''); setSynopsis(''); setReleaseFrequency(''); setCoverUrl(''); setSelectedGenres([]);
                                                 setCoverValid(null); setAttemptedSubmit(false);
-                                        }} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Criar outro</button>
-                                        <button onClick={() => { setSuccessModal(false); window.location.href = redirectAfter; }} className="px-4 py-2 rounded-full text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Ir para biblioteca</button>
+                                        }} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Criar outro</button>
+                                        <button onClick={() => { setSuccessModal(false); window.location.href = redirectAfter; }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Ir para biblioteca</button>
                                 </div>
                         </Modal>
 

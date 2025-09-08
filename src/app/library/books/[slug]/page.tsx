@@ -23,7 +23,7 @@ export default async function BookPage({ params }: PageProps) {
 
   return (
     <main className="px-4 py-6 md:px-8">
-  <section className="relative bg-readowl-purple-medium rounded-2xl p-4 md:p-6 text-white shadow-lg max-w-6xl mx-auto">
+  <section className="relative bg-readowl-purple-medium p-4 md:p-6 text-white shadow-lg max-w-6xl mx-auto">
   {/* Two columns: left cover (smaller), right info list */}
         <div className="grid grid-cols-1 md:grid-cols-[230px_1fr] items-stretch">
           <div>
@@ -35,7 +35,7 @@ export default async function BookPage({ params }: PageProps) {
                         width={300}
                         height={400}
                         sizes="(max-width: 768px) 100vw, 300px"
-                        className="rounded-xl w-full max-w-[250px] h-auto object-cover shadow-md"
+                        className="w-full max-w-[250px] h-auto object-cover shadow-md"
                     />
                 ) : null}
             </div>

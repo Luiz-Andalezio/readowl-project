@@ -7,7 +7,7 @@ type Tab = 'chapters' | 'comments';
 export default function BookTabs() {
   const [tab, setTab] = React.useState<Tab>('chapters');
   return (
-    <div className=" bg-readowl-purple-light border-2 text-white border-readowl-purple shadow-md rounded-2xl p-3">
+  <div className=" bg-readowl-purple-light border-2 text-white border-readowl-purple shadow-md p-3">
       <div className="flex gap-3 mb-3">
         <SelectableIconButton
           iconUrl="/img/svg/book/chapter-purple.svg"
@@ -30,7 +30,7 @@ export default function BookTabs() {
           Comentários
         </SelectableIconButton>
       </div>
-      <div className="rounded-xl bg-readowl-purple-dark/40 p-4 min-h-[120px]">
+  <div className="bg-readowl-purple-dark/40 p-4 min-h-[120px]">
         {tab === 'chapters' ? (
           <div>Lista de capítulos (em breve)</div>
         ) : (

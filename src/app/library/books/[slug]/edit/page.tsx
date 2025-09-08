@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
 import EditBookForm from './ui/EditBookForm';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 
 interface PageProps { params: Promise<{ slug: string }> }
 

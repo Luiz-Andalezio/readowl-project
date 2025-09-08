@@ -10,7 +10,7 @@ const Testimonials: React.FC = () => {
         
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Testimonial 1 */}
-          <div className="bg-readowl-purple-extralight p-8 rounded-lg shadow-sm">
+          <div className="bg-readowl-purple-extralight p-8 shadow-sm">
             <blockquote className="text-lg italic text-gray-800">
               <p>&quot;O Readowl me deu confiança para publicar minhas histórias. É fácil, rápido e a comunidade é incrível.&quot;</p>
               <cite className="mt-4 block not-italic font-semibold text-readowl-purple">
@@ -20,7 +20,7 @@ const Testimonials: React.FC = () => {
           </div>
 
           {/* Testimonial 2 */}
-          <div className="bg-readowl-purple-extralight p-8 rounded-lg shadow-sm">
+          <div className="bg-readowl-purple-extralight p-8 shadow-sm">
             <blockquote className="text-lg italic text-gray-800">
               <p>&quot;Descobri livros que jamais encontraria em livrarias. É como abrir uma porta para novos mundos.&quot;</p>
               <cite className="mt-4 block not-italic font-semibold text-readowl-purple">

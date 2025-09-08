@@ -58,13 +58,13 @@ const PasswordStrengthBar: React.FC<Props> = ({ password, tipTextColor, showPerc
   const tip = buildTip(password, score, checks);
   return (
     <div className="w-full mt-1 mb-4">
-      <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden group" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} aria-label="Força da senha">
+  <div className="relative w-full h-2 bg-gray-200 overflow-hidden group" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} aria-label="Força da senha">
         <div
-          className={`h-full transition-all duration-300 rounded-full ${colors[score - 1] || colors[0]} ${percent === 0 ? 'w-0' : ''}`}
+          className={`h-full transition-all duration-300 ${colors[score - 1] || colors[0]} ${percent === 0 ? 'w-0' : ''}`}
           style={{ width: `${percent}%` }}
         />
         <div
-          className={`absolute left-1/2 -translate-x-1/2 -top-10 bg-readowl-purple-dark px-4 py-2 rounded-lg shadow-lg z-10 whitespace-nowrap text-xs pointer-events-none opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition duration-200 ${tipTextColor || 'text-readowl-purple-extralight'}`}
+          className={`absolute left-1/2 -translate-x-1/2 -top-10 bg-readowl-purple-dark px-4 py-2 shadow-lg z-10 whitespace-nowrap text-xs pointer-events-none opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition duration-200 ${tipTextColor || 'text-readowl-purple-extralight'}`}
           style={tipTextColor === 'text-white' ? { color: '#fff' } : {}}
         >
           {tip}

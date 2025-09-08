@@ -15,7 +15,7 @@ const HowItHelps: React.FC = () => {
         </h2>
         <div className="flex flex-col md:flex-row gap-12">
           {/* Readers */}
-          <div className="md:w-1/2 bg-white p-8 rounded-lg shadow-lg">
+          <div className="md:w-1/2 bg-white p-8 shadow-lg">
             <h3 className="text-2xl font-semibold text-readowl-purple mb-6">
               Para leitores:
             </h3>
@@ -28,7 +28,7 @@ const HowItHelps: React.FC = () => {
           </div>
 
           {/* Writers */}
-          <div className="md:w-1/2 bg-white p-8 rounded-lg shadow-lg">
+          <div className="md:w-1/2 bg-white p-8 shadow-lg">
             <h3 className="text-2xl font-semibold text-readowl-purple mb-6">
               Para escritores:
             </h3>

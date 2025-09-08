@@ -149,7 +149,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
 
     return (
         <>
-            <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium rounded-3xl p-8 shadow-2xl mt-10">
+            <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium p-8 shadow-2xl mt-10">
                 <div className="flex items-center justify-center gap-3 mb-8">
                     <Image src="/img/svg/book/checkbook.svg" alt="Livro" width={50} height={50} className="w-10 h-10 mt-0.4" />
                     <h1 className="text-3xl font-yusei text-center font-semibold text-white">Editar obra: {book.title}</h1>
@@ -216,16 +216,16 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                 <Modal open={confirmCancelOpen} onClose={() => setConfirmCancelOpen(false)} title="Descartar alterações?" widthClass="max-w-sm">
                     <p>Suas alterações serão perdidas.</p>
                     <div className="flex gap-3 justify-end mt-6">
-                        <button onClick={() => setConfirmCancelOpen(false)} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
-                        <a href={`/library/books/${encodeURIComponent(slug)}`} className="px-4 py-2 rounded-full text-sm bg-red-500 text-white hover:bg-red-600">Descartar</a>
+                        <button onClick={() => setConfirmCancelOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
+                        <a href={`/library/books/${encodeURIComponent(slug)}`} className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600">Descartar</a>
                     </div>
                 </Modal>
 
                 <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar atualização" widthClass="max-w-sm">
                     <p>Deseja salvar as alterações?</p>
                     <div className="flex gap-3 justify-end mt-6">
-                        <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
-                        <button disabled={submitting} onClick={onSubmit} className="px-4 py-2 rounded-full text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
+                        <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
+                        <button disabled={submitting} onClick={onSubmit} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
                     </div>
                 </Modal>
 
@@ -245,11 +245,11 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                                 });
                                 setSuccessOpen(false);
                             }}
-                            className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight"
+                            className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight"
                         >
                             Continuar editando
                         </button>
-                        <button onClick={() => { setSuccessOpen(false); window.location.href = `/library/books/${encodeURIComponent(slugify(title))}`; }} className="px-4 py-2 rounded-full text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Voltar para o livro</button>
+                        <button onClick={() => { setSuccessOpen(false); window.location.href = `/library/books/${encodeURIComponent(slugify(title))}`; }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Voltar para o livro</button>
                     </div>
                 </Modal>
             </div>
@@ -281,7 +281,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                             value={deleteTitle}
                             onChange={(e) => setDeleteTitle(e.target.value)}
                             placeholder={book.title}
-                            className="mt-1 w-full rounded-full bg-white border-2 border-white/60 focus:ring-2 focus:ring-readowl-purple-dark px-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50"
+                            className="mt-1 w-full bg-white border-2 border-white/60 focus:ring-2 focus:ring-readowl-purple-dark px-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50"
                         />
                     </div>
                     {!isGoogleOnly ? (
@@ -291,7 +291,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                                 type="password"
                                 value={deletePassword}
                                 onChange={(e) => setDeletePassword(e.target.value)}
-                                className="mt-1 w-full rounded-full bg-white border-2 border-white/60 focus:ring-2 focus:ring-readowl-purple-dark px-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50"
+                                className="mt-1 w-full bg-white border-2 border-white/60 focus:ring-2 focus:ring-readowl-purple-dark px-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50"
                             />
                         </div>
                     ) : (
@@ -299,7 +299,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                             <button
                                 type="button"
                                 onClick={() => signIn('google', { callbackUrl: window.location.href, prompt: 'login' })}
-                                className="w-full flex items-center justify-center gap-2 bg-white text-readowl-purple font-semibold py-2 px-4 rounded-full border border-gray-300 hover:bg-gray-100 transition"
+                                className="w-full flex items-center justify-center gap-2 bg-white text-readowl-purple font-semibold py-2 px-4 border border-gray-300 hover:bg-gray-100 transition"
                             >
                                 <svg width="20" height="20" viewBox="0 0 48 48">
                                     <g>
@@ -319,7 +319,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                     )}
                 </div>
                 <div className="flex gap-3 justify-end mt-6">
-                    <button onClick={() => setConfirmDeleteOpen(false)} className="px-4 py-2 rounded-full text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Cancelar</button>
+                    <button onClick={() => setConfirmDeleteOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Cancelar</button>
                     <button
                         onClick={async () => {
                             try {
@@ -347,7 +347,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                             }
                         }}
                         disabled={submitting || deleteTitle !== book.title || (!isGoogleOnly && !deletePassword)}
-                        className="px-4 py-2 rounded-full text-sm bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         Excluir
                     </button>
