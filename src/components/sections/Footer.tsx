@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import PolicyDropdown from '@/components/ui/PolicyDropdown';
 
 const GithubIcon = () => (
   <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -19,13 +20,11 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-readowl-purple-medium text-readowl-purple-extralight py-10">
       <div className="container mx-auto px-6 text-center">
-        <div className="flex justify-center space-x-6 mb-6">
+        <div className="flex justify-center items-center gap-6 mb-6">
           <Link href="/landing" className="hover:text-white">Sobre</Link>
-          <Link href="/landing/terms" className="hover:text-white">Termos de uso</Link>
-          <Link href="/landing/privacy" className="hover:text-white">Política de Privacidade</Link>
           <Link href="/landing/help" className="hover:text-white">Ajuda</Link>
           <Link href="/landing/contact" className="hover:text-white">Contato</Link>
-          <Link href="/landing/security" className="hover:text-white">Segurança</Link>
+          <PolicyDropdown colorMode="footer" />
         </div>
 
         <div className="flex justify-center mb-4">

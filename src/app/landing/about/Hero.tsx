@@ -39,7 +39,7 @@ const Hero: React.FC = () => {
             <Link href="/home">
               <Button variant="primary">Iniciar Leitura</Button>
             </Link>
-            <Link href="/create">
+            <Link href="/library/create">
               <Button variant="primary">Criar uma nova obra</Button>
             </Link>
           </div>

@@ -1,5 +1,4 @@
 import LandingHeader from "../about/LandingHeader";
-import Footer from "@/components/sections/Footer";
 import AppearCard from "@/components/ui/AppearCard";
 
 export default function SecurityPage() {
@@ -49,7 +48,6 @@ export default function SecurityPage() {
           </AppearCard>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }
