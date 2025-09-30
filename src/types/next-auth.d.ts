@@ -9,6 +9,7 @@ declare module "next-auth" {
         } & DefaultSession["user"];
     authProvider?: string;
     stepUpAt?: number; // epoch ms of last (re)authentication
+    remember?: boolean; // whether the user opted into long-lived session
     }
     interface User extends NextAuthUser {
         id: string;
@@ -21,5 +22,6 @@ declare module "next-auth/jwt" {
     role: AppRole;
     authProvider?: string;
     stepUpAt?: number; // epoch ms of last (re)authentication
+    remember?: boolean; // whether the user opted into long-lived session
     }
 }

@@ -50,6 +50,7 @@ The platform aims to solve common issues found in other systems, such as ineffic
 - **Prisma**: ORM for PostgreSQL database communication.
 - **Zod**: Consistent data validation (front and back).
 - **JWT + Bcrypt.js**: Authentication and password security.
+- **Remember Me (JWT + NextAuth)**: Sessions with dual policy: 8 hours by default and 30 days when "Remember Me" is enabled. Implemented using JWT strategy, a `remember` flag in the token, `stepUpAt` for inactivity control, and middleware that enforces the TTL.
 - **Multer + Cloudinary**: Upload and storage for book covers and profile photos.
 - **Nodemailer**: Email sending for password recovery.
 
