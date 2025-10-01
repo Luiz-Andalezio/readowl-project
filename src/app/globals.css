@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+html { width: 100%; max-width: 100vw; overflow-x: hidden; }
+body { width: 100%; max-width: 100vw; overflow-x: hidden; background: #23004B; }
+
 @keyframes shake {
 	0% { transform: translateX(0); }
 	20% { transform: translateX(-6px); }

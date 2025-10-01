@@ -28,7 +28,7 @@ const MagicNotification: React.FC<MagicNotificationProps> = ({ id, icon, message
 
     return (
         <div
-            className={`w-full max-w-sm text-white flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl border border-white/10 backdrop-blur-md relative overflow-hidden transition-all duration-450 ${bgClass || bgFallback} ${exiting ? 'animate-magic-out' : 'animate-magic-in'}`}
+            className={`relative z-[200] w-full max-w-sm text-white flex items-start gap-3 px-4 py-3 shadow-xl border border-white/10 overflow-hidden transition-all duration-450 ${bgClass || bgFallback} ${exiting ? 'animate-magic-out' : 'animate-magic-in'}`}
             role="alert"
         >
             <div className="text-xl select-none leading-none mt-[2px]">{icon || '🦉'}</div>
@@ -37,11 +37,11 @@ const MagicNotification: React.FC<MagicNotificationProps> = ({ id, icon, message
                 type="button"
                 aria-label="Fechar"
                 onClick={startClose}
-                className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center rounded-md hover:bg-white/10 transition-colors"
+                className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center hover:bg-white/10 transition-colors"
             >
                 ✕
             </button>
-            <span className="pointer-events-none absolute -top-10 -right-10 w-24 h-24 bg-white/20 rounded-full blur-2xl" />
+            <span className="pointer-events-none absolute -top-10 -right-10 w-24 h-24 bg-white/20 blur-2xl" />
         </div>
     );
 };

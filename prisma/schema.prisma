@@ -7,35 +7,81 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enum para papéis de usuário
+// Enum for user roles
 enum Role {
   USER
   ADMIN
 }
 
-// Modelo de Usuário
+// Enum for book status
+enum Status {
+  ONGOING    // In progress
+  COMPLETED  // Completed
+  HIATUS     // Hiatus
+  PAUSED     // Paused
+}
+
+// User model
 model User {
   id          String   @id @default(cuid())
   name        String
   email       String   @unique
-  password    String? // Nullable: será null para contas Google
-  image       String? // URL da imagem de perfil
+  password    String? // Nullable: will be null for Google accounts
+  image       String? // Profile image URL
   description String?
   role        Role     @default(USER)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relacionamentos futuros (exemplo)
+  // Future relationships (example)
   // books         Book[]   @relation("UserBooks")
   // followedBooks Book[]   @relation("BookFollowers")
 
-  // Campos para NextAuth
+  // Fields for NextAuth
   emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
+
+  // Relationships with books
+  books   Book[] @relation("AuthorBooks")
+
+  // Password recovery
+  passwordResetTokens PasswordResetToken[]
+
+  // Credential version: incremented when credentials change (forces JWT re-login)
+  credentialVersion Int @default(0)
 }
 
-// Modelos auxiliares para NextAuth
+// Literary genre model
+model Genre {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  books Book[]  @relation("BookGenres")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Book model
+model Book {
+  id              String    @id @default(cuid())
+  title           String    @db.VarChar(200)
+  synopsis        String    @db.VarChar(2000)
+  releaseFrequency String?  @db.VarChar(50)
+  coverUrl        String?
+  status          Status    @default(ONGOING)
+  views           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Author
+  authorId String
+  author   User      @relation("AuthorBooks", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Genres
+  genres   Genre[]   @relation("BookGenres")
+}
+
+// Auxiliary models for NextAuth
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -70,4 +116,16 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Password reset token (single use)
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  consumedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

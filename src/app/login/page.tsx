@@ -20,6 +20,8 @@ function Login() {
   const [toasts, setToasts] = useState<MagicNotificationProps[]>([]);
   // State to toggle password visibility
   const [showPassword, setShowPassword] = useState(false);
+  // State to remember login
+  const [remember, setRemember] = useState(false);
 
   // Handles input changes and resets error state
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,10 +35,15 @@ function Login() {
     setError(null);
     setLoading(true);
     // Attempt to sign in with credentials
+    // Persist the remember preference in a cookie for server-side checks (Lax for CSRF safety)
+    document.cookie = `rw_rem=${remember ? "yes" : "no"}; Path=/; SameSite=Lax; ${remember ? "Max-Age=2592000;" : ""}`;
+
     const res = await signIn("credentials", {
       redirect: false,
       email: form.email,
       password: form.password,
+      // Pass through for potential server-side use
+      remember: remember ? "true" : "false",
     });
     if (res?.error) {
       // Show error if authentication fails
@@ -59,15 +66,20 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-readowl-purple-extralight">
-      <div className="bg-readowl-purple-medium rounded-xl shadow-lg p-8 w-full max-w-md">
+    <div className="min-h-screen flex flex-col justify-center items-center">
+  <div className="bg-readowl-purple-medium shadow-lg p-8 w-full max-w-md">
         {/* Logo and title */}
         <div className="flex flex-col items-center mb-6">
           <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={64} height={64} />
           <span className="text-2xl font-bold text-white mt-2">Readowl</span>
         </div>
         {/* Google authentication button */}
-        <GoogleButton onClick={() => signIn("google", { callbackUrl: "/home" })}></GoogleButton>
+        <GoogleButton
+          onClick={() => {
+            document.cookie = `rw_rem=${remember ? "yes" : "no"}; Path=/; SameSite=Lax; ${remember ? "Max-Age=2592000;" : ""}`;
+            signIn("google", { callbackUrl: "/home" });
+          }}
+        />
         <hr />
         {/* Login form */}
         <form onSubmit={handleSubmit} className="mt-4">
@@ -108,15 +120,23 @@ function Login() {
           {/* Remember me and forgot password */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <input id="remember" type="checkbox" className="mr-2 accent-readowl-purple" />
+              <input
+                id="remember"
+                type="checkbox"
+                className="mr-2 accent-readowl-purple"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
               <label htmlFor="remember" className="text-white text-sm">Lembrar de mim</label>
             </div>
-            <Link href="#" className="text-readowl-purple-extralight underline hover:text-white text-sm">Esqueci minha senha</Link>
+            <Link href="/forgot-password" className="text-readowl-purple-extralight underline hover:text-white text-sm">Esqueci minha senha</Link>
           </div>
           {/* Submit button */}
-          <Button type="submit" variant="primary" className="w-full mb-2" disabled={loading}>
-            {loading ? "Logando..." : "Logar"}
-          </Button>
+          <div className="flex justify-center">
+            <Button type="submit" variant="primary" className="md:w-1/2 text-center" disabled={loading}>
+              {loading ? "Logando..." : "Logar"}
+            </Button>
+          </div>
         </form>
         {/* Registration link */}
         <div className="text-center mt-1">
@@ -125,7 +145,7 @@ function Login() {
         </div>
         {/* Back to landing page link */}
         <div className="text-center mt-1">
-          <Link href="/landing" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
+          <Link href="/" className="text-xs text-readowl-purple-extralight underline hover:text-white">← Voltar para a página inicial</Link>
         </div>
       </div>
     </div>
