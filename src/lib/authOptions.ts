@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions = {
 		// },
 	callbacks: {
 		async session({ session, token }) {
-			const t = token as JWT & { role?: AppRole; authProvider?: string; stepUpAt?: number; remember?: boolean };
+			const t = token as JWT & { role?: AppRole; authProvider?: string; stepUpAt?: number; remember?: boolean; credentialVersion?: number };
 			if (session.user && token.sub) {
 				session.user.id = token.sub;
 				if (t.role) session.user.role = t.role;
@@ -66,6 +66,7 @@ export const authOptions: NextAuthOptions = {
 			(session as Session & { authProvider?: string; stepUpAt?: number; remember?: boolean }).authProvider = t.authProvider;
 			(session as Session & { authProvider?: string; stepUpAt?: number; remember?: boolean }).stepUpAt = t.stepUpAt;
 			(session as Session & { authProvider?: string; stepUpAt?: number; remember?: boolean }).remember = t.remember;
+			(session.user as Session["user"] & { credentialVersion?: number }).credentialVersion = t.credentialVersion ?? 0;
 			return session;
 		},
 		async jwt({ token, user, account }) {
@@ -79,6 +80,13 @@ export const authOptions: NextAuthOptions = {
 			// For credentials sign-in, ensure we stamp stepUpAt as well
 			if (user && !account) {
 				(token as JWT & { stepUpAt?: number }).stepUpAt = Date.now();
+			}
+			// Load credentialVersion for this user on sign-in
+			if (user) {
+				try {
+					const dbUser = await prisma.user.findUnique({ where: { id: (user as NextAuthUser).id }, select: { credentialVersion: true } });
+					if (dbUser) (token as JWT & { credentialVersion?: number }).credentialVersion = dbUser.credentialVersion ?? 0;
+				} catch {}
 			}
 			// Initialize remember from user payload on sign in (credentials) or default to true on OAuth
 			if (user) {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { JWT } from "next-auth/jwt";
+import prisma from "@/lib/prisma";
 
 // Protect app pages under these prefixes
 const PROTECTED_PREFIXES = [
@@ -20,6 +21,8 @@ export async function middleware(req: NextRequest) {
   const token = (await getToken({ req, secret: process.env.NEXTAUTH_SECRET })) as (JWT & {
     remember?: boolean;
     stepUpAt?: number;
+    sub?: string;
+    credentialVersion?: number;
   }) | null;
   if (!token) {
     const url = new URL("/login", req.url);
@@ -38,6 +41,18 @@ export async function middleware(req: NextRequest) {
     const url = new URL("/login", req.url);
     url.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Enforce credentialVersion: reject tokens older than the user's current credential version
+  if (token.sub) {
+    try {
+      const db = await prisma.user.findUnique({ where: { id: token.sub }, select: { credentialVersion: true } });
+      if (db && (token.credentialVersion ?? 0) < (db.credentialVersion ?? 0)) {
+        const url = new URL("/login", req.url);
+        url.searchParams.set("callbackUrl", pathname);
+        return NextResponse.redirect(url);
+      }
+    } catch {}
   }
 
   return NextResponse.next();

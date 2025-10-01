@@ -129,7 +129,7 @@ function Login() {
               />
               <label htmlFor="remember" className="text-white text-sm">Lembrar de mim</label>
             </div>
-            <Link href="#" className="text-readowl-purple-extralight underline hover:text-white text-sm">Esqueci minha senha</Link>
+            <Link href="/forgot-password" className="text-readowl-purple-extralight underline hover:text-white text-sm">Esqueci minha senha</Link>
           </div>
           {/* Submit button */}
           <div className="flex justify-center">

@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useRef } from "react";
 
 interface Props {
   password: string;
@@ -6,7 +7,10 @@ interface Props {
   showPercent?: boolean;
 }
 
-const getStrength = (password: string) => {
+type ZXFeedback = { warning?: string; suggestions?: string[] };
+type ZXResult = { score: number; feedback?: ZXFeedback };
+
+function heuristicStrength(password: string): { score: number; checks: { min: boolean; upper: boolean; number: boolean; symbol: boolean; long: boolean } } {
   const checks = {
     min: password.length >= 6,
     upper: /[A-Z]/.test(password),
@@ -22,7 +26,7 @@ const getStrength = (password: string) => {
   if (checks.symbol) score += 1;
   if (checks.long) score += 1;
   return { score, checks };
-};
+}
 
 const colors = [
   "bg-readowl-purple-extralight",
@@ -39,10 +43,12 @@ const baseMessages = {
   strong: "Senha digna de um guardião de livros! 🦉",
 };
 
-const buildTip = (password: string, score: number, checks: ReturnType<typeof getStrength>["checks"]) => {
+const buildTip = (password: string, score: number, checks: ReturnType<typeof heuristicStrength>["checks"], feedback?: ZXFeedback) => {
   if (!password) return baseMessages.start;
   if (!checks.min) return baseMessages.short;
   if (score === 5) return baseMessages.strong;
+  if (feedback?.warning) return feedback.warning;
+  if (feedback?.suggestions && feedback.suggestions.length) return feedback.suggestions[0]!;
   const missing: string[] = [];
   if (!checks.upper) missing.push("uma LETRA MAIÚSCULA");
   if (!checks.number) missing.push("um NÚMERO");
@@ -53,9 +59,39 @@ const buildTip = (password: string, score: number, checks: ReturnType<typeof get
 };
 
 const PasswordStrengthBar: React.FC<Props> = ({ password, tipTextColor, showPercent = true }) => {
-  const { score, checks } = getStrength(password);
+  const zxRef = useRef<null | ((pwd: string) => ZXResult)>(null);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+  const mod = await import("zxcvbn");
+        if (!active) return;
+        // Try common export shapes
+  const maybeDefault = (mod as { default?: unknown }).default;
+  const maybeFn = (maybeDefault ?? (mod as unknown)) as unknown;
+  if (typeof maybeFn === "function") zxRef.current = maybeFn as (pwd: string) => ZXResult;
+      } catch {
+        // Optional dependency not available – keep heuristic
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  let score = 0;
+  let feedback: ZXFeedback | undefined = undefined;
+  const h = heuristicStrength(password);
+  const checks = h.checks;
+  if (zxRef.current && password) {
+    const res = zxRef.current(password);
+    const zxScore = Math.min(4, Math.max(0, res.score));
+    // promote to 5 if long and strong
+    score = zxScore + (checks.long && zxScore === 4 ? 1 : 0);
+    feedback = res.feedback;
+  } else {
+    score = h.score;
+  }
   const percent = Math.round((score / 5) * 100);
-  const tip = buildTip(password, score, checks);
+  const tip = buildTip(password, score, checks, feedback);
   return (
     <div className="w-full mt-1 mb-4">
   <div className="relative w-full h-2 bg-gray-200 overflow-hidden group" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} aria-label="Força da senha">
