@@ -1,16 +1,15 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import Hero from '@/components/sections/hero';
-import Purpose from '@/components/sections/purpose';
-import HowItHelps from '@/components/sections/howItHelps';
-import HowToPost from '@/components/sections/howToPost';
-import Features from '@/components/sections/features';
-import Testimonials from '@/components/sections/testimonials';
+import LandingHeader from '@/app/landing/about/LandingHeader';
+import Hero from '@/app/landing/about/Hero';
+import Purpose from '@/app/landing/about/Purpose';
+import HowItHelps from '@/app/landing/about/HowItHelps';
+import HowToPost from '@/app/landing/about/HowToPost';
+import Features from '@/app/landing/about/Features';
+import Testimonials from '@/app/landing/about/Testimonials';
 
 function App() {
   return (
-    <div className="bg-white">
-      <Header />
+    <div className="bg-readowl-purple-dark/10">
+      <LandingHeader />
       <main>
         <Hero />
         <Purpose />
@@ -19,7 +18,6 @@ function App() {
         <Features />
         <Testimonials />
       </main>
-      <Footer />
     </div>
   );
 }

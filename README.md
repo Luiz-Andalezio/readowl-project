@@ -45,13 +45,21 @@ The platform aims to solve common issues found in other systems, such as ineffic
 - **TipTap**: Rich text editor for authors to write chapters.
 
 #### **Backend**
-- **Node.js (Next.js API Routes)**: Server and business logic.
-- **TypeScript**: Static typing to prevent bugs.
-- **Prisma**: ORM for PostgreSQL database communication.
-- **Zod**: Consistent data validation (front and back).
-- **JWT + Bcrypt.js**: Authentication and password security.
-- **Multer + Cloudinary**: Upload and storage for book covers and profile photos.
-- **Nodemailer**: Email sending for password recovery.
+
+- **Node.js (Next.js API Routes)**: Handles server-side logic and API endpoints.
+- **TypeScript**: Ensures type safety and reduces bugs.
+- **Prisma**: ORM for seamless PostgreSQL integration.
+- **Zod**: Unified data validation across frontend and backend.
+- **JWT + Bcrypt.js**: Secure authentication and password hashing.
+- **Session Management**: Supports "Remember Me" with JWT and NextAuth, offering 8-hour default sessions or 30 days when enabled. Session TTL is enforced via middleware using token flags (`remember`, `stepUpAt`).
+- **File Uploads**: Uses Multer and Cloudinary for storing book covers and profile images.
+- **Email Services**: Nodemailer for password recovery, with HTML templates and plain-text fallback. Password reset flow uses single-use SHA-256 tokens (30-minute expiry) and session invalidation via `credentialVersion`.
+- **Security**: Per-user cooldown (120s) and IP rate limiting (5 requests/15min) on password recovery requests.
+- **SMTP Configuration**: Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `MAIL_FROM` in `.env` for production. In development, emails are logged to the console.
+- **Redis (Optional)**: For distributed rate limiting, configure `REDIS_URL` or Upstash variables; defaults to in-memory if unset.
+- **UX Enhancements**: Success page after password reset and improved feedback messages.
+- **Password Strength**: `PasswordStrengthBar` uses a local heuristic and optionally loads `zxcvbn` for enhanced feedback.
+- **Environment Variables**: See `.env.example` for required settings.
 
 #### **Database**
 - **PostgreSQL**: Data storage.
@@ -75,15 +83,14 @@ DATABASE_URL="postgresql://docker:docker@localhost:5432/readowl?schema=public"
 
 ### 📁 Suggested Project Structure
 
-- `public/` – Images, fonts, and static files.
+- `docs/` – Project documentation and diagrams.
+- `prisma/` – Prisma schema and database migrations.
+- `public/` – Static assets served as-is (images, icons, fonts, SVGs).
 - `src/` – Application source code.
-    - `app/` – Next.js routes and pages.
-    - `assets/` – Media files and global styles.
-    - `components/` – Reusable React components.
-    - `hooks/` – Custom hooks.
-    - `services/` – API communication logic.
-    - `styles/` – Application CSS.
-    - `utils/` – Utility functions.
+        - `app/` – Next.js App Router: pages, layouts, and API routes under `app/api`.
+        - `components/` – Reusable UI and feature components (e.g., book, ui, sections).
+        - `lib/` – Application libraries and utilities (Prisma client, auth, mailer, rate limiters, slug helpers).
+        - `types/` – Global TypeScript types and module augmentations (e.g., NextAuth, zxcvbn).
 
 -----
 
@@ -227,4 +234,3 @@ A Pull Request (PR) is the mechanism for reviewing and integrating code from one
         At the end of the sprint, a **Pull Request** will be opened from the `dev` branch to the `main` branch, containing all features and fixes developed during the cycle.
 
 -----
-

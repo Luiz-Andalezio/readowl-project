@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum for user roles
+enum Role {
+  USER
+  ADMIN
+}
+
+// Enum for book status
+enum Status {
+  ONGOING    // In progress
+  COMPLETED  // Completed
+  HIATUS     // Hiatus
+  PAUSED     // Paused
+}
+
+// User model
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String? // Nullable: will be null for Google accounts
+  image       String? // Profile image URL
+  description String?
+  role        Role     @default(USER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Future relationships (example)
+  // books         Book[]   @relation("UserBooks")
+  // followedBooks Book[]   @relation("BookFollowers")
+
+  // Fields for NextAuth
+  emailVerified DateTime?
+  accounts      Account[]
+  sessions      Session[]
+
+  // Relationships with books
+  books   Book[] @relation("AuthorBooks")
+
+  // Password recovery
+  passwordResetTokens PasswordResetToken[]
+
+  // Credential version: incremented when credentials change (forces JWT re-login)
+  credentialVersion Int @default(0)
+}
+
+// Literary genre model
+model Genre {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  books Book[]  @relation("BookGenres")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Book model
+model Book {
+  id              String    @id @default(cuid())
+  title           String    @db.VarChar(200)
+  synopsis        String    @db.VarChar(2000)
+  releaseFrequency String?  @db.VarChar(50)
+  coverUrl        String?
+  status          Status    @default(ONGOING)
+  views           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Author
+  authorId String
+  author   User      @relation("AuthorBooks", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Genres
+  genres   Genre[]   @relation("BookGenres")
+}
+
+// Auxiliary models for NextAuth
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Password reset token (single use)
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  consumedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

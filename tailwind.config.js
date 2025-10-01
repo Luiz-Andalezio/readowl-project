@@ -16,6 +16,10 @@ module.exports = {
           extralight: '#F0EAFF'
         },
         'readowl-purple-medium': '#836DBE',
+        'readowl-purple-hover': '#A78CF0' //'#AD92F5'
+      },
+      fontFamily: {
+        yusei: ['var(--font-yusei-magic)', 'system-ui', 'sans-serif']
       }
     },
   },
