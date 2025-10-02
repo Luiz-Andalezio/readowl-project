@@ -8,7 +8,7 @@ import Testimonials from '@/app/landing/about/Testimonials';
 
 function App() {
   return (
-    <div className="bg-white">
+    <div className="bg-readowl-purple-dark/10">
       <LandingHeader />
       <main>
         <Hero />

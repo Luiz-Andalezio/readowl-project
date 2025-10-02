@@ -43,7 +43,7 @@ export default function Modal({
 
 	return (
 		<div
-			className="fixed inset-0 z-[100] flex items-center justify-center"
+			className="fixed inset-0 z-[150] flex items-center justify-center"
 			aria-modal="true"
 			role="dialog"
 			aria-label={title || ariaLabel || "Modal"}
@@ -57,7 +57,7 @@ export default function Modal({
 			<div
 				ref={dialogRef}
 				tabIndex={-1}
-				className={`relative w-full ${widthClass} mx-4 rounded-2xl bg-readowl-purple-extradark/90 border border-readowl-purple-light/20 shadow-2xl p-6 text-readowl-purple-extralight animate-scaleIn`}
+				className={`relative w-full ${widthClass} mx-4 bg-readowl-purple-extradark/90 border border-readowl-purple-light/20 shadow-2xl p-6 text-readowl-purple-extralight animate-scaleIn`}
 			>
 				{!hideCloseButton && (
 					<button

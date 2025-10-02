@@ -8,7 +8,6 @@ import GoogleButton from "@/components/ui/GoogleButton";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
-import MagicNotification, { MagicNotificationProps } from "@/components/ui/MagicNotification";
 import { signIn } from "next-auth/react";
 
 function Register() {
@@ -17,12 +16,10 @@ function Register() {
     const [form, setForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
     // State for loading indicator
     const [loading, setLoading] = useState(false);
-    // State for notification toasts
-    const [toasts, setToasts] = useState<MagicNotificationProps[]>([]);
+    // Simple alert message (success or error)
+    const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
     // State for form errors
     const [error, setError] = useState<{ username?: string; email?: string; password?: string; confirmPassword?: string } | null>(null);
-    // State for success message
-    const [success, setSuccess] = useState("");
     // State to toggle password visibility
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -31,13 +28,14 @@ function Register() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
         setError(null);
+        if (notice) setNotice(null);
     };
 
     // Handles form submission and validation
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        setSuccess("");
+    setNotice(null);
         const localError: typeof error = {};
         // Validate required fields
         if (!form.username) localError.username = "Informe o nome de usuário.";
@@ -52,9 +50,8 @@ function Register() {
         // If there are validation errors, show the first one as a toast
         if (Object.keys(localError).length > 0) {
             setError(localError);
-            // Show the first error message as a toast
             const first = Object.values(localError)[0];
-            if (first) pushToast({ message: first, icon: '⚠️', bgClass: 'bg-red-500/80' });
+            if (first) setNotice({ type: "error", message: String(first) });
             return;
         }
         setLoading(true);
@@ -71,47 +68,49 @@ function Register() {
                 if (typeof data.error === "object" && data.error !== null) {
                     setError(data.error);
                     const first = Object.values(data.error)[0];
-                    if (first) pushToast({ message: String(first), icon: '🚫', bgClass: 'bg-red-600/80' });
+                    if (first) setNotice({ type: "error", message: String(first) });
                 } else if (typeof data.error === "string") {
                     setError({ password: data.error });
-                    pushToast({ message: data.error, icon: '🚫', bgClass: 'bg-red-600/80' });
+                    setNotice({ type: "error", message: data.error });
                 }
                 return;
             }
             // Registration successful
-            setSuccess("Cadastro realizado! Redirecionando...");
-            pushToast({ message: 'Cadastro concluído! Faça login.', icon: '✅', bgClass: 'bg-green-600/80' });
+            setNotice({ type: "success", message: "Cadastro concluído! Faça login." });
             setForm({ username: "", email: "", password: "", confirmPassword: "" });
             // Redirect immediately to login page
             router.push("/login");
-        } catch (err: unknown) {
+    } catch {
             // Handle unexpected errors
             setError({ password: "Ocorreu um erro desconhecido." });
-            pushToast({ message: 'Erro inesperado. Tente novamente.', icon: '💥', bgClass: 'bg-red-700/80' });
+            setNotice({ type: "error", message: "Erro inesperado. Tente novamente." });
         } finally {
             setLoading(false);
         }
     };
 
-    // Removes a toast notification by id
-    const removeToast = (id: string) => setToasts(t => t.filter(n => n.id !== id));
-    // Adds a new toast notification
-    const pushToast = (partial: Omit<MagicNotificationProps, 'id' | 'onClose'>) => {
-        const id = Math.random().toString(36).slice(2);
-        setToasts(t => [...t, { id, duration: 5000, ...partial, onClose: removeToast }]);
-    };
-
     return (
-        <div className="min-h-screen flex flex-col justify-center items-center bg-readowl-purple-extralight">
-            <div className="bg-readowl-purple-medium rounded-xl shadow-lg p-8 w-full max-w-md mt-10 mb-10">
+        <div className="min-h-screen flex flex-col justify-center items-center">
+            <div className="bg-readowl-purple-medium shadow-lg p-8 w-full max-w-md mt-10 mb-10">
                 {/* Logo and title */}
                 <div className="flex flex-col items-center mb-6">
                     <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={64} height={64} />
                     <span className="text-2xl font-bold text-white mt-2">Readowl</span>
                 </div>
 
+                {/* Inline alert */}
+                {notice && (
+                    <div
+                        role="alert"
+                        aria-live="assertive"
+                        className={`${notice.type === "success" ? "bg-green-600/80" : "bg-red-600/80"} text-white px-3 py-2 mb-3`}
+                    >
+                        {notice.message}
+                    </div>
+                )}
+
                 {/* Google sign-in button */}
-                <GoogleButton onClick={() => signIn("google", { callbackUrl: "/home" })}></GoogleButton>
+                <GoogleButton aria-label="Continuar com Google" onClick={() => signIn("google", { callbackUrl: "/home" })} />
                 <hr />
                 {/* Registration form */}
                 <form onSubmit={handleSubmit} className="mt-4">
@@ -174,15 +173,9 @@ function Register() {
                             </span>
                         }
                     />
-                    {/* Toast notifications container */}
-                    <div className="fixed top-4 right-4 flex flex-col gap-3 z-50 w-full max-w-sm">
-                        {toasts.map(t => (
-                            <MagicNotification key={t.id} {...t} onClose={removeToast} />
-                        ))}
-                    </div>
                     {/* Submit button */}
                     <div className="flex justify-center">
-                        <Button type="submit" variant="secondary" className="md:w-1/2 text-center" disabled={loading}>
+                        <Button type="submit" variant="secondary" className="md:w-1/2 text-center" disabled={loading} aria-busy={loading}>
                             {loading ? "Cadastrando..." : "Cadastrar"}
                         </Button>
                     </div>

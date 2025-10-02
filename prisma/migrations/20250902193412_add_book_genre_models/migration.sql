@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "public"."Status" AS ENUM ('ONGOING', 'COMPLETED', 'HIATUS');
+CREATE TYPE "public"."Status" AS ENUM ('ONGOING', 'COMPLETED', 'HIATUS', 'PAUSED');
 
 -- CreateTable
 CREATE TABLE "public"."Genre" (
@@ -15,12 +15,11 @@ CREATE TABLE "public"."Genre" (
 CREATE TABLE "public"."Book" (
     "id" TEXT NOT NULL,
     "title" VARCHAR(200) NOT NULL,
-    "synopsis" VARCHAR(1000) NOT NULL,
+    "synopsis" VARCHAR(2000) NOT NULL,
     "releaseFrequency" VARCHAR(50),
     "coverUrl" TEXT,
     "status" "public"."Status" NOT NULL DEFAULT 'ONGOING',
     "views" INTEGER NOT NULL DEFAULT 0,
-    "lastUpdate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "authorId" TEXT NOT NULL,

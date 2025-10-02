@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '../../../components/ui/Button';
+import PolicyDropdown from '../../../components/ui/PolicyDropdown';
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,11 +17,10 @@ const Header: React.FC = () => {
         </div>
         {/* Desktop menu */}
         <div className="hidden md:flex items-center space-x-6 text-readowl-purple-extralight">
-          <a href="#" className="hover:text-white">Sobre</a>
-          <a href="#" className="hover:text-white">Termos de uso</a>
-          <a href="#" className="hover:text-white">Política de Privacidade</a>
-          <a href="#" className="hover:text-white">Ajuda</a>
-          <a href="#" className="hover:text-white">Contato</a>
+          <Link href="/landing" className="hover:text-white">Sobre</Link>
+          <Link href="/landing/help" className="hover:text-white">Ajuda</Link>
+          <Link href="/landing/contact" className="hover:text-white">Contato</Link>
+          <PolicyDropdown />
         </div>
         <div className="hidden md:flex items-center space-x-4">
           <Link href="/login">
@@ -55,11 +55,13 @@ const Header: React.FC = () => {
             </Link>
           </div>
           <div className="flex flex-col space-y-2 text-readowl-purple-extralight">
-            <a href="#" className="hover:text-white">Sobre</a>
-            <a href="#" className="hover:text-white">Termos de uso</a>
-            <a href="#" className="hover:text-white">Política de Privacidade</a>
-            <a href="#" className="hover:text-white">Ajuda</a>
-            <a href="#" className="hover:text-white">Contato</a>
+            <Link href="/landing" className="hover:text-white">Sobre</Link>
+            {/* Mobile: show simple links instead of dropdown for accessibility */}
+            <Link href="/landing/terms" className="hover:text-white">Termos</Link>
+            <Link href="/landing/privacy" className="hover:text-white">Privacidade</Link>
+            <Link href="/landing/licenses" className="hover:text-white">Licenças</Link>
+            <Link href="/landing/help" className="hover:text-white">Ajuda</Link>
+            <Link href="/landing/contact" className="hover:text-white">Contato</Link>
           </div>
         </div>
       )}

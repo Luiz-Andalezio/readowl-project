@@ -1,8 +1,7 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
-import DevTools from "@/components/dev/DevTools";
-import FloatingNavbar from "@/components/ui/FloatingNavbar";
+import Navbar from "@/components/ui/Navbar";
 
 
 export default async function Search() {
@@ -11,9 +10,8 @@ export default async function Search() {
 
     return (
         <>
-            <FloatingNavbar />
-            <main className="min-h-screen flex flex-col bg-readowl-purple-extralight">
-                <DevTools />
+            <Navbar />
+            <main className="min-h-screen flex flex-col">
             </main>
         </>
     );
