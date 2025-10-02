@@ -2,6 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { BOOK_TITLE_MAX, BOOK_SYNOPSIS_MAX, BOOK_FREQ_MAX } from '@/types/book';
+import SynopsisEditor from '@/components/ui/SynopsisEditor';
 
 export interface BasicFieldsEditProps {
   title: string;
@@ -61,19 +62,14 @@ export const BasicFieldsEdit: React.FC<BasicFieldsEditProps> = ({
           <Image src="/img/svg/book/text.svg" alt="Sinopse" width={18} height={18} className="opacity-80" />
           Sinopse
         </label>
-        <div className="relative">
-          <textarea
-            value={synopsis}
-            maxLength={BOOK_SYNOPSIS_MAX}
-            onChange={e => onSynopsis(e.target.value)}
-            onBlur={onBlurSynopsis}
-            className={`w-full bg-white border-2 pl-4 pr-4 py-3 h-80 resize-none focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple placeholder-readowl-purple/50 leading-relaxed transition ${errors.synopsis && (touched.synopsis || attemptedSubmit) ? 'border-red-400' : 'border-white/60'}`}
-            placeholder="Descreva brevemente a história..."
-          />
-        </div>
-        <div className="flex justify-between text-xs mt-1 text-white/80">
-          {errors.synopsis && (touched.synopsis || attemptedSubmit) ? <span className="text-red-300">{errors.synopsis}</span> : <span />}
-          <span>{synopsis.length}/{BOOK_SYNOPSIS_MAX}</span>
+        <div onBlur={onBlurSynopsis}>
+        <SynopsisEditor
+          value={synopsis}
+          onChange={onSynopsis}
+          maxChars={BOOK_SYNOPSIS_MAX}
+          error={errors.synopsis}
+          showError={touched.synopsis || attemptedSubmit}
+        />
         </div>
       </div>
 

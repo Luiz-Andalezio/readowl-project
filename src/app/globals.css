@@ -3,7 +3,12 @@
 @tailwind utilities;
 
 html { width: 100%; max-width: 100vw; overflow-x: hidden; }
-body { width: 100%; max-width: 100vw; overflow-x: hidden; background: #23004B; }
+body { 
+	width: 100%; 
+	max-width: 100vw; 
+	overflow-x: hidden; 
+	background: linear-gradient(135deg, #23004B 0%, #2F0959 100%);
+}
 
 @keyframes shake {
 	0% { transform: translateX(0); }

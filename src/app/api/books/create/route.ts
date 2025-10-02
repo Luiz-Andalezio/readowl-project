@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
 import { createBookSchema, normalizeCreateBookInput } from '@/types/book';
+import { sanitizeSynopsisHtml } from '@/lib/sanitize';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -21,12 +22,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Validation failed', issues: parsed.error.flatten() }, { status: 400 });
   }
   const { title, synopsis, releaseFrequency, coverUrl, genres } = normalizeCreateBookInput(parsed.data);
+  const cleanSynopsis = sanitizeSynopsisHtml(synopsis);
 
   try {
   const book = await prisma.book.create({
       data: {
         title,
-        synopsis,
+  synopsis: cleanSynopsis,
         releaseFrequency: releaseFrequency || null,
         coverUrl: coverUrl || null,
         authorId: session.user.id,

@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma';
 import { Status } from '@prisma/client';
 import { slugify } from '@/lib/slug';
 import { normalizeUpdateBookInput, updateBookSchema } from '@/types/book';
+import { sanitizeSynopsisHtml } from '@/lib/sanitize';
 
 export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
   const session = await getServerSession(authOptions);
@@ -21,6 +22,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
     return NextResponse.json({ error: 'Validation failed', issues: parsed.error.flatten() }, { status: 400 });
   }
   const data = normalizeUpdateBookInput(parsed.data);
+  const cleanSynopsis = sanitizeSynopsisHtml(data.synopsis);
 
   // Find by slug derived from title (no slug column yet)
   const { slug } = await ctx.params;
@@ -37,7 +39,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
       where: { id: found.id },
       data: {
         title: data.title,
-        synopsis: data.synopsis,
+  synopsis: cleanSynopsis,
         releaseFrequency: data.releaseFrequency || null,
         coverUrl: data.coverUrl || null,
   status: data.status as Status,

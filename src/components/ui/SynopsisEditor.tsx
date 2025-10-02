@@ -1,0 +1,496 @@
+"use client";
+import React, { useEffect, useState } from 'react';
+import { EditorContent, useEditor } from '@tiptap/react';
+// Access ReactNodeViewRenderer from the module in a way that works across minor versions
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const RNVR = (require('@tiptap/react') as { ReactNodeViewRenderer: (component: unknown, options?: unknown) => unknown }).ReactNodeViewRenderer;
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import ImageExtension from '@tiptap/extension-image';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
+import NextImage from 'next/image';
+import { NodeSelection, TextSelection } from '@tiptap/pm/state';
+import type { DOMOutputSpec } from '@tiptap/pm/model';
+import ResizableImage from './tiptap/ResizableImage';
+
+// Props contract
+// - value: current HTML
+// - onChange: callback with sanitized HTML
+// - maxChars: hard character limit for plain text length
+// - error/showError: optional error display
+export type SynopsisEditorProps = {
+  value: string;
+  onChange: (html: string) => void;
+  maxChars: number;
+  error?: string;
+  showError?: boolean;
+};
+
+function getTextLen(html: string) {
+  if (typeof window === 'undefined') return html.replace(/<[^>]*>/g, ' ').trim().length;
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').length;
+}
+
+export default function SynopsisEditor({ value, onChange, maxChars, error, showError }: SynopsisEditorProps) {
+  const [charCount, setCharCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [imageOpen, setImageOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageWidth, setImageWidth] = useState<string>('');
+  const [imageHeight, setImageHeight] = useState<string>('');
+
+  // Ensure alignment works when selecting an image node by moving to a nearby text selection first
+  const alignCurrentBlock = (align: 'left' | 'center' | 'right') => {
+    if (!editor) return;
+    const { state, view } = editor;
+    const sel = state.selection as unknown;
+    if (sel instanceof NodeSelection) {
+      try {
+        const ns = sel as NodeSelection;
+        const nearLeft = TextSelection.near(state.doc.resolve(ns.from), -1);
+        view.dispatch(state.tr.setSelection(nearLeft));
+      } catch {
+        // ignore and attempt to align anyway
+      }
+    }
+    editor.chain().focus().setTextAlign(align).run();
+  };
+
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit.configure({ dropcursor: { class: 'tiptap-dropcursor' } }),
+        Underline,
+        TextAlign.configure({ types: ['heading', 'paragraph'] }),
+        Link.configure({
+          openOnClick: false,
+          autolink: true,
+          HTMLAttributes: {
+            rel: 'nofollow noopener noreferrer',
+            target: '_blank',
+            class: 'underline text-readowl-purple',
+          },
+        }),
+        ImageExtension.extend({
+          addAttributes() {
+            const parent = (this.parent as unknown as (() => Record<string, unknown>) | undefined)?.();
+            return {
+              ...(parent || {}),
+              href: { default: null },
+            };
+          },
+          renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, string> }): DOMOutputSpec {
+            const { href, ...attrs } = HTMLAttributes as Record<string, string>;
+            const imgSpec: DOMOutputSpec = ['img', attrs];
+            const anchorSpec: DOMOutputSpec = ['a', { href, rel: 'nofollow noopener noreferrer', target: '_blank' }, imgSpec];
+            return href ? anchorSpec : imgSpec;
+          },
+          addNodeView() {
+            return RNVR(ResizableImage);
+          },
+        }).configure({ inline: true, allowBase64: false }),
+      ],
+      content: value || '<p></p>',
+      immediatelyRender: false,
+      editorProps: {
+        attributes: { class: 'prose prose-sm max-w-none focus:outline-none' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        handlePaste(view: any, event: any) {
+          const items = event.clipboardData?.items;
+          if (items) {
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].kind === 'file') {
+                event.preventDefault();
+                return true;
+              }
+            }
+          }
+          return false;
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        handleDrop(view: any, event: any) {
+          if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length) {
+            event.preventDefault();
+            return true;
+          }
+          return false;
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onUpdate({ editor }: any) {
+        const html = editor.getHTML();
+        const len = editor.getText().length;
+        setCharCount(len);
+        if (len > maxChars) {
+          editor.commands.setContent(value || '<p></p>', false);
+          return;
+        }
+        onChange(html);
+      },
+    },
+    [maxChars]
+  );
+
+  useEffect(() => {
+    setMounted(true);
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value || '<p></p>', false);
+      setCharCount(getTextLen(value || ''));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  const isLinkActive = !!editor?.isActive('link');
+
+  if (!mounted) {
+    // Defer rendering until client mount to avoid hydration glitches
+    return (
+      <div className={`w-full bg-white rounded-none shadow-none overflow-hidden`}>
+        <div className="flex flex-nowrap items-center gap-1 text-readowl-purple-medium bg-white px-2 py-1" />
+        <div className="px-4 py-3 min-h-[18rem] max-h-[28rem] overflow-y-auto" />
+        <div className="flex justify-between text-xs mt-1 text-white/80" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Integrated white container: toolbar + editor */}
+      <div
+        className={`w-full bg-white rounded-none shadow-none overflow-hidden`}
+        onClick={() => editor?.chain().focus().run()}
+      >
+        {/* Toolbar */}
+        <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-readowl-purple-medium bg-white px-2 py-1 border-b border-readowl-purple/10">
+          <button
+            type="button"
+            title="Desfazer (Ctrl/Cmd+Z)"
+            onClick={() => editor?.chain().focus().undo().run()}
+            className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
+          >
+            <NextImage src="/img/svg/tiptap/arrow-undo.svg" width={16} height={16} alt="Desfazer" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <button
+            type="button"
+            title="Refazer (Ctrl/Cmd+Shift+Z)"
+            onClick={() => editor?.chain().focus().redo().run()}
+            className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
+          >
+            <NextImage src="/img/svg/tiptap/arrow-redo.svg" width={16} height={16} alt="Refazer" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <span className="mx-1 opacity-40">|</span>
+          <select
+            title="Título"
+            className="px-1.5 py-0.5 rounded-none border border-transparent text-readowl-purple-medium bg-white"
+            value={
+              editor?.isActive('heading', { level: 2 })
+                ? 'h2'
+                : editor?.isActive('heading', { level: 3 })
+                ? 'h3'
+                : 'p'
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === 'h2') editor?.chain().focus().toggleHeading({ level: 2 }).run();
+              else if (v === 'h3') editor?.chain().focus().toggleHeading({ level: 3 }).run();
+              else editor?.chain().focus().setParagraph().run();
+            }}
+          >
+            <option value="p">P</option>
+            <option value="h2">H2</option>
+            <option value="h3">H3</option>
+          </select>
+          <span className="mx-1 opacity-40">|</span>
+          <button
+            type="button"
+            title="Negrito (Ctrl/Cmd+B)"
+            onClick={() => editor?.chain().focus().toggleBold().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <NextImage src="/img/svg/tiptap/bold.svg" width={16} height={16} alt="Negrito" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <button
+            type="button"
+            title="Itálico (Ctrl/Cmd+I)"
+            onClick={() => editor?.chain().focus().toggleItalic().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('italic') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <NextImage src="/img/svg/tiptap/italic.svg" width={16} height={16} alt="Itálico" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <button
+            type="button"
+            title="Sublinhado (Ctrl/Cmd+U)"
+            onClick={() => editor?.chain().focus().toggleUnderline().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('underline') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M7 4v7a5 5 0 0010 0V4"/>
+              <line x1="5" y1="20" x2="19" y2="20"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            title="Tachado"
+            onClick={() => editor?.chain().focus().toggleStrike().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <NextImage src="/img/svg/tiptap/strikethrough.svg" width={16} height={16} alt="Tachado" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <button
+            type="button"
+            title="Código (Ctrl/Cmd+E)"
+            onClick={() => editor?.chain().focus().toggleCode().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+          </button>
+          <span className="mx-1 opacity-40">|</span>
+          <button
+            type="button"
+            title={isLinkActive ? 'Remover link' : 'Adicionar link'}
+            onClick={() =>
+              isLinkActive ? editor?.chain().focus().unsetLink().run() : (setLinkUrl(''), setLinkOpen(true))
+            }
+            className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
+          >
+            <NextImage src="/img/svg/tiptap/add-link.svg" width={16} height={16} alt="Link" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <button
+            type="button"
+            title="Imagem"
+            onClick={() => {
+              setImageUrl('');
+              setImageWidth('');
+              setImageHeight('');
+              setImageOpen(true);
+            }}
+            className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
+          >
+            <NextImage src="/img/svg/tiptap/add-image.svg" width={16} height={16} alt="Imagem" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <span className="mx-1 opacity-40">|</span>
+          <button
+            type="button"
+            title="Lista •"
+            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <NextImage src="/img/svg/tiptap/bulleted-list.svg" width={16} height={16} alt="Lista" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <button
+            type="button"
+            title="Lista 1."
+            onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('orderedList') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <NextImage src="/img/svg/tiptap/numbered-list.svg" width={16} height={16} alt="Lista numerada" aria-hidden className="pointer-events-none select-none" />
+          </button>
+          <span className="mx-1 opacity-40">|</span>
+          <button
+            type="button"
+            title="Alinhar à esquerda"
+            onClick={() => alignCurrentBlock('left')}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive({ textAlign: 'left' }) ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 6h18"/>
+              <path d="M3 12h12"/>
+              <path d="M3 18h18"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            title="Centralizar"
+            onClick={() => alignCurrentBlock('center')}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive({ textAlign: 'center' }) ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 6h18"/>
+              <path d="M6 12h12"/>
+              <path d="M3 18h18"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            title="Alinhar à direita"
+            onClick={() => alignCurrentBlock('right')}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive({ textAlign: 'right' }) ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 6h18"/>
+              <path d="M9 12h12"/>
+              <path d="M3 18h18"/>
+            </svg>
+          </button>
+          <span className="mx-1 opacity-40">|</span>
+          <button
+            type="button"
+            title="Citação"
+            onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
+              editor?.isActive('blockquote') ? 'bg-readowl-purple-extralight/60' : ''
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            title="Linha"
+            onClick={() => editor?.chain().focus().setHorizontalRule().run()}
+            className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
+          >
+            <span className="block w-[18px] h-[18px]" aria-hidden>
+              <span className="block w-full h-[2px] bg-current mt-[8px]" />
+            </span>
+          </button>
+          <span className="mx-1 opacity-40">|</span>
+          <button
+            type="button"
+            title="Limpar formatação"
+            onClick={() => editor?.chain().focus().clearNodes().unsetAllMarks().run()}
+            className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
+          >
+            <NextImage src="/img/svg/tiptap/format-clear.svg" width={16} height={16} alt="Limpar formatação" aria-hidden className="pointer-events-none select-none" />
+          </button>
+        </div>
+
+        {/* Editor */}
+        <div className="px-4 py-3 min-h-[18rem] max-h-[28rem] overflow-y-auto">
+          <EditorContent editor={editor} />
+        </div>
+      </div>
+
+      {/* Link modal */}
+      {linkOpen && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white text-readowl-purple border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
+            <h3 className="font-semibold mb-2">Adicionar link</h3>
+            <input
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="https://..."
+              className="w-full border border-readowl-purple/30 px-3 py-2 mb-3 outline-none"
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setLinkOpen(false)} className="px-3 py-1 border border-readowl-purple/30">
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  try {
+                    const u = new URL(linkUrl);
+                    if (!['http:', 'https:'].includes(u.protocol)) return;
+                    editor?.chain()
+                      .focus()
+                      .setLink({ href: u.toString(), target: '_blank', rel: 'nofollow noopener noreferrer' })
+                      .run();
+                    setLinkOpen(false);
+                  } catch {}
+                }}
+                className="px-3 py-1 bg-readowl-purple-light text-white"
+              >
+                Aplicar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image modal */}
+      {imageOpen && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white text-readowl-purple border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
+            <h3 className="font-semibold mb-2">Adicionar imagem por URL</h3>
+            <input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://..."
+              className="w-full border border-readowl-purple/30 px-3 py-2 mb-3 outline-none"
+            />
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="text-xs text-readowl-purple/80">Largura (px)</label>
+                <input
+                  value={imageWidth}
+                  onChange={(e) => setImageWidth(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="Original"
+                  inputMode="numeric"
+                  className="w-full border border-readowl-purple/30 px-3 py-2 outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-readowl-purple/80">Altura (px)</label>
+                <input
+                  value={imageHeight}
+                  onChange={(e) => setImageHeight(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="Original"
+                  inputMode="numeric"
+                  className="w-full border border-readowl-purple/30 px-3 py-2 outline-none"
+                />
+              </div>
+            </div>
+            <p className="text-sm mb-3">Apenas domínios permitidos (veja hosts em Configuração de imagens).</p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setImageOpen(false)} className="px-3 py-1 border border-readowl-purple/30">
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  try {
+                    const u = new URL(imageUrl);
+                    if (!['http:', 'https:'].includes(u.protocol)) return;
+                    const attrs: Record<string, unknown> = { src: u.toString() };
+                    if (imageWidth) attrs.width = parseInt(imageWidth, 10);
+                    if (imageHeight) attrs.height = parseInt(imageHeight, 10);
+                    editor?.chain().focus().setImage(attrs).run();
+                    setImageOpen(false);
+                  } catch {}
+                }}
+                className="px-3 py-1 bg-readowl-purple-light text-white"
+              >
+                Inserir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-between text-xs mt-1 text-white/80">
+        {showError && error ? <span className="text-red-300">{error}</span> : <span />}
+        <span>
+          {charCount}/{maxChars}
+        </span>
+      </div>
+    </div>
+  );
+}

@@ -140,7 +140,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: title.trim(),
-                    synopsis: synopsis.trim(),
+                    synopsis: synopsis,
                     releaseFrequency: releaseFrequency.trim() || undefined,
                     coverUrl: coverUrl || undefined,
                     genres: selectedGenres,

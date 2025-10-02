@@ -7,6 +7,7 @@ import RatingBox from '../../../../components/book/RatingBox';
 import BookActions from '../../../../components/book/BookActions';
 import BookTabs from '../../../../components/book/BookTabs';
 import type { BookWithAuthorAndGenres } from '@/types/book';
+import { sanitizeSynopsisHtml } from '@/lib/sanitize';
 
 interface PageProps { params: Promise<{ slug: string }> }
 
@@ -58,7 +59,24 @@ export default async function BookPage({ params }: PageProps) {
         </div>
         {/* Synopsis below both columns */}
         <div className="mt-4">
-          <p className="text-readowl-purple-extralight/95 font-semibold leading-relaxed">{book.synopsis}</p>
+          <div
+            className="prose prose-base prose-invert max-w-none prose-a:text-readowl-purple-extralight/90 prose-blockquote:border-l-readowl-purple-extralight/50 [--tw-prose-invert-body:255_255_255] [--tw-prose-invert-headings:255_255_255] [--tw-prose-invert-bold:255_255_255]
+            [&_p[style*='text-align: center']]:text-center [&_p[style*='text-align: right']]:text-right
+            [&_h2[style*='text-align: center']]:text-center [&_h2[style*='text-align: right']]:text-right
+            [&_h3[style*='text-align: center']]:text-center [&_h3[style*='text-align: right']]:text-right
+            [&_p[style*='text-align: center']>img]:block [&_p[style*='text-align: center']>img]:mx-auto
+            [&_p[style*='text-align: center']>a>img]:block [&_p[style*='text-align: center']>a>img]:mx-auto
+            [&_p[style*='text-align: right']>img]:block [&_p[style*='text-align: right']>img]:ml-auto
+            [&_p[style*='text-align: right']>a>img]:block [&_p[style*='text-align: right']>a>img]:ml-auto
+            [&_p[data-align='center']]:text-center [&_p[data-align='right']]:text-right
+            [&_h2[data-align='center']]:text-center [&_h2[data-align='right']]:text-right
+            [&_h3[data-align='center']]:text-center [&_h3[data-align='right']]:text-right
+            [&_p[data-align='center']>img]:block [&_p[data-align='center']>img]:mx-auto
+            [&_p[data-align='center']>a>img]:block [&_p[data-align='center']>a>img]:mx-auto
+            [&_p[data-align='right']>img]:block [&_p[data-align='right']>img]:ml-auto
+            [&_p[data-align='right']>a>img]:block [&_p[data-align='right']>a>img]:ml-auto"
+            dangerouslySetInnerHTML={{ __html: sanitizeSynopsisHtml(book.synopsis) }}
+          />
         </div>
         {/* Rating centered below synopsis */}
         <div className="mt-5 flex justify-center">

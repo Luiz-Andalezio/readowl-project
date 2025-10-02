@@ -7,7 +7,7 @@ const HIDDEN_PREFIXES = ['/login', '/register', '/', '/landing', '/landing/conta
 
 export default function NavGate() {
   const pathname = usePathname();
-  const hide = HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'));
+  const hide = HIDDEN_PREFIXES.some((p) => pathname === p || pathname?.startsWith(p + '/'));
   if (hide) return null;
   return <Navbar />;
 }
