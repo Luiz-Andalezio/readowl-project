@@ -135,7 +135,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
             const res = await fetch(`/api/books/${encodeURIComponent(slug)}/edit`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: title.trim(), synopsis: synopsis.trim(), releaseFrequency: releaseFrequency.trim() || undefined, coverUrl: coverUrl.trim(), status, genres: selectedGenres }),
+                body: JSON.stringify({ title: title.trim(), synopsis: synopsis, releaseFrequency: releaseFrequency.trim() || undefined, coverUrl: coverUrl.trim(), status, genres: selectedGenres }),
             });
             if (!res.ok) throw new Error('Falha ao atualizar livro');
             setConfirmSaveOpen(false);

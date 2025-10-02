@@ -1,15 +1,15 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import InputWithIcon from "@/components/ui/InputWithIcon";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
 
-export default function ResetPasswordPage() {
+function ResetPasswordInner() {
   const search = useSearchParams();
   const router = useRouter();
-  const token = search.get("token") || "";
+  const token = search?.get("token") || "";
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -111,5 +111,13 @@ export default function ResetPasswordPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordInner />
+    </Suspense>
   );
 }

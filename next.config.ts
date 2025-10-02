@@ -25,6 +25,18 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'static.wikia.nocookie.net' } // Fandom/Wikia static assets
     ],
   },
+  webpack: (config, { dev }) => {
+    // Mitigate sporadic ENOENT and missing chunk errors in dev by disabling persistent FS cache.
+    // This trades a small perf hit for stability on some filesystems/paths with spaces.
+    if (dev) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cfg = config as any;
+      if (cfg.cache) {
+        cfg.cache = false;
+      }
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

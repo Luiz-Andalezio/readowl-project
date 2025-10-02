@@ -1,5 +1,6 @@
 import { Book, Genre, User } from '@prisma/client';
 import { z } from 'zod';
+import { getPlainTextLength } from '@/lib/sanitize';
 
 // Centralized limits
 export const BOOK_TITLE_MAX = 200;
@@ -23,7 +24,16 @@ export type BookWithAuthorAndGenres = Book & {
 // Zod schema for create request (shared client/server)
 export const createBookSchema = z.object({
   title: z.string().trim().min(1, 'É necessário um título').max(BOOK_TITLE_MAX),
-  synopsis: z.string().trim().min(1, 'É necessário uma sinopse').max(BOOK_SYNOPSIS_MAX),
+  // Accept HTML but validate based on plain text length and not empty
+  synopsis: z.string().trim().superRefine((val, ctx) => {
+    const len = getPlainTextLength(val);
+    if (len < 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'É necessário uma sinopse' });
+    }
+    if (len > BOOK_SYNOPSIS_MAX) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Sinopse muito longa (máx. ${BOOK_SYNOPSIS_MAX} caracteres)` });
+    }
+  }),
   releaseFrequency: z.string().trim().max(BOOK_FREQ_MAX).optional().or(z.literal('').transform(() => undefined)),
   coverUrl: z.string().pipe(z.url({ message: 'URL inválida' })),
   genres: z.array(z.string().min(1)).min(1, 'Selecione ao menos um gênero'),
@@ -61,7 +71,15 @@ export const BOOK_STATUS_LABEL: Record<BookStatus, string> = {
 // Zod schema for update (edit)
 export const updateBookSchema = z.object({
   title: z.string().trim().min(1, 'É necessário um título').max(BOOK_TITLE_MAX),
-  synopsis: z.string().trim().min(1, 'É necessário uma sinopse').max(BOOK_SYNOPSIS_MAX),
+  synopsis: z.string().trim().superRefine((val, ctx) => {
+    const len = getPlainTextLength(val);
+    if (len < 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'É necessário uma sinopse' });
+    }
+    if (len > BOOK_SYNOPSIS_MAX) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Sinopse muito longa (máx. ${BOOK_SYNOPSIS_MAX} caracteres)` });
+    }
+  }),
   releaseFrequency: z.string().trim().max(BOOK_FREQ_MAX).optional().or(z.literal('').transform(() => undefined)),
   coverUrl: z.string().pipe(z.url({ message: 'URL inválida' })),
   status: z.enum(BOOK_STATUS),

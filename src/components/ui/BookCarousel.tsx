@@ -231,7 +231,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                 </div>
             </div>
 
-            {books.length === 0 && <div className="text-sm text-readowl-purple mt-6 px-2">Nenhum livro encontrado.</div>}
+            {books.length === 0 && <div className="text-sm text-readowl-purple-extralight mt-6 px-2">Nenhuma obra registrada.</div>}
 
             {books.length > 0 && (
                 <div className="relative mt-5">

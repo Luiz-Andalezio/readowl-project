@@ -77,7 +77,7 @@ export default function FloatingNavbar() {
                                     <button
                                         key={l.href}
                                         onClick={() => go(l.href)}
-                                        className={`relative flex items-center gap-1.5 px-1 text-readowl-purple-extralight/80 hover:text-white transition-colors after:transition-opacity after:duration-300 after:ease-out after:bg-white/70 after:h-[2px] after:w-full after:absolute after:left-0 after:-bottom-1 ${pathname.startsWith(l.href) ? activeClass : 'after:opacity-0 hover:after:opacity-60'}`}
+                                        className={`relative flex items-center gap-1.5 px-1 text-readowl-purple-extralight/80 hover:text-white transition-colors after:transition-opacity after:duration-300 after:ease-out after:bg-white/70 after:h-[2px] after:w-full after:absolute after:left-0 after:-bottom-1 ${pathname?.startsWith(l.href) ? activeClass : 'after:opacity-0 hover:after:opacity-60'}`}
                                     >
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={iconSrc} alt="" className="w-4 h-4 opacity-90" />
@@ -149,14 +149,14 @@ export default function FloatingNavbar() {
                             {links.map(l => {
                                 const iconSrc = l.href.startsWith('/notifications') ? '/img/svg/navbar/notification.svg' : '/img/svg/navbar/book1.svg';
                                 return (
-                                    <button key={l.href} onClick={() => go(l.href)} className={`flex items-center gap-2 text-left px-3 py-2 text-sm font-medium transition-colors ${pathname.startsWith(l.href) ? 'bg-readowl-purple-dark/40 text-white' : 'text-readowl-purple-extralight/85 hover:bg-readowl-purple-light/20 hover:text-white'}`}>
+                                    <button key={l.href} onClick={() => go(l.href)} className={`flex items-center gap-2 text-left px-3 py-2 text-sm font-medium transition-colors ${pathname?.startsWith(l.href) ? 'bg-readowl-purple-dark/40 text-white' : 'text-readowl-purple-extralight/85 hover:bg-readowl-purple-light/20 hover:text-white'}`}>
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={iconSrc} alt="" className="w-5 h-5" />
                                         <span>{l.label}</span>
                                     </button>
                                 );
                             })}
-                            <button onClick={() => go('/user')} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors ${pathname.startsWith('/user') ? 'bg-readowl-purple-dark/40 text-white' : 'text-readowl-purple-extralight/85 hover:bg-readowl-purple-light/20 hover:text-white'}`}>
+                            <button onClick={() => go('/user')} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors ${pathname?.startsWith('/user') ? 'bg-readowl-purple-dark/40 text-white' : 'text-readowl-purple-extralight/85 hover:bg-readowl-purple-light/20 hover:text-white'}`}>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={session?.user?.image || '/img/svg/navbar/account-box.svg'} alt="Avatar" className="w-8 h-8 object-cover" />
                                 <span>Perfil</span>

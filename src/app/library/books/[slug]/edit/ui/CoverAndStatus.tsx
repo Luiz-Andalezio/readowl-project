@@ -56,7 +56,7 @@ export const CoverAndStatus: React.FC<CoverAndStatusProps> = ({
         value={coverUrl}
         onChange={e => onChange(e.target.value.trim())}
         onBlur={onBlur}
-  className="mt-2.5 w-full bg-white focus:ring-readowl-purple-dark px-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50 border"
+  className="mt-3.5 w-full bg-white focus:ring-readowl-purple-dark px-4 py-2 text-sm text-readowl-purple placeholder-readowl-purple/50 border"
       />
       {errors.coverUrl && (touched || attemptedSubmit) && <p className="text-xs text-red-300 mt-1">{errors.coverUrl}</p>}
 
