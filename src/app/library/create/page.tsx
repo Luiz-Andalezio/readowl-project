@@ -12,7 +12,7 @@ export default async function CreateBookPage() {
     return (
         <>
             <Navbar />
-            <main className="min-h-screen pb-20">
+            <main className="min-h-screen pb-6">
                 <div className="w-full flex justify-center mt-14 sm:mt-16">
                     <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', create: 'Criar' }} />
                 </div>

@@ -149,7 +149,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
 
     return (
         <>
-            <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium p-8 shadow-2xl mt-10">
+            <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium p-8 shadow-2xl">
                 <div className="flex items-center justify-center gap-3 mb-8">
                     <Image src="/img/svg/book/checkbook.svg" alt="Livro" width={50} height={50} className="w-10 h-10 mt-0.4" />
                     <h1 className="text-3xl font-yusei text-center font-semibold text-white">Editar obra: {book.title}</h1>
@@ -259,7 +259,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
             {/* Danger zone - delete button below purple card */}
             <div className="w-full max-w-6xl mx-auto mt-4 flex justify-end">
                 <ButtonWithIcon
-                    className="!bg-red-600 !text-white !border-red-700 hover:!bg-red-700"
+                    className="!bg-red-700 !text-white !border-red-900 hover:!bg-red-600"
                     variant="secondary"
                     iconUrl="/img/svg/book/book-delete.svg"
                     iconAlt="Excluir"
@@ -347,7 +347,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                             }
                         }}
                         disabled={submitting || deleteTitle !== book.title || (!isGoogleOnly && !deletePassword)}
-                        className="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="px-4 py-2 text-sm bg-red-700 text-white hover:bg-red-600 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         Excluir
                     </button>
