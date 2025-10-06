@@ -8,6 +8,7 @@ import BookActions from '../../../../components/book/BookActions';
 import BookTabs from '../../../../components/book/BookTabs';
 import type { BookWithAuthorAndGenres } from '@/types/book';
 import { sanitizeSynopsisHtml } from '@/lib/sanitize';
+import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
 
 interface PageProps { params: Promise<{ slug: string }> }
 
@@ -23,7 +24,11 @@ export default async function BookPage({ params }: PageProps) {
   if (!book) return notFound();
 
   return (
-    <main className="px-4 py-6 md:px-8">
+    <>
+  <div className="w-full flex justify-center mt-14 sm:mt-16">
+    <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros' }} />
+  </div>
+    <main className="px-4 pb-6 md:px-8">
   <section className="relative bg-readowl-purple-medium p-4 md:p-6 text-white shadow-lg max-w-6xl mx-auto">
   {/* Two columns: left cover (smaller), right info list */}
         <div className="grid grid-cols-1 md:grid-cols-[230px_1fr] items-stretch">
@@ -89,6 +94,7 @@ export default async function BookPage({ params }: PageProps) {
         </div>
       </section>
     </main>
+    </>
   );
 }
 
