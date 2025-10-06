@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import Navbar from '@/components/ui/Navbar';
 import CreateBookForm from '@/app/library/create/ui/CreateBookForm';
+import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
 
 export default async function CreateBookPage() {
     const session = await getServerSession(authOptions);
@@ -12,6 +13,9 @@ export default async function CreateBookPage() {
         <>
             <Navbar />
             <main className="min-h-screen pb-20">
+                <div className="w-full flex justify-center mt-14 sm:mt-16">
+                    <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', create: 'Criar' }} />
+                </div>
                 <div className="flex justify-center items-start">
                     <CreateBookForm />
                 </div>

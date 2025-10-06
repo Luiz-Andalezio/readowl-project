@@ -1,7 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Editor } from '@tiptap/core';
-import NextImage from 'next/image';
 import { Node as PMNode } from '@tiptap/pm/model';
 // Lightweight type to match the subset used from NodeViewProps
 type ImageNodeViewProps = {

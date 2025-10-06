@@ -170,8 +170,6 @@ export default function FloatingNavbar() {
                     </div>
                 </div>
             </header>
-            {/* Spacer: ensure content isn't hidden under fixed navbar (different heights mobile vs desktop) */}
-            <div aria-hidden className="block h-14 sm:h-16" />
 
             {/* Logout confirmation modal */}
             <Modal
