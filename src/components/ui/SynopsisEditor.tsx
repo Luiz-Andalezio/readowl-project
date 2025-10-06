@@ -39,6 +39,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
   const [mounted, setMounted] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imageWidth, setImageWidth] = useState<string>('');
@@ -147,6 +148,16 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
 
   const isLinkActive = !!editor?.isActive('link');
 
+  // Close mobile menu with ESC
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMoreOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [moreOpen]);
+
   if (!mounted) {
     // Defer rendering until client mount to avoid hydration glitches
     return (
@@ -165,8 +176,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
         className={`w-full bg-white rounded-none shadow-none overflow-hidden`}
         onClick={() => editor?.chain().focus().run()}
       >
-        {/* Toolbar */}
-        <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-readowl-purple-medium bg-white px-2 py-1 border-b border-readowl-purple/10">
+        {/* Toolbar (desktop) */}
+        <div className="hidden md:flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-readowl-purple-medium bg-white px-2 py-1 border-b border-readowl-purple/10">
           <button
             type="button"
             title="Desfazer (Ctrl/Cmd+Z)"
@@ -184,27 +195,41 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             <NextImage src="/img/svg/tiptap/arrow-redo.svg" width={16} height={16} alt="Refazer" aria-hidden className="pointer-events-none select-none" />
           </button>
           <span className="mx-1 opacity-40">|</span>
-          <select
-            title="Título"
-            className="px-1.5 py-0.5 rounded-none border border-transparent text-readowl-purple-medium bg-white"
-            value={
-              editor?.isActive('heading', { level: 2 })
-                ? 'h2'
-                : editor?.isActive('heading', { level: 3 })
-                ? 'h3'
-                : 'p'
-            }
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === 'h2') editor?.chain().focus().toggleHeading({ level: 2 }).run();
-              else if (v === 'h3') editor?.chain().focus().toggleHeading({ level: 3 }).run();
-              else editor?.chain().focus().setParagraph().run();
-            }}
-          >
-            <option value="p">P</option>
-            <option value="h2">H2</option>
-            <option value="h3">H3</option>
-          </select>
+          <div className="inline-flex rounded border border-readowl-purple/20 overflow-hidden">
+            <button
+              type="button"
+              title="Parágrafo"
+              className={`px-2 py-0.5 text-sm hover:bg-readowl-purple-extralight/40 ${
+                editor?.isActive('paragraph') ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+              }`}
+              aria-pressed={editor?.isActive('paragraph')}
+              onClick={() => editor?.chain().focus().setParagraph().run()}
+            >
+              P
+            </button>
+            <button
+              type="button"
+              title="Título H2"
+              className={`px-2 py-0.5 text-sm hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${
+                editor?.isActive('heading', { level: 2 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+              }`}
+              aria-pressed={editor?.isActive('heading', { level: 2 })}
+              onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+            >
+              H2
+            </button>
+            <button
+              type="button"
+              title="Título H3"
+              className={`px-2 py-0.5 text-sm hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${
+                editor?.isActive('heading', { level: 3 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+              }`}
+              aria-pressed={editor?.isActive('heading', { level: 3 })}
+              onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+            >
+              H3
+            </button>
+          </div>
           <span className="mx-1 opacity-40">|</span>
           <button
             type="button"
@@ -384,11 +409,215 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
           </button>
         </div>
 
+        {/* Toolbar (mobile, compact) */}
+        <div className="md:hidden flex items-center justify-between gap-1.5 text-readowl-purple-medium bg-white px-2 py-1 border-b border-readowl-purple/10">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button
+              type="button"
+              title="Desfazer"
+              onClick={() => editor?.chain().focus().undo().run()}
+              className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40"
+            >
+              <NextImage src="/img/svg/tiptap/arrow-undo.svg" width={16} height={16} alt="Desfazer" aria-hidden className="pointer-events-none select-none" />
+            </button>
+            <button
+              type="button"
+              title="Refazer"
+              onClick={() => editor?.chain().focus().redo().run()}
+              className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40"
+            >
+              <NextImage src="/img/svg/tiptap/arrow-redo.svg" width={16} height={16} alt="Refazer" aria-hidden className="pointer-events-none select-none" />
+            </button>
+            <span className="mx-1 opacity-40">|</span>
+            <button
+              type="button"
+              title="Negrito"
+              onClick={() => editor?.chain().focus().toggleBold().run()}
+              className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''}`}
+            >
+              <NextImage src="/img/svg/tiptap/bold.svg" width={16} height={16} alt="Negrito" aria-hidden className="pointer-events-none select-none" />
+            </button>
+            <button
+              type="button"
+              title="Itálico"
+              onClick={() => editor?.chain().focus().toggleItalic().run()}
+              className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('italic') ? 'bg-readowl-purple-extralight/60' : ''}`}
+            >
+              <NextImage src="/img/svg/tiptap/italic.svg" width={16} height={16} alt="Itálico" aria-hidden className="pointer-events-none select-none" />
+            </button>
+            <button
+              type="button"
+              title={isLinkActive ? 'Remover link' : 'Adicionar link'}
+              onClick={() => isLinkActive ? editor?.chain().focus().unsetLink().run() : (setLinkUrl(''), setLinkOpen(true))}
+              className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40"
+            >
+              <NextImage src="/img/svg/tiptap/add-link.svg" width={16} height={16} alt="Link" aria-hidden className="pointer-events-none select-none" />
+            </button>
+            <button
+              type="button"
+              title="Imagem"
+              onClick={() => { setImageUrl(''); setImageWidth(''); setImageHeight(''); setImageOpen(true); }}
+              className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40"
+            >
+              <NextImage src="/img/svg/tiptap/add-image.svg" width={16} height={16} alt="Imagem" aria-hidden className="pointer-events-none select-none" />
+            </button>
+          </div>
+          <button
+            type="button"
+            title="Mais opções"
+            onClick={() => setMoreOpen(true)}
+            className="px-2 py-1 rounded-none hover:bg-readowl-purple-extralight/40"
+            aria-haspopup="dialog"
+            aria-expanded={moreOpen}
+          >
+            {/* List icon */}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <circle cx="4" cy="6" r="1"/>
+              <circle cx="4" cy="12" r="1"/>
+              <circle cx="4" cy="18" r="1"/>
+            </svg>
+          </button>
+        </div>
+
         {/* Editor */}
         <div className="px-4 py-3 min-h-[18rem] max-h-[28rem] overflow-y-auto">
           <EditorContent editor={editor} />
         </div>
       </div>
+
+      {/* Mobile bottom-sheet for more options */}
+      {moreOpen && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMoreOpen(false)} />
+          <div className="absolute inset-x-0 bottom-0 bg-white text-readowl-purple rounded-t-xl shadow-xl border-t border-readowl-purple/10">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-readowl-purple/10">
+              <h3 className="font-medium">Ferramentas</h3>
+              <button onClick={() => setMoreOpen(false)} className="px-2 py-1 hover:bg-readowl-purple-extralight/40 rounded">
+                <span className="sr-only">Fechar</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="px-3 py-2 max-h-[50vh] overflow-y-auto">
+              {/* Headings (segmented control) */}
+              <div className="mb-3">
+                <span className="block text-xs mb-1 text-readowl-purple/80">Título</span>
+                <div className="inline-flex rounded border border-readowl-purple/20 overflow-hidden">
+                  <button
+                    type="button"
+                    title="Parágrafo"
+                    className={`px-3 py-1 text-sm hover:bg-readowl-purple-extralight/40 ${
+                      editor?.isActive('paragraph') ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+                    }`}
+                    aria-pressed={editor?.isActive('paragraph')}
+                    onClick={() => { editor?.chain().focus().setParagraph().run(); setMoreOpen(false); }}
+                  >
+                    P
+                  </button>
+                  <button
+                    type="button"
+                    title="Título H2"
+                    className={`px-3 py-1 text-sm hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${
+                      editor?.isActive('heading', { level: 2 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+                    }`}
+                    aria-pressed={editor?.isActive('heading', { level: 2 })}
+                    onClick={() => { editor?.chain().focus().toggleHeading({ level: 2 }).run(); setMoreOpen(false); }}
+                  >
+                    H2
+                  </button>
+                  <button
+                    type="button"
+                    title="Título H3"
+                    className={`px-3 py-1 text-sm hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${
+                      editor?.isActive('heading', { level: 3 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+                    }`}
+                    aria-pressed={editor?.isActive('heading', { level: 3 })}
+                    onClick={() => { editor?.chain().focus().toggleHeading({ level: 3 }).run(); setMoreOpen(false); }}
+                  >
+                    H3
+                  </button>
+                </div>
+              </div>
+
+              {/* Marks */}
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                <button aria-label="Sublinhar" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive('underline') ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { editor?.chain().focus().toggleUnderline().run(); setMoreOpen(false); }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M7 4v7a5 5 0 0010 0V4"/>
+                    <line x1="5" y1="20" x2="19" y2="20"/>
+                  </svg>
+                </button>
+                <button aria-label="Tachado" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { editor?.chain().focus().toggleStrike().run(); setMoreOpen(false); }}>
+                  <NextImage src="/img/svg/tiptap/strikethrough.svg" width={16} height={16} alt="Tachado" aria-hidden className="pointer-events-none select-none" />
+                </button>
+                <button aria-label="Código" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { editor?.chain().focus().toggleCode().run(); setMoreOpen(false); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                </button>
+                <button aria-label="Limpar formatação" className="p-2 border rounded flex items-center justify-center" onClick={() => { editor?.chain().focus().clearNodes().unsetAllMarks().run(); setMoreOpen(false); }}>
+                  <NextImage src="/img/svg/tiptap/format-clear.svg" width={16} height={16} alt="Limpar" aria-hidden className="pointer-events-none select-none" />
+                </button>
+              </div>
+
+              {/* Lists */}
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <button aria-label="Lista com marcadores" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { editor?.chain().focus().toggleBulletList().run(); setMoreOpen(false); }}>
+                  <NextImage src="/img/svg/tiptap/bulleted-list.svg" width={16} height={16} alt="Lista" aria-hidden className="pointer-events-none select-none" />
+                </button>
+                <button aria-label="Lista numerada" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive('orderedList') ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { editor?.chain().focus().toggleOrderedList().run(); setMoreOpen(false); }}>
+                  <NextImage src="/img/svg/tiptap/numbered-list.svg" width={16} height={16} alt="Lista numerada" aria-hidden className="pointer-events-none select-none" />
+                </button>
+              </div>
+
+              {/* Align */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <button aria-label="Alinhar à esquerda" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive({ textAlign: 'left' }) ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { alignCurrentBlock('left'); setMoreOpen(false); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M3 6h18"/>
+                    <path d="M3 12h12"/>
+                    <path d="M3 18h18"/>
+                  </svg>
+                </button>
+                <button aria-label="Centralizar" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive({ textAlign: 'center' }) ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { alignCurrentBlock('center'); setMoreOpen(false); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M3 6h18"/>
+                    <path d="M6 12h12"/>
+                    <path d="M3 18h18"/>
+                  </svg>
+                </button>
+                <button aria-label="Alinhar à direita" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive({ textAlign: 'right' }) ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { alignCurrentBlock('right'); setMoreOpen(false); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M3 6h18"/>
+                    <path d="M9 12h12"/>
+                    <path d="M3 18h18"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Blocks */}
+              <div className="grid grid-cols-2 gap-2">
+                <button aria-label="Citação" className={`p-2 border rounded flex items-center justify-center ${editor?.isActive('blockquote') ? 'bg-readowl-purple-extralight/60' : ''}`} onClick={() => { editor?.chain().focus().toggleBlockquote().run(); setMoreOpen(false); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z"/>
+                  </svg>
+                </button>
+                <button aria-label="Linha horizontal" className="p-2 border rounded flex items-center justify-center" onClick={() => { editor?.chain().focus().setHorizontalRule().run(); setMoreOpen(false); }}>
+                  <span className="block w-[18px] h-[18px]" aria-hidden>
+                    <span className="block w-full h-[2px] bg-current mt-[8px]" />
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Link modal */}
       {linkOpen && (
