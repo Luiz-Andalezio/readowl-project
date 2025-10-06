@@ -82,6 +82,19 @@ export function BreadcrumbAuto({
   anchor?: Anchor;
 }) {
   const pathname = usePathname() || base;
+  // Simple error-context detection: 403, generic error, or Next.js not-found fallback
+  const isErrorContext = (() => {
+    if (!pathname) return false;
+    const direct = pathname === "/403" || pathname === "/erro" || pathname === "/_not-found";
+    if (direct) return true;
+    const segs = pathname.replace(/^\/+/, "").split("/").filter(Boolean);
+    return segs.includes("403") || segs.includes("erro") || segs.includes("_not-found");
+  })();
+
+  if (isErrorContext) {
+    // Render a single trail pointing to an error context, with Home prefix
+    return <Breadcrumb items={[{ label: "Erro" }]} showHome homeHref={base} className={className} anchor={anchor} />;
+  }
   const segments = pathname
     .replace(/^\/+/, "")
     .split("/")
