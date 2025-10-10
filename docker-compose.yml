@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  # Dedicated Postgres for the Next.js project.
+  # Exposes 5433 on the host to avoid clashing with any other Postgres you may have.
+  postgres:
+    image: postgres:16-alpine
+    container_name: readowl_next_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: readowl
+      POSTGRES_PASSWORD: readowl
+      POSTGRES_DB: readowl
+    ports:
+      - "5433:5432"
+    volumes:
+      - readowl_next_pgdata:/var/lib/postgresql/data
+
+volumes:
+  readowl_next_pgdata:

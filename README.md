@@ -55,7 +55,7 @@ The platform aims to solve common issues found in other systems, such as ineffic
 - **File Uploads**: Uses Multer and Cloudinary for storing book covers and profile images.
 - **Email Services**: Nodemailer for password recovery, with HTML templates and plain-text fallback. Password reset flow uses single-use SHA-256 tokens (30-minute expiry) and session invalidation via `credentialVersion`.
 - **Security**: Per-user cooldown (120s) and IP rate limiting (5 requests/15min) on password recovery requests.
-- **SMTP Configuration**: Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `MAIL_FROM` in `.env` for production. In development, emails are logged to the console.
+- **SMTP Configuration**: Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `MAIL_FROM` in `.env`. In development, if SMTP is not configured, emails are logged to the console.
 - **Redis (Optional)**: For distributed rate limiting, configure `REDIS_URL` or Upstash variables; defaults to in-memory if unset.
 - **UX Enhancements**: Success page after password reset and improved feedback messages.
 - **Password Strength**: `PasswordStrengthBar` uses a local heuristic and optionally loads `zxcvbn` for enhanced feedback.
@@ -71,15 +71,130 @@ The platform aims to solve common issues found in other systems, such as ineffic
 
 **VS Code Extensions:** Prisma, ESLint, Prettier - Code formatter, Tailwind CSS IntelliSense, EchoAPI
 
-**Docker Database URL:**
-```env
-DATABASE_URL="postgresql://docker:docker@localhost:5432/readowl?schema=public"
+## 🚀 Getting Started (from scratch)
+
+This guide walks you from zero to running the app locally with a Dockerized PostgreSQL dedicated to this Next.js project. If you already run pgAdmin for the React project (container name: `readowl_pgadmin`), keep using it; we don't run a second pgAdmin here. It also covers Google OAuth login and SMTP for password recovery.
+
+### 1) Prerequisites
+
+- Node.js 18+ and pnpm or npm
+- Docker Desktop or Docker Engine
+- A PostgreSQL instance (local/native or in Docker). If you already have one, you can keep using it.
+- Optional: Google Cloud project for OAuth2 (we provide example credentials for local dev)
+
+### 2) Clone and install dependencies
+
+```bash
+git clone <your-repo-url>
+cd readowl-next
+npm install
 ```
 
-**Dev script example:**
-```json
-"dev": "node --loader ts-node/esm --watch src/server.ts"
+### 3) Environment variables
+
+Copy `.env.example` to `.env` and fill values. For local development, an example:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/readowl-next_db?schema=public"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="<a-strong-random-secret>"
+
+# Google OAuth
+GOOGLE_CLIENT_ID="<google-client-id>"
+GOOGLE_CLIENT_SECRET="<google-client-secret>"
+
+# SMTP (Gmail)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=587
+SMTP_USER="<your-gmail>@gmail.com"
+SMTP_PASS="<app-password>"
+MAIL_FROM="Readowl <no-reply@readowl.dev>"
 ```
+
+Notes:
+- For Gmail SMTP, use an App Password (not your normal password). Enable 2-Step Verification and create an App Password.
+- The project includes a `credentials/google-oauth.json` template. We ignore the `credentials/` folder in Git to avoid leaking secrets.
+
+### 4) Database
+
+We ship a dedicated Postgres service for this project via Docker Compose. It exposes port `5433` on your host, so it won’t conflict with other Postgres instances.
+
+Bring it up:
+
+```bash
+docker compose up -d postgres
+```
+
+Details:
+- Container name: `readowl_next_db`
+- Database: `readowl`
+- User/Password: `readowl` / `readowl`
+- Host port: 5433 (container 5432)
+
+Your `.env` should already point `DATABASE_URL` to `postgresql://readowl:readowl@localhost:5433/readowl?schema=public`.
+
+If you want to manage the DB via GUI, reuse the existing pgAdmin from the React project (container `readowl_pgadmin`) at http://localhost:5050.
+
+#### Create a server in pgAdmin (GUI steps)
+
+1. Open http://localhost:5051 and log in.
+2. Right-click “Servers” > Create > Server…
+3. General tab: Name: `readowl-local`
+4. Connection tab:
+   - Host: If pgAdmin is in Docker and Postgres is on the host, use your host IP (Linux) or `host.docker.internal` (Mac/Windows). If both are in Docker, `host.docker.internal` also works in many setups.
+   - Port: `5433`
+   - Maintenance DB: `readowl`
+   - Username: `readowl`
+   - Password: `readowl`
+   - Save
+5. Expand the server > Databases. The default DB `readowl` should exist. If not, create it.
+
+### 5) Prisma setup
+
+Generate and apply the schema to your database:
+
+```bash
+npx prisma generate
+npx prisma migrate deploy
+# For first-time dev setup (optional) use:
+# npx prisma migrate dev
+```
+
+### 6) Google OAuth setup
+
+In Google Cloud Console (APIs & Services > Credentials), create OAuth 2.0 Client ID for Web application:
+- Authorized JavaScript origins: `http://localhost:3000`
+- Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
+
+Copy Client ID and Secret to `.env` (`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`).
+
+### 7) SMTP (password recovery)
+
+If using Gmail:
+- Enable 2-Step Verification
+- Create an App Password and set it in `.env` as `SMTP_PASS`
+- Keep `SMTP_HOST=smtp.gmail.com` and `SMTP_PORT=587`
+
+### 8) Run the app
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000
+
+### 9) Troubleshooting
+
+- Check `.env` values and database connectivity.
+- If using Dockerized Postgres, ensure the port mapping matches your `DATABASE_URL`.
+- Prisma fails to connect: verify DB exists and credentials are correct.
+- Gmail EAUTH/535: use an App Password, not the normal password. Consider port 465 with `SMTP_PORT=465` for SSL.
+
+## 🧰 Development notes
+
+- Tech stack: Next.js (App Router), TypeScript, Tailwind CSS, Prisma, NextAuth, Zod, Nodemailer.
+- We added a `docker-compose.yml` entry for pgAdmin to simplify DB management in development.
+
 
 ### 📁 Suggested Project Structure
 
