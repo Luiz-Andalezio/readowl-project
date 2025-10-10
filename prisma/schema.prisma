@@ -48,6 +48,9 @@ model User {
   // Follows: books this user follows
   follows BookFollow[]
 
+  // Ratings given by this user
+  ratings BookRating[]
+
   // Password recovery
   passwordResetTokens PasswordResetToken[]
 
@@ -85,6 +88,9 @@ model Book {
 
   // Followers: users who follow this book
   followers BookFollow[]
+
+  // Ratings received by this book
+  ratings BookRating[]
 }
 
 // Auxiliary models for NextAuth
@@ -141,6 +147,21 @@ model BookFollow {
   userId   String
   bookId   String
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([userId, bookId])
+  @@index([bookId])
+}
+
+// Explicit join model for user ratings on books (1..5 stars)
+model BookRating {
+  userId   String
+  bookId   String
+  score    Int // 1..5
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
