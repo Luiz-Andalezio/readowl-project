@@ -73,7 +73,7 @@ The platform aims to solve common issues found in other systems, such as ineffic
 
 ## 🚀 Getting Started (from scratch)
 
-This guide walks you from zero to running the app locally with PostgreSQL (via your host or an existing container), pgAdmin for DB management, Google OAuth login, and SMTP for password recovery.
+This guide walks you from zero to running the app locally with a Dockerized PostgreSQL dedicated to this Next.js project. If you already run pgAdmin for the React project (container name: `readowl_pgadmin`), keep using it; we don't run a second pgAdmin here. It also covers Google OAuth login and SMTP for password recovery.
 
 ### 1) Prerequisites
 
@@ -115,35 +115,39 @@ Notes:
 - For Gmail SMTP, use an App Password (not your normal password). Enable 2-Step Verification and create an App Password.
 - The project includes a `credentials/google-oauth.json` template. We ignore the `credentials/` folder in Git to avoid leaking secrets.
 
-### 4) Database and pgAdmin
+### 4) Database
 
-We include a Docker Compose service for pgAdmin. Start it with:
+We ship a dedicated Postgres service for this project via Docker Compose. It exposes port `5433` on your host, so it won’t conflict with other Postgres instances.
+
+Bring it up:
 
 ```bash
-docker compose up -d pgadmin
+docker compose up -d postgres
 ```
 
-This exposes pgAdmin at http://localhost:5051 (default login from env: `admin@example.com` / `admin`). If you already run pgAdmin elsewhere, you can skip this.
+Details:
+- Container name: `readowl_next_db`
+- Database: `readowl`
+- User/Password: `readowl` / `readowl`
+- Host port: 5433 (container 5432)
 
-If you don't have PostgreSQL yet, you can uncomment the `postgres` service in `docker-compose.yml` and run it too. Make sure your `.env` `DATABASE_URL` matches the container credentials and port mapping.
+Your `.env` should already point `DATABASE_URL` to `postgresql://readowl:readowl@localhost:5433/readowl?schema=public`.
+
+If you want to manage the DB via GUI, reuse the existing pgAdmin from the React project (container `readowl_pgadmin`) at http://localhost:5050.
 
 #### Create a server in pgAdmin (GUI steps)
 
 1. Open http://localhost:5051 and log in.
 2. Right-click “Servers” > Create > Server…
 3. General tab: Name: `readowl-local`
-4. Connection tab (choose based on your setup):
-         - If your Postgres runs on your HOST (native):
-                 - Hostname/address: `localhost` or `127.0.0.1`
-                 - Port: `5432` (or the port you use)
-         - If your Postgres runs in another Docker container and pgAdmin is in Docker too:
-                 - Hostname/address: `host.docker.internal` (on Linux, if not available, use the Docker gateway IP `172.17.0.1`)
-                 - Port: the HOST port you mapped (e.g., `5433`, `5434`, etc.)
-         - Maintenance DB: `postgres` (or your DB name)
-         - Username: `postgres` (or the configured user)
-         - Password: your password
-         - Save
-5. Expand the server > Databases > Create Database named `readowl-next_db` (if not created automatically).
+4. Connection tab:
+   - Host: If pgAdmin is in Docker and Postgres is on the host, use your host IP (Linux) or `host.docker.internal` (Mac/Windows). If both are in Docker, `host.docker.internal` also works in many setups.
+   - Port: `5433`
+   - Maintenance DB: `readowl`
+   - Username: `readowl`
+   - Password: `readowl`
+   - Save
+5. Expand the server > Databases. The default DB `readowl` should exist. If not, create it.
 
 ### 5) Prisma setup
 

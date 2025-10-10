@@ -1,32 +1,20 @@
 version: "3.9"
 
 services:
-  # Optional Postgres if you don't already have one; keep commented if using local/other.
-  # postgres:
-  #   image: postgres:16-alpine
-  #   container_name: readowl-next-postgres
-  #   restart: unless-stopped
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #     POSTGRES_DB: readowl-next_db
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-
-  pgadmin:
-    image: dpage/pgadmin4:8
-    container_name: readowl-next-pgadmin
+  # Dedicated Postgres for the Next.js project.
+  # Exposes 5433 on the host to avoid clashing with any other Postgres you may have.
+  postgres:
+    image: postgres:16-alpine
+    container_name: readowl_next_db
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      POSTGRES_USER: readowl
+      POSTGRES_PASSWORD: readowl
+      POSTGRES_DB: readowl
     ports:
-      - "5051:80"
+      - "5433:5432"
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - readowl_next_pgdata:/var/lib/postgresql/data
 
 volumes:
-  pgadmin_data:
-  # pgdata:
+  readowl_next_pgdata:
