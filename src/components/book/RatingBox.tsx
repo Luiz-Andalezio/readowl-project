@@ -45,6 +45,10 @@ export default function RatingBox({ bookId, slug }: Props) {
         const isToggleOff = prevMy === nextScore; // clicking same star removes rating
         // optimistic
         const newMy = isToggleOff ? 0 : nextScore;
+        if (isToggleOff) {
+            // Clear hover so UI returns to default star sprites immediately
+            setHover(0);
+        }
         setMyScore(newMy);
         try {
             let res: Response;
