@@ -23,6 +23,9 @@ export default async function BookPage({ params }: PageProps) {
   const book = (await getBookBySlug(slug)) as BookWithAuthorAndGenres | null;
   if (!book) return notFound();
 
+  // Fetch followers count for the meta section
+  const followersCount = await prisma.bookFollow.count({ where: { bookId: book.id } });
+
   return (
     <>
   <div className="w-full flex justify-center mt-14 sm:mt-16">
@@ -54,7 +57,7 @@ export default async function BookPage({ params }: PageProps) {
             {/* Shared row for infos + buttons, stretched to match the cover height */}
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
               <div className="min-h-full">
-                <BookHeader book={book} mode="meta" />
+                <BookHeader book={book} mode="meta" followersCount={followersCount} />
               </div>
               <div className="flex min-h-full">
                 <BookActions book={book} className="ml-auto" />

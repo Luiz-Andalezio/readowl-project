@@ -15,6 +15,7 @@ type Props = {
 export default function BookActions({ book, className }: Props) {
     const { data: session } = useSession();
     const [following, setFollowing] = React.useState(false);
+    const [loadingFollow, setLoadingFollow] = React.useState(false);
     const router = useRouter();
 
     const isOwner = session?.user?.id === book.authorId;
@@ -23,6 +24,71 @@ export default function BookActions({ book, className }: Props) {
     // Base style for the "Seguir" button
     const baseStyle =
         "flex-1 text-left font-yusei text-lg font-semibold py-2 px-6 border-2 transition-colors duration-300 flex items-center justify-start gap-2 w-full";
+
+    // Fetch initial follow status
+    React.useEffect(() => {
+        const slug = slugify(book.title);
+        fetch(`/api/books/${slug}/follow`)
+            .then((r) => r.ok ? r.json() : Promise.reject(r))
+            .then((data: { isFollowing: boolean }) => {
+                setFollowing(data.isFollowing);
+            })
+            .catch(() => {
+                // ignore errors silently for public view
+            });
+    }, [book.title]);
+
+    async function toggleFollow() {
+        const slug = slugify(book.title);
+        if (loadingFollow) return;
+        setLoadingFollow(true);
+        const prevFollowing = following;
+        // optimistic update
+        setFollowing(!prevFollowing);
+        // Optimistic count update via event
+        try {
+            window.dispatchEvent(new CustomEvent('book:followers:updated', {
+                detail: { slug, delta: prevFollowing ? -1 : 1 }
+            }));
+        } catch {}
+        try {
+            const res = await fetch(`/api/books/${slug}/follow`, {
+                method: prevFollowing ? "DELETE" : "POST",
+            });
+            if (res.status === 401) {
+                // restore and redirect to login
+                setFollowing(prevFollowing);
+                try {
+                    window.dispatchEvent(new CustomEvent('book:followers:updated', {
+                        detail: { slug, delta: prevFollowing ? 1 : -1 }
+                    }));
+                } catch {}
+                router.push("/login");
+                return;
+            }
+            if (!res.ok) {
+                // revert on error
+                setFollowing(prevFollowing);
+                try {
+                    window.dispatchEvent(new CustomEvent('book:followers:updated', {
+                        detail: { slug, delta: prevFollowing ? 1 : -1 }
+                    }));
+                } catch {}
+            } else {
+                // If API returns count, normalize UI with exact value
+                try {
+                    const data = await res.json();
+                    if (typeof data?.count === 'number') {
+                        window.dispatchEvent(new CustomEvent('book:followers:updated', {
+                            detail: { slug, count: data.count }
+                        }));
+                    }
+                } catch {}
+            }
+        } finally {
+            setLoadingFollow(false);
+        }
+    }
 
     return (
         <div
@@ -51,11 +117,12 @@ export default function BookActions({ book, className }: Props) {
             {/* Follow / Start row */}
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full max-w-[340px] mx-auto md:mx-0 md:w-[340px] md:self-end min-w-0">
                 <button
-                    onClick={() => setFollowing((v) => !v)}
+                    onClick={toggleFollow}
+                    disabled={loadingFollow}
                     className={`${baseStyle} ${following
                             ? "bg-readowl-purple-dark text-readowl-purple-light border-readowl-purple shadow-md"
                             : "bg-readowl-purple-light text-white border-readowl-purple hover:bg-readowl-purple-hover shadow-md"
-                        }`}
+                        } ${loadingFollow ? "opacity-75 cursor-not-allowed" : ""}`}
                 >
                     <Image
                         src="/img/svg/book/bookmark-purple.svg"
