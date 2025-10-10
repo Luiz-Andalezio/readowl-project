@@ -6,6 +6,7 @@ import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
 import BookCarousel from "@/components/ui/BookCarousel";
 import { prisma } from "@/lib/prisma";
 import Link from 'next/link';
+import { BreadcrumbAuto } from "@/components/ui/Breadcrumb";
 
 export default async function Library() {
     const session = await getServerSession(authOptions);
@@ -22,6 +23,9 @@ export default async function Library() {
         <>
             <Navbar />
             <main className="min-h-screen">
+                <div className="w-full flex justify-center mt-14 sm:mt-16">
+                    <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: "Biblioteca" }} />
+                </div>
                 <div className="flex justify-center items-start">
                     <Link href="/library/create">
                         <ButtonWithIcon

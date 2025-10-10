@@ -1,6 +1,5 @@
 import LandingHeader from "../about/LandingHeader";
 import Link from "next/link";
-import Footer from "@/components/sections/Footer";
 import AppearCard from "@/components/ui/AppearCard";
 
 export default function ContactPage() {

@@ -1,9 +1,15 @@
 import Image from 'next/image';
 import { BookWithAuthorAndGenres, BookStatus } from '@/types/book';
+import FollowersCountClient from './FollowersCountClient';
+import RatingSummaryClient from './RatingSummaryClient';
+import { slugify } from '@/lib/slug';
 
 type Props = {
     book: BookWithAuthorAndGenres;
     mode?: 'title-genres' | 'meta';
+    followersCount?: number;
+    ratingAvg?: number | null;
+    ratingCount?: number;
 };
 
 const ICON_SIZE = 18;
@@ -26,8 +32,9 @@ const statusLabelMap: Record<BookStatus, string> = {
     PAUSED: 'Pausado',
 };
 
-export default function BookHeader({ book, mode }: Props) {
+export default function BookHeader({ book, mode, followersCount, ratingAvg, ratingCount }: Props) {
     const isTitleGenres = !mode || mode === 'title-genres';
+    const slug = slugify(book.title);
 
     return (
         <header className="text-white px-3">
@@ -70,12 +77,20 @@ export default function BookHeader({ book, mode }: Props) {
                         <div className="flex items-center">
                             {icon('/img/svg/book/bookmark.svg', 'Salvos')}
                             <dt className="sr-only">Salvos</dt>
-                            <dd>—</dd>
+                                                        <dd>
+                                                                {typeof followersCount === 'number'
+                                                                    ? <FollowersCountClient slug={slug} initialCount={followersCount} />
+                                                                    : '—'}
+                                                        </dd>
                         </div>
                         <div className="flex items-center">
                             {icon('/img/svg/book/stars.svg', 'Média de Avaliações')}
                             <dt className="sr-only">Avaliações</dt>
-                            <dd>x.2f% (y avaliações)</dd>
+                            <dd>
+                                {typeof ratingCount === 'number'
+                                  ? <RatingSummaryClient slug={slug} initialAvg={ratingAvg ?? null} initialCount={ratingCount} />
+                                  : '—'}
+                            </dd>
                         </div>
                         <div className="flex items-center">
                             {icon('/img/svg/book/date.svg', 'Frequência')}

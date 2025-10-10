@@ -8,6 +8,7 @@ import BookActions from '../../../../components/book/BookActions';
 import BookTabs from '../../../../components/book/BookTabs';
 import type { BookWithAuthorAndGenres } from '@/types/book';
 import { sanitizeSynopsisHtml } from '@/lib/sanitize';
+import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
 
 interface PageProps { params: Promise<{ slug: string }> }
 
@@ -22,8 +23,23 @@ export default async function BookPage({ params }: PageProps) {
   const book = (await getBookBySlug(slug)) as BookWithAuthorAndGenres | null;
   if (!book) return notFound();
 
+  // Fetch followers count for the meta section
+  const followersCount = await prisma.bookFollow.count({ where: { bookId: book.id } });
+  // Fetch rating summary (avg and count)
+  const ratingAgg = await prisma.bookRating.aggregate({
+    where: { bookId: book.id },
+    _avg: { score: true },
+    _count: { _all: true },
+  });
+  const ratingAvg = ratingAgg._avg.score ? Number(ratingAgg._avg.score) : null;
+  const ratingCount = ratingAgg._count._all || 0;
+
   return (
-    <main className="px-4 py-6 md:px-8">
+    <>
+  <div className="w-full flex justify-center mt-14 sm:mt-16">
+    <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros' }} />
+  </div>
+    <main className="px-4 pb-6 md:px-8">
   <section className="relative bg-readowl-purple-medium p-4 md:p-6 text-white shadow-lg max-w-6xl mx-auto">
   {/* Two columns: left cover (smaller), right info list */}
         <div className="grid grid-cols-1 md:grid-cols-[230px_1fr] items-stretch">
@@ -49,7 +65,9 @@ export default async function BookPage({ params }: PageProps) {
             {/* Shared row for infos + buttons, stretched to match the cover height */}
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
               <div className="min-h-full">
-                <BookHeader book={book} mode="meta" />
+                <BookHeader book={book} mode="meta" followersCount={followersCount} 
+                  ratingAvg={ratingAvg} ratingCount={ratingCount}
+                />
               </div>
               <div className="flex min-h-full">
                 <BookActions book={book} className="ml-auto" />
@@ -81,7 +99,7 @@ export default async function BookPage({ params }: PageProps) {
         {/* Rating centered below synopsis */}
         <div className="mt-5 flex justify-center">
           <div className="w-full md:w-[600px]">
-            <RatingBox bookId={book.id} />
+            <RatingBox bookId={book.id} slug={slug} />
           </div>
         </div>
         <div className="mt-6">
@@ -89,6 +107,7 @@ export default async function BookPage({ params }: PageProps) {
         </div>
       </section>
     </main>
+    </>
   );
 }
 
