@@ -23,6 +23,17 @@ export default async function BookPage({ params }: PageProps) {
   const book = (await getBookBySlug(slug)) as BookWithAuthorAndGenres | null;
   if (!book) return notFound();
 
+  // Fetch followers count for the meta section
+  const followersCount = await prisma.bookFollow.count({ where: { bookId: book.id } });
+  // Fetch rating summary (avg and count)
+  const ratingAgg = await prisma.bookRating.aggregate({
+    where: { bookId: book.id },
+    _avg: { score: true },
+    _count: { _all: true },
+  });
+  const ratingAvg = ratingAgg._avg.score ? Number(ratingAgg._avg.score) : null;
+  const ratingCount = ratingAgg._count._all || 0;
+
   return (
     <>
   <div className="w-full flex justify-center mt-14 sm:mt-16">
@@ -54,7 +65,9 @@ export default async function BookPage({ params }: PageProps) {
             {/* Shared row for infos + buttons, stretched to match the cover height */}
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
               <div className="min-h-full">
-                <BookHeader book={book} mode="meta" />
+                <BookHeader book={book} mode="meta" followersCount={followersCount} 
+                  ratingAvg={ratingAvg} ratingCount={ratingCount}
+                />
               </div>
               <div className="flex min-h-full">
                 <BookActions book={book} className="ml-auto" />
@@ -86,7 +99,7 @@ export default async function BookPage({ params }: PageProps) {
         {/* Rating centered below synopsis */}
         <div className="mt-5 flex justify-center">
           <div className="w-full md:w-[600px]">
-            <RatingBox bookId={book.id} />
+            <RatingBox bookId={book.id} slug={slug} />
           </div>
         </div>
         <div className="mt-6">

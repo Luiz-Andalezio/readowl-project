@@ -1,8 +1,9 @@
 "use client";
 import Image from 'next/image';
 import React from 'react';
+ 
 
-type Props = { bookId: string };
+type Props = { bookId: string; slug: string };
 
 function starSrc(score: number) {
     switch (score) {
@@ -15,19 +16,71 @@ function starSrc(score: number) {
     }
 }
 
-export default function RatingBox({ bookId }: Props) {
+export default function RatingBox({ bookId, slug }: Props) {
     const [myScore, setMyScore] = React.useState<number>(0);
     const [hover, setHover] = React.useState<number>(0);
     const [avg, setAvg] = React.useState<number | null>(null);
     const [count, setCount] = React.useState<number>(0);
+    const [loading, setLoading] = React.useState<boolean>(false);
 
-    // TODO: hook up to API later. For now, local-only mock average
+    // slug is provided by server page to avoid brittle parsing
+
+    // Initial fetch
     React.useEffect(() => {
-        setAvg(4.6);
-        setCount(16);
-    }, []);
+        if (!slug) return;
+        fetch(`/api/books/${slug}/rating`).then(r => r.ok ? r.json() : Promise.reject(r)).then((data: { avg: number|null; count: number; myScore: number }) => {
+            setAvg(data.avg);
+            setCount(data.count);
+            setMyScore(data.myScore || 0);
+        }).catch(() => {});
+    }, [slug]);
 
     const display = hover || myScore;
+
+    async function setRating(nextScore: number) {
+        if (!slug || loading) return;
+        setLoading(true);
+        const prevMy = myScore;
+        
+        const isToggleOff = prevMy === nextScore; // clicking same star removes rating
+        // optimistic
+        const newMy = isToggleOff ? 0 : nextScore;
+        if (isToggleOff) {
+            // Clear hover so UI returns to default star sprites immediately
+            setHover(0);
+        }
+        setMyScore(newMy);
+        try {
+            let res: Response;
+            if (isToggleOff) {
+                res = await fetch(`/api/books/${slug}/rating`, { method: 'DELETE' });
+            } else {
+                res = await fetch(`/api/books/${slug}/rating`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ score: nextScore }) });
+            }
+            if (res.status === 401) {
+                // revert and send user to login
+                setMyScore(prevMy);
+                window.location.href = '/login';
+                return;
+            }
+            if (!res.ok) {
+                setMyScore(prevMy);
+                return;
+            }
+            const data = await res.json().catch(() => null) as { avg?: number|null; count?: number; myScore?: number } | null;
+            if (data) {
+                if (typeof data.avg !== 'undefined') setAvg(data.avg ?? null);
+                if (typeof data.count === 'number') setCount(data.count);
+                if (typeof data.myScore === 'number') setMyScore(data.myScore);
+                // notify header to refresh rating summary if needed in the future
+                try {
+                    window.dispatchEvent(new CustomEvent('book:rating:updated', { detail: { slug, avg: data.avg, count: data.count } }));
+                } catch {}
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
     <div className="relative bg-readowl-purple-light border-2 text-white border-readowl-purple shadow-md p-4 text-center" data-bookid={bookId}>
@@ -44,7 +97,7 @@ export default function RatingBox({ bookId }: Props) {
                             aria-label={`Avaliar ${idx} ${idx === 1 ? 'estrela' : 'estrelas'}`}
                             onMouseEnter={() => setHover(idx)}
                             onMouseLeave={() => setHover(0)}
-                            onClick={() => setMyScore(idx)}
+                            onClick={() => setRating(idx)}
                             className="transition-transform duration-150 ease-out hover:scale-110 active:scale-95"
                         >
                             <Image src={src} alt={`${idx}`} width={90} height={90} className="transition-all duration-150 hover:brightness-110" />
