@@ -33,7 +33,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
             <p className="sr-only">Digest: {error.digest}</p>
           ) : null}
           <div className="text-center mt-4">
-            <button onClick={reset} className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 text-white transition">Tentar novamente</button>
+            <button onClick={reset} className="px-4 py-2 text-sm mb-6 font-medium bg-white/10 hover:bg-white/20 text-white transition">Tentar novamente</button>
           </div>
         </main>
         {beforeLogin ? <Footer /> : null}

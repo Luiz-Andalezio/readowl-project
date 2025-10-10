@@ -74,7 +74,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
           HTMLAttributes: {
             rel: 'nofollow noopener noreferrer',
             target: '_blank',
-            class: 'underline text-readowl-purple',
+            class: 'underline text-readowl-purple-extradark',
           },
         }),
         ImageExtension.extend({
@@ -99,7 +99,25 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
       content: value || '<p></p>',
       immediatelyRender: false,
       editorProps: {
-        attributes: { class: 'prose prose-sm max-w-none focus:outline-none' },
+        attributes: {
+          // Make the editor text purple like other inputs; links darker; hr extra dark inside the editor for visibility
+          class:
+            [
+              'prose prose-sm max-w-none focus:outline-none',
+              // base text color across elements
+              'text-readowl-purple-dark',
+              'prose-p:text-readowl-purple-dark',
+              'prose-li:text-readowl-purple-dark',
+              'prose-strong:text-readowl-purple-dark',
+              'prose-code:text-readowl-purple-medium',
+              'prose-h2:text-readowl-purple-extradark',
+              'prose-h3:text-readowl-purple-extradark',
+              // links should be a darker purple
+              'prose-a:text-readowl-purple-extradark',
+              // inside the editor, hr should be Readowl purple medium
+              'prose-hr:border-t prose-hr:border-readowl-purple-medium prose-hr:opacity-100'
+            ].join(' '),
+        },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handlePaste(view: any, event: any) {
           const items = event.clipboardData?.items;
@@ -475,7 +493,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
         </div>
 
         {/* Editor */}
-        <div className="px-4 py-3 min-h-[18rem] max-h-[28rem] overflow-y-auto">
+        <div className="px-4 py-3 min-h-[18rem] max-h-[28rem] overflow-y-auto tiptap-editor">
           <EditorContent editor={editor} />
         </div>
       </div>
