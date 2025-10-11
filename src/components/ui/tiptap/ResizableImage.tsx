@@ -45,13 +45,14 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
     const dy = e.clientY - dragging.startY;
     let newW = dragging.startW;
     let newH = dragging.startH;
-    // Keep simple proportional resize for corner handles; edge handles change single dimension
+    // Edge handles: change single dimension. Make west/east behave intuitively with pointer movement.
     if (dragging.edge === 'e' || dragging.edge === 'w') {
-      newW = Math.max(20, dragging.startW + (dragging.edge === 'e' ? dx : -dx));
+      // Move right (dx>0) increases width; move left (dx<0) decreases width for both sides
+      newW = Math.max(20, dragging.startW + dx);
     } else if (dragging.edge === 'n' || dragging.edge === 's') {
       newH = Math.max(20, dragging.startH + (dragging.edge === 's' ? dy : -dy));
     } else {
-      // corner: scale proportionally by dx
+      // corner: scale proportionally by horizontal movement (dx) with same direction for E/W
       const scale = 1 + dx / Math.max(1, dragging.startW);
       newW = Math.max(20, Math.round(dragging.startW * scale));
       newH = Math.max(20, Math.round(dragging.startH * scale));
@@ -141,16 +142,16 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
   };
 
   return (
-    <div className="relative inline-block group align-top leading-none" data-node-view-wrapper>
+    <div className="relative inline-block group align-top leading-none text-[0]" data-node-view-wrapper>
       {/* image (wrap with anchor when href present to match renderHTML) */}
       {href ? (
         <a href={href} rel="nofollow noopener noreferrer" target="_blank" className="inline-block no-underline" style={{ textDecoration: 'none' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none inline-block align-top" />
+          <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none block align-top" />
         </a>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element 
-        <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none inline-block align-top" />
+        <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none block align-top" />
       )}
 
       {/* bubble toolbar */}
