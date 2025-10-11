@@ -166,7 +166,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                     className="w-10 h-10 mt-0.4"
                     aria-hidden="true"
                 />
-                <h1 className="text-3xl font-yusei text-center font-semibold text-white">CADASTRAR NOVO LIVRO</h1>
+                <h1 className="text-3xl font-yusei text-center font-semibold text-white">Registrar nova obra</h1>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <CoverInput
