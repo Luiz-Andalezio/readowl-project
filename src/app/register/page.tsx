@@ -1,13 +1,13 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import InputWithIcon from "@/components/ui/InputWithIcon";
-import Button from "@/components/ui/Button";
-import GoogleButton from "@/components/ui/GoogleButton";
+import InputWithIcon from "@/components/ui/input/InputWithIcon";
+import Button from "@/components/ui/button/Button";
+import GoogleButton from "@/components/ui/button/GoogleButton";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
+import PasswordStrengthBar from "@/components/animation/PasswordStrengthBar";
 import { signIn } from "next-auth/react";
 
 function Register() {

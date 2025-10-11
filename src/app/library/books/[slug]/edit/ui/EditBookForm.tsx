@@ -1,8 +1,8 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import Modal from '@/components/ui/Modal';
-import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
+import Modal from '@/components/ui/modal/Modal';
+import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import { BOOK_GENRES_MASTER, BOOK_COVER_RATIO, BOOK_COVER_RATIO_TOLERANCE, BOOK_STATUS, updateBookSchema, BOOK_COVER_MIN_WIDTH, BOOK_COVER_MIN_HEIGHT } from '@/types/book';
 import { slugify } from '@/lib/slug';
 import { signIn } from 'next-auth/react';

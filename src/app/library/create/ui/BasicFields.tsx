@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { BOOK_TITLE_MAX, BOOK_SYNOPSIS_MAX, BOOK_FREQ_MAX } from '@/types/book';
-import SynopsisEditor from '@/components/ui/SynopsisEditor';
+import SynopsisEditor from '@/components/ui/tiptap/SynopsisEditor';
 
 export interface BasicFieldsProps {
   title: string; synopsis: string; releaseFrequency: string;

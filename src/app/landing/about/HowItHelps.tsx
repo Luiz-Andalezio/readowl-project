@@ -1,5 +1,5 @@
 import React from 'react';
-import AppearCard from '@/components/ui/AppearCard';
+import AppearCard from '@/components/animation/AppearCard';
 
 const CheckIcon = () => (
   <svg className="w-6 h-6 text-readowl-purple-light mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

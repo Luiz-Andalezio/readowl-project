@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
+import ButtonWithIcon from "@/components/ui/button/ButtonWithIcon";
 import { BookWithAuthorAndGenres } from "@/types/book";
 import React from "react";
 import { useRouter } from "next/navigation";

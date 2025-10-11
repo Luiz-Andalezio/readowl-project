@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import SelectableIconButton from '@/components/ui/SelectableIconButton';
+import SelectableIconButton from '@/components/ui/button/SelectableIconButton';
 
 type Tab = 'chapters' | 'comments';
 

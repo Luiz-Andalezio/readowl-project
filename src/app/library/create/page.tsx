@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
-import Navbar from '@/components/ui/Navbar';
+import Navbar from '@/components/ui/navbar/Navbar';
 import CreateBookForm from '@/app/library/create/ui/CreateBookForm';
 import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
 

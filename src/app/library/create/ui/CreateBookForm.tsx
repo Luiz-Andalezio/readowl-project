@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Modal from '@/components/ui/Modal';
-import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
+import Modal from '@/components/ui/modal/Modal';
+import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import Image from 'next/image';
 import { CoverInput } from './CoverInput';
 import { BasicFields } from './BasicFields';

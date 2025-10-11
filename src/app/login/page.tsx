@@ -1,12 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import InputWithIcon from "@/components/ui/InputWithIcon";
-import Button from "@/components/ui/Button";
-import GoogleButton from "@/components/ui/GoogleButton";
+import InputWithIcon from "@/components/ui/input/InputWithIcon";
+import Button from "@/components/ui/button/Button";
+import GoogleButton from "@/components/ui/button/GoogleButton";
 
 import { useState } from "react";
-import MagicNotification, { MagicNotificationProps } from "@/components/ui/MagicNotification";
+import MagicNotification, { MagicNotificationProps } from "@/components/ui/modal/MagicNotification";
 import { signIn } from "next-auth/react";
 
 function Login() {

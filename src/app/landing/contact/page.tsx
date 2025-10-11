@@ -1,6 +1,6 @@
 import LandingHeader from "../about/LandingHeader";
 import Link from "next/link";
-import AppearCard from "@/components/ui/AppearCard";
+import AppearCard from "@/components/animation/AppearCard";
 
 export default function ContactPage() {
   return (

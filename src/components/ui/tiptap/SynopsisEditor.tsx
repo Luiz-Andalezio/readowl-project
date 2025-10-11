@@ -12,7 +12,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import NextImage from 'next/image';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
-import ResizableImage from './tiptap/ResizableImage';
+import ResizableImage from './ResizableImage';
 
 // Props contract
 // - value: current HTML
