@@ -257,7 +257,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
             {/* Notifications removed for edit flow as requested */}
 
             {/* Danger zone - delete button below purple card */}
-            <div className="w-full max-w-6xl mx-auto mt-4 flex justify-end">
+            <div className="w-full max-w-6xl mx-auto mt-4 flex justify-center">
                 <ButtonWithIcon
                     className="!bg-red-700 !text-white !border-red-900 hover:!bg-red-600"
                     variant="secondary"
