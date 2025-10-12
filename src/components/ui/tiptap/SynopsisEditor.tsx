@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 // Access ReactNodeViewRenderer from the module in a way that works across minor versions
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -13,6 +13,7 @@ import NextImage from 'next/image';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
 import ResizableImage from './ResizableImage';
+import { normalizeHtmlSpacing } from '@/lib/sanitize';
 
 // Props contract
 // - value: current HTML
@@ -37,6 +38,7 @@ function getTextLen(html: string) {
 export default function SynopsisEditor({ value, onChange, maxChars, error, showError }: SynopsisEditorProps) {
   const [charCount, setCharCount] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const lastGoodHtmlRef = useRef<string>(value || '<p></p>');
   const [linkOpen, setLinkOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -120,7 +122,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handlePaste(view: any, event: any) {
-          const items = event.clipboardData?.items;
+          const dt = event.clipboardData;
+          const items = dt?.items;
           if (items) {
             for (let i = 0; i < items.length; i++) {
               if (items[i].kind === 'file') {
@@ -129,7 +132,45 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               }
             }
           }
-          return false;
+          if (!dt) return false;
+          const html = dt.getData('text/html');
+          const plain = dt.getData('text/plain');
+          if (!html && !plain) return false;
+          event.preventDefault();
+          // Convert plain text to minimal HTML preserving paragraphs and line breaks
+          const plainToHtml = (txt: string) => {
+            const safe = (txt || '')
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/\u00A0/g, ' ');
+            const blocks = safe.split(/\n{2,}/).map(b => `<p>${b.replace(/\n/g, '<br>')}</p>`).join('');
+            return blocks || '<p></p>';
+          };
+          const divToP = (h: string) => h
+            .replace(/<div\b([^>]*)>/gi, '<p$1>')
+            .replace(/<\/div>/gi, '</p>')
+            .replace(/<p\b[^>]*>\s*<p\b/gi, '<p')
+            .replace(/<\/p>\s*<\/p>/gi, '</p>');
+          // Convert directly like ChapterEditor (fragment extraction may drop content in some cases)
+          const incomingHtml = html ? divToP(html) : plainToHtml(plain);
+          const normalized = normalizeHtmlSpacing(incomingHtml);
+          // Enforce maxChars by truncating paste if needed (keep behavior close to ChapterEditor but user-friendly)
+          const currentLen = editor?.getText().length ?? 0;
+          const allowed = Math.max(0, maxChars - currentLen);
+          if (allowed === 0) { return true; }
+          const normalizedPlainLen = (() => {
+            const d = document.createElement('div'); d.innerHTML = normalized; return (d.textContent || d.innerText || '').length;
+          })();
+          if (normalizedPlainLen > allowed) {
+            const sourcePlain = plain || (() => { const d = document.createElement('div'); d.innerHTML = normalized; return d.textContent || d.innerText || ''; })();
+            const truncated = sourcePlain.slice(0, allowed);
+            const truncatedHtml = plainToHtml(truncated);
+            editor?.chain().focus().insertContent(truncatedHtml).run();
+          } else {
+            editor?.chain().focus().insertContent(normalized).run();
+          }
+          return true;
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handleDrop(view: any, event: any) {
@@ -146,13 +187,14 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
         const len = editor.getText().length;
         setCharCount(len);
         if (len > maxChars) {
-          editor.commands.setContent(value || '<p></p>', false);
+          editor.commands.setContent(lastGoodHtmlRef.current || '<p></p>', false);
           return;
         }
+        lastGoodHtmlRef.current = html;
         onChange(html);
       },
     },
-    [maxChars]
+    []
   );
 
   useEffect(() => {
@@ -160,6 +202,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
     if (editor && value !== editor.getHTML()) {
       editor.commands.setContent(value || '<p></p>', false);
       setCharCount(getTextLen(value || ''));
+      lastGoodHtmlRef.current = value || '<p></p>';
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -226,8 +269,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                 editor?.isActive('heading', { level: 2 })
                   ? 'h2'
                   : editor?.isActive('heading', { level: 3 })
-                  ? 'h3'
-                  : 'p'
+                    ? 'h3'
+                    : 'p'
               }
               onChange={(e) => {
                 const v = e.target.value;
@@ -251,9 +294,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Negrito (Ctrl/Cmd+B)"
             onClick={() => editor?.chain().focus().toggleBold().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <NextImage src="/img/svg/tiptap/bold.svg" width={20} height={20} alt="Negrito" aria-hidden className="pointer-events-none select-none" />
           </button>
@@ -261,9 +303,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Itálico (Ctrl/Cmd+I)"
             onClick={() => editor?.chain().focus().toggleItalic().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('italic') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('italic') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <NextImage src="/img/svg/tiptap/italic.svg" width={20} height={20} alt="Itálico" aria-hidden className="pointer-events-none select-none" />
           </button>
@@ -271,9 +312,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Sublinhado (Ctrl/Cmd+U)"
             onClick={() => editor?.chain().focus().toggleUnderline().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('underline') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('underline') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <NextImage src="/img/svg/tiptap/underlined.svg" width={20} height={20} alt="Sublinhado" aria-hidden className="pointer-events-none select-none" />
           </button>
@@ -281,9 +321,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Tachado"
             onClick={() => editor?.chain().focus().toggleStrike().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <NextImage src="/img/svg/tiptap/strikethrough.svg" width={20} height={20} alt="Tachado" aria-hidden className="pointer-events-none select-none" />
           </button>
@@ -291,9 +330,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Código (Ctrl/Cmd+E)"
             onClick={() => editor?.chain().focus().toggleCode().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <NextImage src="/img/svg/tiptap/code.svg" width={20} height={20} alt="Código" aria-hidden className="pointer-events-none select-none" />
           </button>
@@ -326,9 +364,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Lista •"
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <NextImage src="/img/svg/tiptap/bulleted-list.svg" width={20} height={20} alt="Lista" aria-hidden className="pointer-events-none select-none" />
           </button>
@@ -336,9 +373,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Lista 1."
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('orderedList') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('orderedList') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <NextImage src="/img/svg/tiptap/numbered-list.svg" width={20} height={20} alt="Lista numerada" aria-hidden className="pointer-events-none select-none" />
           </button>
@@ -347,42 +383,39 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Alinhar à esquerda"
             onClick={() => alignCurrentBlock('left')}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive({ textAlign: 'left' }) ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive({ textAlign: 'left' }) ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M3 6h18"/>
-              <path d="M3 12h12"/>
-              <path d="M3 18h18"/>
+              <path d="M3 6h18" />
+              <path d="M3 12h12" />
+              <path d="M3 18h18" />
             </svg>
           </button>
           <button
             type="button"
             title="Centralizar"
             onClick={() => alignCurrentBlock('center')}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive({ textAlign: 'center' }) ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive({ textAlign: 'center' }) ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M3 6h18"/>
-              <path d="M6 12h12"/>
-              <path d="M3 18h18"/>
+              <path d="M3 6h18" />
+              <path d="M6 12h12" />
+              <path d="M3 18h18" />
             </svg>
           </button>
           <button
             type="button"
             title="Alinhar à direita"
             onClick={() => alignCurrentBlock('right')}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive({ textAlign: 'right' }) ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive({ textAlign: 'right' }) ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M3 6h18"/>
-              <path d="M9 12h12"/>
-              <path d="M3 18h18"/>
+              <path d="M3 6h18" />
+              <path d="M9 12h12" />
+              <path d="M3 18h18" />
             </svg>
           </button>
           <span className="mx-1 opacity-40">|</span>
@@ -390,12 +423,11 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             type="button"
             title="Citação"
             onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${
-              editor?.isActive('blockquote') ? 'bg-readowl-purple-extralight/60' : ''
-            }`}
+            className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('blockquote') ? 'bg-readowl-purple-extralight/60' : ''
+              }`}
           >
             <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-              <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z"/>
+              <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z" />
             </svg>
           </button>
           <button
@@ -409,6 +441,30 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             </span>
           </button>
           <span className="mx-1 opacity-40">|</span>
+          <button
+            type="button"
+            title="Corrigir espaçamento"
+            onClick={() => {
+              const current = editor?.getHTML() || '';
+              const divToP = (h: string) => h
+                .replace(/<div\b([^>]*)>/gi, '<p$1>')
+                .replace(/<\/div>/gi, '</p>')
+                .replace(/<p\b[^>]*>\s*<p\b/gi, '<p')
+                .replace(/<\/p>\s*<\/p>/gi, '</p>');
+              const normalized = normalizeHtmlSpacing(divToP(current));
+              editor?.commands.setContent(normalized, false);
+            }}
+            className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
+          >
+            <span className="block w-[18px] h-[18px] text-[#836DBE]" aria-hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="8 6 12 2 16 6" />
+                <polyline points="8 18 12 22 16 18" />
+                <line x1="12" y1="4" x2="12" y2="20" />
+                <line x1="6" y1="12" x2="18" y2="12" />
+              </svg>
+            </span>
+          </button>
           <button
             type="button"
             title="Limpar formatação"
@@ -482,12 +538,12 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
           >
             {/* List icon */}
             <svg className="text-[#836DBE]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <line x1="8" y1="6" x2="21" y2="6"/>
-              <line x1="8" y1="12" x2="21" y2="12"/>
-              <line x1="8" y1="18" x2="21" y2="18"/>
-              <circle cx="4" cy="6" r="1"/>
-              <circle cx="4" cy="12" r="1"/>
-              <circle cx="4" cy="18" r="1"/>
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <circle cx="4" cy="6" r="1" />
+              <circle cx="4" cy="12" r="1" />
+              <circle cx="4" cy="18" r="1" />
             </svg>
           </button>
         </div>
@@ -508,8 +564,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               <button onClick={() => setMoreOpen(false)} className="px-2 py-1 hover:bg-readowl-purple-extralight/40 rounded">
                 <span className="sr-only">Fechar</span>
                 <svg className="text-[#836DBE]" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
@@ -521,9 +577,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                   <button
                     type="button"
                     title="Parágrafo"
-                    className={`px-4 py-2 text-base hover:bg-readowl-purple-extralight/40 ${
-                      editor?.isActive('paragraph') ? 'bg-readowl-purple-extralight/60' : 'bg-white'
-                    }`}
+                    className={`px-4 py-2 text-base hover:bg-readowl-purple-extralight/40 ${editor?.isActive('paragraph') ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+                      }`}
                     aria-pressed={editor?.isActive('paragraph')}
                     onClick={() => { editor?.chain().focus().setParagraph().run(); setMoreOpen(false); }}
                   >
@@ -532,9 +587,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                   <button
                     type="button"
                     title="Título H2"
-                    className={`px-4 py-2 text-base hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${
-                      editor?.isActive('heading', { level: 2 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
-                    }`}
+                    className={`px-4 py-2 text-base hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${editor?.isActive('heading', { level: 2 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+                      }`}
                     aria-pressed={editor?.isActive('heading', { level: 2 })}
                     onClick={() => { editor?.chain().focus().toggleHeading({ level: 2 }).run(); setMoreOpen(false); }}
                   >
@@ -543,9 +597,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                   <button
                     type="button"
                     title="Título H3"
-                    className={`px-4 py-2 text-base hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${
-                      editor?.isActive('heading', { level: 3 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
-                    }`}
+                    className={`px-4 py-2 text-base hover:bg-readowl-purple-extralight/40 border-l border-readowl-purple/20 ${editor?.isActive('heading', { level: 3 }) ? 'bg-readowl-purple-extralight/60' : 'bg-white'
+                      }`}
                     aria-pressed={editor?.isActive('heading', { level: 3 })}
                     onClick={() => { editor?.chain().focus().toggleHeading({ level: 3 }).run(); setMoreOpen(false); }}
                   >
@@ -558,8 +611,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               <div className="grid grid-cols-4 gap-2 mb-3">
                 <button aria-label="Sublinhar" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('underline') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleUnderline().run(); setMoreOpen(false); }}>
                   <svg className="text-[#836DBE]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M7 4v7a5 5 0 0010 0V4"/>
-                    <line x1="5" y1="20" x2="19" y2="20"/>
+                    <path d="M7 4v7a5 5 0 0010 0V4" />
+                    <line x1="5" y1="20" x2="19" y2="20" />
                   </svg>
                 </button>
                 <button aria-label="Tachado" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleStrike().run(); setMoreOpen(false); }}>
@@ -567,8 +620,8 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                 </button>
                 <button aria-label="Código" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleCode().run(); setMoreOpen(false); }}>
                   <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <polyline points="16 18 22 12 16 6"/>
-                    <polyline points="8 6 2 12 8 18"/>
+                    <polyline points="16 18 22 12 16 6" />
+                    <polyline points="8 6 2 12 8 18" />
                   </svg>
                 </button>
                 <button aria-label="Limpar formatação" className="p-2 border border-readowl-purple/20 rounded flex items-center justify-center hover:bg-readowl-purple-extralight/40" onClick={() => { editor?.chain().focus().clearNodes().unsetAllMarks().run(); setMoreOpen(false); }}>
@@ -590,23 +643,23 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               <div className="grid grid-cols-3 gap-2 mb-3">
                 <button aria-label="Alinhar à esquerda" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive({ textAlign: 'left' }) ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { alignCurrentBlock('left'); setMoreOpen(false); }}>
                   <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M3 6h18"/>
-                    <path d="M3 12h12"/>
-                    <path d="M3 18h18"/>
+                    <path d="M3 6h18" />
+                    <path d="M3 12h12" />
+                    <path d="M3 18h18" />
                   </svg>
                 </button>
                 <button aria-label="Centralizar" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive({ textAlign: 'center' }) ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { alignCurrentBlock('center'); setMoreOpen(false); }}>
                   <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M3 6h18"/>
-                    <path d="M6 12h12"/>
-                    <path d="M3 18h18"/>
+                    <path d="M3 6h18" />
+                    <path d="M6 12h12" />
+                    <path d="M3 18h18" />
                   </svg>
                 </button>
                 <button aria-label="Alinhar à direita" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive({ textAlign: 'right' }) ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { alignCurrentBlock('right'); setMoreOpen(false); }}>
                   <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M3 6h18"/>
-                    <path d="M9 12h12"/>
-                    <path d="M3 18h18"/>
+                    <path d="M3 6h18" />
+                    <path d="M9 12h12" />
+                    <path d="M3 18h18" />
                   </svg>
                 </button>
               </div>
@@ -615,12 +668,23 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               <div className="grid grid-cols-2 gap-2">
                 <button aria-label="Citação" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('blockquote') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleBlockquote().run(); setMoreOpen(false); }}>
                   <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z"/>
+                    <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z" />
                   </svg>
                 </button>
                 <button aria-label="Linha horizontal" className="p-2 border border-readowl-purple/20 rounded flex items-center justify-center hover:bg-readowl-purple-extralight/40" onClick={() => { editor?.chain().focus().setHorizontalRule().run(); setMoreOpen(false); }}>
                   <span className="block w-[18px] h-[18px]" aria-hidden>
                     <span className="block w-full h-[2px] bg-[#836DBE] mt-[8px]" />
+                  </span>
+                </button>
+                {/* Fix spacing (mobile sheet) */}
+                <button aria-label="Corrigir espaçamento" className="p-2 border border-readowl-purple/20 rounded flex items-center justify-center hover:bg-readowl-purple-extralight/40" onClick={() => { const current = editor?.getHTML() || ''; const divToP = (h: string) => h.replace(/<div\b([^>]*)>/gi, '<p$1>').replace(/<\/div>/gi, '</p>').replace(/<p\b[^>]*>\s*<p\b/gi, '<p').replace(/<\/p>\s*<\/p>/gi, '</p>'); const normalized = normalizeHtmlSpacing(divToP(current)); editor?.commands.setContent(normalized, false); setMoreOpen(false); }}>
+                  <span className="block w-[18px] h-[18px]" aria-hidden>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="8 6 12 2 16 6" />
+                      <polyline points="8 18 12 22 16 18" />
+                      <line x1="12" y1="4" x2="12" y2="20" />
+                      <line x1="6" y1="12" x2="18" y2="12" />
+                    </svg>
                   </span>
                 </button>
               </div>
@@ -654,7 +718,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                       .setLink({ href: u.toString(), target: '_blank', rel: 'nofollow noopener noreferrer' })
                       .run();
                     setLinkOpen(false);
-                  } catch {}
+                  } catch { }
                 }}
                 className="px-3 py-1 bg-readowl-purple-light text-white"
               >
@@ -713,7 +777,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                     if (imageHeight) attrs.height = parseInt(imageHeight, 10);
                     editor?.chain().focus().setImage(attrs).run();
                     setImageOpen(false);
-                  } catch {}
+                  } catch { }
                 }}
                 className="px-3 py-1 bg-readowl-purple-light text-white"
               >

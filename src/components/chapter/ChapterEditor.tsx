@@ -12,6 +12,7 @@ import NextImage from 'next/image';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
 import ResizableImage from '@/components/ui/tiptap/ResizableImage';
+import { normalizeHtmlSpacing } from '@/lib/sanitize';
 
 export type ChapterEditorProps = {
   value: string;
@@ -41,7 +42,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
         const ns = sel as NodeSelection;
         const nearLeft = TextSelection.near(state.doc.resolve(ns.from), -1);
         view.dispatch(state.tr.setSelection(nearLeft));
-      } catch {}
+      } catch { }
     }
     editor.chain().focus().setTextAlign(align).run();
   };
@@ -95,16 +96,42 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
             'prose-hr:border-t prose-hr:border-readowl-purple-medium prose-hr:opacity-100',
           ].join(' '),
         },
-        // prevent file drop/paste for now
+        // prevent file drop/paste and normalize spacing on paste
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handlePaste(_view: any, event: any) {
-          const items = event.clipboardData?.items;
+          const dt = event.clipboardData;
+          const items = dt?.items;
           if (items) {
             for (let i = 0; i < items.length; i++) {
               if (items[i].kind === 'file') { event.preventDefault(); return true; }
             }
           }
-          return false;
+          if (!dt) return false;
+          const html = dt.getData('text/html');
+          const plain = dt.getData('text/plain');
+          if (!html && !plain) return false;
+          event.preventDefault();
+          // Convert plain text to minimal HTML preserving paragraphs and line breaks
+          const plainToHtml = (txt: string) => {
+            const safe = (txt || '')
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/\u00A0/g, ' ');
+            const blocks = safe.split(/\n{2,}/).map(b => `<p>${b.replace(/\n/g, '<br>')}</p>`).join('');
+            return blocks || '<p></p>';
+          };
+          // Convert <div> based HTML (Docs/Word) to paragraphs first
+          const divToP = (h: string) => h
+            .replace(/<div\b([^>]*)>/gi, '<p$1>')
+            .replace(/<\/div>/gi, '</p>')
+            // Avoid nested p by collapsing </p><p> duplicates created by conversion
+            .replace(/<p\b[^>]*>\s*<p\b/gi, '<p')
+            .replace(/<\/p>\s*<\/p>/gi, '</p>');
+          const incomingHtml = html ? divToP(html) : plainToHtml(plain);
+          const normalized = normalizeHtmlSpacing(incomingHtml);
+          editor?.chain().focus().insertContent(normalized).run();
+          return true;
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handleDrop(_view: any, event: any) { if (event.dataTransfer?.files?.length) { event.preventDefault(); return true; } return false; },
@@ -160,6 +187,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
         <button title="Refazer" onClick={() => editor?.chain().focus().redo().run()} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
           <NextImage src="/img/svg/tiptap/arrow-redo.svg" width={18} height={18} alt="Redo" />
         </button>
+
         <span className="mx-1 opacity-40">|</span>
 
         {/* Paragraph / H2 / H3 */}
@@ -171,8 +199,8 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
               editor?.isActive('heading', { level: 2 })
                 ? 'h2'
                 : editor?.isActive('heading', { level: 3 })
-                ? 'h3'
-                : 'p'
+                  ? 'h3'
+                  : 'p'
             }
             onChange={(e) => {
               const v = e.target.value;
@@ -191,6 +219,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
         </div>
 
         <span className="mx-1 opacity-40">|</span>
+
         {/* Bold/Italic/Underline/Strike/Code */}
         <button title="Negrito" onClick={() => editor?.chain().focus().toggleBold().run()} className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''}`}>
           <NextImage src="/img/svg/tiptap/bold.svg" width={18} height={18} alt="B" />
@@ -209,6 +238,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
         </button>
 
         <span className="mx-1 opacity-40">|</span>
+
         {/* Link & Image */}
         <button title="Link" onClick={() => { setLinkUrl(''); setLinkOpen(true); }} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
           <NextImage src="/img/svg/tiptap/add-link.svg" width={18} height={18} alt="Link" />
@@ -218,6 +248,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
         </button>
 
         <span className="mx-1 opacity-40">|</span>
+
         {/* Lists */}
         <button title="Lista" onClick={() => editor?.chain().focus().toggleBulletList().run()} className={`px-1 py-0.5 hover:bg-readowl-purple-extralight/40 ${editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''}`}>
           <NextImage src="/img/svg/tiptap/bulleted-list.svg" width={18} height={18} alt="•" />
@@ -227,27 +258,58 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
         </button>
 
         <span className="mx-1 opacity-40">|</span>
+
         {/* Align */}
         <button title="Esq." onClick={() => alignCurrentBlock('left')} className={`px-1 py-0.5 hover:bg-readowl-purple-extralight/40 ${editor?.isActive({ textAlign: 'left' }) ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M3 12h12"/><path d="M3 18h18"/></svg>
+          <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M3 12h12" /><path d="M3 18h18" /></svg>
         </button>
         <button title="Centro" onClick={() => alignCurrentBlock('center')} className={`px-1 py-0.5 hover:bg-readowl-purple-extralight/40 ${editor?.isActive({ textAlign: 'center' }) ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M6 12h12"/><path d="M3 18h18"/></svg>
+          <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M6 12h12" /><path d="M3 18h18" /></svg>
         </button>
         <button title="Dir." onClick={() => alignCurrentBlock('right')} className={`px-1 py-0.5 hover:bg-readowl-purple-extralight/40 ${editor?.isActive({ textAlign: 'right' }) ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M9 12h12"/><path d="M3 18h18"/></svg>
+          <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M9 12h12" /><path d="M3 18h18" /></svg>
         </button>
 
         <span className="mx-1 opacity-40">|</span>
+
         {/* Quote */}
         <button title="Citação" onClick={() => editor?.chain().focus().toggleBlockquote().run()} className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('blockquote') ? 'bg-readowl-purple-extralight/60' : ''}`}>
           <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z"/>
+            <path d="M7 7h5v5H7zM12 12c0 3-2 5-5 5v-2c2 0 3-1 3-3H5V7h7v5zM19 7h-5v5h5zM14 12c0 3 2 5 5 5v-2c-2 0-3-1-3-3h5V7h-7v5z" />
           </svg>
         </button>
         <button title="Linha" onClick={() => editor?.chain().focus().setHorizontalRule().run()} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
           <span className="block w-[18px] h-[18px] text-[#836DBE]" aria-hidden>
             <span className="block w-full h-[2px] bg-current mt-[8px]" />
+          </span>
+        </button>
+
+        <span className="mx-1 opacity-40">|</span>
+
+        {/* Fix spacing */}
+        <button
+          title="Corrigir espaçamento"
+          onClick={() => {
+            const current = editor?.getHTML() || '';
+            // Also normalize any legacy <div> blocks before spacing normalization
+            const divToP = (h: string) => h
+              .replace(/<div\b([^>]*)>/gi, '<p$1>')
+              .replace(/<\/div>/gi, '</p>')
+              .replace(/<p\b[^>]*>\s*<p\b/gi, '<p')
+              .replace(/<\/p>\s*<\/p>/gi, '</p>');
+            const normalized = normalizeHtmlSpacing(divToP(current));
+            editor?.commands.setContent(normalized, false);
+          }}
+          className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40"
+        >
+          <span className="block w-[18px] h-[18px] text-[#836DBE]" aria-hidden>
+            {/* icon: adjust spacing */}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="8 6 12 2 16 6" />
+              <polyline points="8 18 12 22 16 18" />
+              <line x1="12" y1="4" x2="12" y2="20" />
+              <line x1="6" y1="12" x2="18" y2="12" />
+            </svg>
           </span>
         </button>
         <button title="Limpar formatação" onClick={() => editor?.chain().focus().clearNodes().unsetAllMarks().run()} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
@@ -289,7 +351,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
                     if (!['http:', 'https:'].includes(u.protocol)) return;
                     editor?.chain().focus().setLink({ href: u.toString() }).run();
                     setLinkOpen(false);
-                  } catch {}
+                  } catch { }
                 }}
                 className="px-3 py-1 bg-readowl-purple-light text-white"
               >
@@ -348,7 +410,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
                     if (imageHeight) attrs.height = parseInt(imageHeight, 10);
                     editor?.chain().focus().setImage(attrs).run();
                     setImageOpen(false);
-                  } catch {}
+                  } catch { }
                 }}
                 className="px-3 py-1 bg-readowl-purple-light text-white"
               >

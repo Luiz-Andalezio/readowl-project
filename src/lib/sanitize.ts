@@ -93,7 +93,7 @@ export function sanitizeSynopsisHtml(html: string): string {
   let cleaned = '';
   // Preprocess: migrate text-align from style into a safe data-align attribute on p/h2/h3
   // This ensures alignment survives even if 'style' is removed by DOMPurify (in environments without hooks)
-  const preprocessed = (html || '').replace(
+  const preprocessedAlign = (html || '').replace(
     /<(p|h2|h3)([^>]*)style=("|')([^"']*?)\3([^>]*)>/gi,
     (_m, tag: string, before: string, _q: string, styleVal: string, after: string) => {
       const m = /(^|;|\s)text-align\s*:\s*(left|center|right|justify)\s*;?/i.exec(styleVal || '');
@@ -107,6 +107,8 @@ export function sanitizeSynopsisHtml(html: string): string {
       return withData;
     }
   );
+  // Normalize spacing: remove empty paragraphs like <p><br></p> or <p>&nbsp;</p> and collapse stray NBSPs
+  const preprocessed = normalizeHtmlSpacing(preprocessedAlign);
   try {
     cleaned = DOMPurify.sanitize(preprocessed, {
       ALLOWED_TAGS,
@@ -135,4 +137,30 @@ export function getPlainTextLength(html: string): number {
   div.innerHTML = html || '';
   const text = (div.textContent || div.innerText || '').trim();
   return text.length;
+}
+
+// Collapse excessive spacing introduced by WYSIWYG pastes (Docs/Word, etc.)
+// - Remove paragraphs that are effectively empty: only <br>, &nbsp; or whitespace
+// - Convert NBSP to regular spaces to avoid artificial spacing
+// Keeping it conservative to not alter meaningful content.
+export function normalizeHtmlSpacing(html: string): string {
+  if (!html) return '';
+  let out = html;
+  // Convert &nbsp; to regular spaces
+  out = out.replace(/&nbsp;/gi, ' ');
+  // Remove paragraphs that are empty (only <br/> and whitespace)
+  out = out.replace(/<p\b[^>]*>(?:\s|<br\s*\/?>)*<\/p>/gi, '');
+  // Also remove paragraphs that only contain spaces
+  out = out.replace(/<p\b[^>]*>\s*<\/p>/gi, '');
+  // Within paragraphs: remove leading/trailing <br> and surrounding whitespace
+  out = out.replace(/(<p\b[^>]*>)\s*(?:<br\s*\/?>\s*)+/gi, '$1');
+  out = out.replace(/(?:\s*<br\s*\/?>\s*)+(<\/p>)/gi, '$1');
+  // Compress multiple consecutive <br> into a single <br>
+  out = out.replace(/(?:\s*<br\s*\/?>\s*){2,}/gi, '<br>');
+  // Trim spaces inside paragraph boundaries to avoid artificial indents/gaps
+  out = out.replace(/(<p\b[^>]*>)\s+/gi, '$1');
+  out = out.replace(/\s+(<\/p>)/gi, '$1');
+  // Remove multiple consecutive empty <p> just in case (after previous rules)
+  out = out.replace(/(?:\s*<p\b[^>]*>\s*<\/p>\s*){2,}/gi, '');
+  return out;
 }
