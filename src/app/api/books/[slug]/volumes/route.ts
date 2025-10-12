@@ -30,6 +30,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
   const body = await req.json().catch(() => null) as { title?: string } | null;
   const title = (body?.title || '').trim();
   if (!title) return NextResponse.json({ error: 'Título obrigatório' }, { status: 400 });
+  // Disallow exact duplicate titles within the same book (case-sensitive, post-trim)
+  const existingSame = await prisma.volume.findFirst({ where: { bookId: book.id, title } });
+  if (existingSame) return NextResponse.json({ error: 'Já existe um volume com este título nesta obra.' }, { status: 409 });
   const maxOrder = await prisma.volume.aggregate({ where: { bookId: book.id }, _max: { order: true } });
   const order = (maxOrder._max.order ?? 0) + 1;
   const vol = await prisma.volume.create({ data: { title, bookId: book.id, order } });

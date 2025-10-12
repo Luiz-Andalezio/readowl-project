@@ -8,6 +8,8 @@ import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
 import VolumeDropdown from '@/components/chapter/VolumeDropdown';
 import type { Volume } from '@/types/volume';
 import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { slugify } from '@/lib/slug';
+import { getPlainTextLength } from '@/lib/sanitize';
 
 export default function PostChapterPage() {
   const params = useParams<{ slug: string }>();
@@ -28,6 +30,7 @@ export default function PostChapterPage() {
   const [bookTitle, setBookTitle] = useState<string>('');
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -101,7 +104,8 @@ export default function PostChapterPage() {
   // computed error flags
   const computedVolumeError = showValidation && ( !volumeTouched || (selectedVolumeId === '' && !emptyExplicit) );
   const computedTitleError = showValidation && chapterTitle.trim() === '';
-  const computedContentError = showValidation && content.trim() === '';
+  const visibleLen = getPlainTextLength(content || '');
+  const computedContentError = showValidation && visibleLen === 0;
 
   // shake flags (one-time pulse when we validate)
   const [shakeVol, setShakeVol] = useState(false);
@@ -113,17 +117,20 @@ export default function PostChapterPage() {
   const titleRef = useRef<HTMLInputElement | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
 
+  const pristine = chapterTitle.trim() === '' && visibleLen === 0 && !volumeTouched;
+
   async function submitChapter() {
     setError(null);
     // enable validation UI
     setShowValidation(true);
     // compute current values
     const title = chapterTitle.trim();
-    const html = content.trim();
+  const html = content.trim();
+  const visibleLength = getPlainTextLength(html);
 
     const volInvalid = (!volumeTouched || (selectedVolumeId === '' && !emptyExplicit));
     const titleInvalid = title === '';
-    const contentInvalid = html === '';
+  const contentInvalid = visibleLength === 0;
 
     // trigger shakes when invalid
     if (volInvalid) { setShakeVol(true); setTimeout(() => setShakeVol(false), 350); }
@@ -161,9 +168,10 @@ export default function PostChapterPage() {
       const res = await fetch(`/api/books/${slug}/chapters`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content: html, volumeId: selectedVolumeId || null }) });
       if (res.status === 401) { router.push('/login'); return; }
       if (res.status === 403) { setError('Você não tem permissão para publicar capítulos nesta obra.'); return; }
+      if (res.status === 409) { setError('Já existe um capítulo com este título nesta obra.'); return; }
       if (!res.ok) throw new Error('Falha ao criar capítulo');
-      // Success: go back to book page
-      router.push(`/library/books/${slug}`);
+      // Success: show success modal with next actions
+      setSuccessOpen(true);
     } catch (e) {
       console.error(e);
       setError('Ocorreu um erro ao criar o capítulo.');
@@ -244,12 +252,19 @@ export default function PostChapterPage() {
             <div className="flex items-center justify-center gap-6">
               <ButtonWithIcon
                 variant="secondary"
-                onClick={() => setConfirmCancelOpen(true)}
+                onClick={() => {
+                  // Skip modal if pristine (nothing entered)
+                  if (pristine) {
+                    router.push(`/library/books/${slug}`);
+                  } else {
+                    setConfirmCancelOpen(true);
+                  }
+                }}
                 iconUrl="/img/svg/generics/cancel2.svg"
               >Cancelar</ButtonWithIcon>
               <ButtonWithIcon
                 variant="primary"
-                disabled={submitting}
+                disabled={submitting || (chapterTitle.trim()==='' || content.trim()==='' || (!volumeTouched || (selectedVolumeId === '' && !emptyExplicit)))}
                 onClick={() => {
                   // only show validation on demand and open confirm if valid
                   setShowValidation(true);
@@ -318,12 +333,22 @@ export default function PostChapterPage() {
             </div>
           </Modal>
 
+
           {/* Confirm Save */}
           <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar publicação" widthClass="max-w-sm" >
             <p>Deseja publicar este capítulo agora?</p>
             <div className="flex gap-3 justify-end mt-6">
               <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
-              <button disabled={submitting} onClick={() => { setConfirmSaveOpen(false); submitChapter(); }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
+        <button disabled={submitting} onClick={() => { setConfirmSaveOpen(false); submitChapter(); }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
+            </div>
+          </Modal>
+
+          {/* Success after create */}
+          <Modal open={successOpen} onClose={() => setSuccessOpen(false)} title="Capítulo atualizado!" widthClass="max-w-sm">
+            <p>As alterações foram salvas.</p>
+            <div className="flex gap-3 justify-end mt-6">
+              <button onClick={() => setSuccessOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Continuar editando</button>
+              <a href={`/library/books/${slug}/${slugify(chapterTitle.trim() || 'capitulo')}`} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Ir para o capítulo</a>
             </div>
           </Modal>
         </div>

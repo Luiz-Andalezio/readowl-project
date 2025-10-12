@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
 import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import EditChapterClient from './ui/EditChapterClient';
 
 interface PageProps { params: Promise<{ slug: string; chapter: string }> }
 
@@ -25,18 +26,13 @@ export default async function EditChapterPage({ params }: PageProps) {
   const chapters = await prisma.chapter.findMany({ where: { bookId: book.id } });
   const ch = chapters.find(c => slugify(c.title) === chapter);
   if (!ch) return notFound();
-  // For now, reuse the post-chapter UI client component by server-passing initial values would require refactor; placeholder stub
+  const initial = { id: ch.id, title: ch.title, content: ch.content, volumeId: ch.volumeId };
   return (
-    <div className="pb-6 md:px-8">
-      <div className="w-full flex justify-center mt-14 sm:mt-16">
-        <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros', 'edit-chapter': `Editar ${ch.title}` }} />
-      </div>
-      <div className="container mx-auto px-4 text-white/90">
-        <h1 className="text-xl font-semibold mb-3">Editar {ch.title} em {book.title}</h1>
-        {/* TODO: Implement editor with prefilled content like post-chapter. */}
-        <p className="opacity-80">Editor de capítulo em desenvolvimento.</p>
-      </div>
-    </div>
+    <EditChapterClient
+      slug={slug}
+      bookTitle={book.title}
+      initialChapter={initial}
+    />
   );
 }
 
