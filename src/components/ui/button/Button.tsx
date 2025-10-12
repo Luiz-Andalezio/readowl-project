@@ -9,7 +9,7 @@ const Button: React.FC<ButtonProps> = ({ children, className, variant = 'primary
   const baseStyle = "font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple transition-colors duration-300";
 
   const styles = {
-  primary: "bg-readowl-purple-light text-white font-semibold hover:bg-readowl-purple-hover",
+  primary: "bg-readowl-purple-light text-white hover:bg-readowl-purple-hover",
   secondary: "bg-readowl-purple-extralight text-readowl-purple hover:bg-white",
   };
 
