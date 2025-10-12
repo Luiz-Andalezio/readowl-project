@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Modal from '@/components/ui/modal/Modal';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
@@ -92,13 +92,70 @@ export default function PostChapterPage() {
   }
 
   const [selectedVolumeId, setSelectedVolumeId] = useState<string>('');
+  // track if user explicitly chose a volume; required even for "Sem volume"
+  const [volumeTouched, setVolumeTouched] = useState(false);
+  // maintain explicit selection state; default false until any selection occurs
+  const [emptyExplicit, setEmptyExplicit] = useState(false);
+  // show validation styles only after user tries to submit
+  const [showValidation, setShowValidation] = useState(false);
+  // computed error flags
+  const computedVolumeError = showValidation && ( !volumeTouched || (selectedVolumeId === '' && !emptyExplicit) );
+  const computedTitleError = showValidation && chapterTitle.trim() === '';
+  const computedContentError = showValidation && content.trim() === '';
+
+  // shake flags (one-time pulse when we validate)
+  const [shakeVol, setShakeVol] = useState(false);
+  const [shakeTitle, setShakeTitle] = useState(false);
+  const [shakeContent, setShakeContent] = useState(false);
+
+  // refs for focusing/scrolling invalid controls
+  const volRef = useRef<HTMLDivElement | null>(null);
+  const titleRef = useRef<HTMLInputElement | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
 
   async function submitChapter() {
     setError(null);
+    // enable validation UI
+    setShowValidation(true);
+    // compute current values
     const title = chapterTitle.trim();
     const html = content.trim();
-    if (!title) { setError('Informe um título para o capítulo.'); return; }
-    if (!html) { setError('Escreva o conteúdo do capítulo.'); return; }
+
+    const volInvalid = (!volumeTouched || (selectedVolumeId === '' && !emptyExplicit));
+    const titleInvalid = title === '';
+    const contentInvalid = html === '';
+
+    // trigger shakes when invalid
+    if (volInvalid) { setShakeVol(true); setTimeout(() => setShakeVol(false), 350); }
+    if (titleInvalid) { setShakeTitle(true); setTimeout(() => setShakeTitle(false), 350); }
+    if (contentInvalid) { setShakeContent(true); setTimeout(() => setShakeContent(false), 350); }
+
+    // focus first invalid
+    if (volInvalid) {
+      setVolumeTouched(true);
+      setConfirmSaveOpen(false);
+      setTimeout(() => {
+        volRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const btn = volRef.current?.querySelector('button[aria-haspopup="listbox"]') as HTMLButtonElement | null;
+        btn?.focus();
+      }, 0);
+      return;
+    }
+    if (titleInvalid) {
+      setTimeout(() => {
+        titleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        titleRef.current?.focus();
+      }, 0);
+      return;
+    }
+    if (contentInvalid) {
+      setTimeout(() => {
+        editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const el = editorRef.current?.querySelector('[contenteditable="true"], textarea, input') as HTMLElement | null;
+        el?.focus();
+      }, 0);
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch(`/api/books/${slug}/chapters`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content: html, volumeId: selectedVolumeId || null }) });
@@ -122,7 +179,7 @@ export default function PostChapterPage() {
         <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros', 'post-chapter': 'Adicionar capítulo' }} />
       </div>
 
-      <div className="px-4 py-6">
+      <div className="pb-6">
         <div className="max-w-4xl mx-auto">
           {/* Header text exactly as requested */}
           <h2 className="text-white text-center font-yusei text-xl mb-3">Adicionar capítulo em: “{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}”</h2>
@@ -134,33 +191,53 @@ export default function PostChapterPage() {
               <VolumeCreateInput value={newVolumeTitle} onChange={setNewVolumeTitle} onSubmit={addVolume} />
             </div>
 
-            {/* Volume dropdown styled as card list */}
-            <div className="mb-4">
+            {/* Volume dropdown styled as card list with validation */}
+            <div className="mb-4" ref={volRef}>
               <VolumeDropdown
+                ref={volRef as React.Ref<HTMLDivElement>}
                 volumes={volumes}
                 selectedId={selectedVolumeId}
-                onSelect={(id) => setSelectedVolumeId(id)}
+                onSelect={(id) => {
+                  setSelectedVolumeId(id);
+                  setVolumeTouched(true);
+                  setEmptyExplicit(id === '');
+                }}
                 onEdit={async (id, title) => { await saveVolumeEditProxy(id, title); }}
                 onDelete={(id) => setConfirmDeleteId(id)}
+                error={computedVolumeError}
+                forceOpen={computedVolumeError}
+                shake={shakeVol}
               />
+              {computedVolumeError && (
+                <p className="mt-1 text-sm text-red-600">Escolha um volume (se desejar a não atribuição de um, escolha &quot;Sem volume&quot;).</p>
+              )}
             </div>
 
-            {/* Chapter title with counter inside the input (right-aligned) */}
+            {/* Chapter title with counter inside the input (right-aligned) and validation */}
             <div className="mb-3 relative">
               <input
                 placeholder="Título do capítulo..."
                 value={chapterTitle.slice(0, TITLE_MAX)}
                 maxLength={TITLE_MAX}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChapterTitle(e.target.value.slice(0, TITLE_MAX))}
-                className="w-full bg-readowl-purple-extralight text-readowl-purple-extradark pl-1 pr-20 py-2 text-3xl font-bold placeholder-readowl-purple-extradark/60 focus:outline-none focus:ring-0 border-0"
+                ref={titleRef}
+                className={`w-full bg-readowl-purple-extralight text-readowl-purple-extradark pl-1 pr-20 py-2 text-3xl font-bold placeholder-readowl-purple-extradark/60 focus:outline-none focus:ring-0 border-2 ${computedTitleError ? 'border-red-600' : 'border-transparent'} ${shakeTitle ? 'animate-shake' : ''}`}
               />
               <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-readowl-purple-extradark/60" aria-live="polite">
                 {chapterTitle.length}/{TITLE_MAX}
               </div>
+              {computedTitleError && (
+                <p className="mt-1 text-sm text-red-600">Informe o título do capítulo.</p>
+              )}
             </div>
 
-            <div className="mb-4">
-              <ChapterEditor value={content} onChange={setContent} maxChars={50000} />
+            <div className="mb-4" ref={editorRef}>
+              <div className={`border-2 ${computedContentError ? 'border-red-600' : 'border-transparent'} ${shakeContent ? 'animate-shake' : ''}`}>
+                <ChapterEditor value={content} onChange={setContent} maxChars={50000} />
+              </div>
+              {computedContentError && (
+                <p className="mt-1 text-sm text-red-600">Escreva o conteúdo do capítulo.</p>
+              )}
             </div>
 
             {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
@@ -173,7 +250,45 @@ export default function PostChapterPage() {
               <ButtonWithIcon
                 variant="primary"
                 disabled={submitting}
-                onClick={() => setConfirmSaveOpen(true)}
+                onClick={() => {
+                  // only show validation on demand and open confirm if valid
+                  setShowValidation(true);
+                  const title = chapterTitle.trim();
+                  const html = content.trim();
+                  const volInvalid = (!volumeTouched || (selectedVolumeId === '' && !emptyExplicit));
+                  const titleInvalid = title === '';
+                  const contentInvalid = html === '';
+
+                  if (volInvalid) { setShakeVol(true); setTimeout(() => setShakeVol(false), 350); }
+                  if (titleInvalid) { setShakeTitle(true); setTimeout(() => setShakeTitle(false), 350); }
+                  if (contentInvalid) { setShakeContent(true); setTimeout(() => setShakeContent(false), 350); }
+
+                  if (volInvalid) {
+                    setVolumeTouched(true);
+                    setTimeout(() => {
+                      volRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      const btn = volRef.current?.querySelector('button[aria-haspopup=\"listbox\"]') as HTMLButtonElement | null;
+                      btn?.focus();
+                    }, 0);
+                    return;
+                  }
+                  if (titleInvalid) {
+                    setTimeout(() => {
+                      titleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      titleRef.current?.focus();
+                    }, 0);
+                    return;
+                  }
+                  if (contentInvalid) {
+                    setTimeout(() => {
+                      editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      const el = editorRef.current?.querySelector('[contenteditable=\"true\"], textarea, input') as HTMLElement | null;
+                      el?.focus();
+                    }, 0);
+                    return;
+                  }
+                  setConfirmSaveOpen(true);
+                }}
                 iconUrl="/img/svg/book/checkbook.svg"
               >{submitting ? 'Salvando...' : 'Registrar'}</ButtonWithIcon>
             </div>

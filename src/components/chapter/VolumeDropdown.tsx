@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import type { Volume } from '@/types/volume';
 
 type Props = {
@@ -9,20 +9,32 @@ type Props = {
   onSelect: (id: string) => void;
   onEdit: (id: string, newTitle: string) => Promise<void> | void;
   onDelete: (id: string) => void;
+  // visual error state for parent-driven validation
+  error?: boolean;
+  // force the list open when parent requests attention (e.g., validation failure)
+  forceOpen?: boolean;
+  // apply shake animation on demand
+  shake?: boolean;
 };
 
-export default function VolumeDropdown({ volumes, selectedId, onSelect, onEdit, onDelete }: Props) {
+const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown(
+  { volumes, selectedId, onSelect, onEdit, onDelete, error = false, forceOpen = false, shake = false }: Props,
+  ref
+) {
   const [open, setOpen] = useState(false);
   // Support multiple simultaneous edit operations keyed by volume id
   const [editing, setEditing] = useState<Record<string, string>>({});
   // Track if the user explicitly selected the "Sem volume" option at least once
   const [emptyChosen, setEmptyChosen] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // expose root element to parent for focus/scroll
+  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement);
 
   // Close on outside pointerdown / ESC. Using pointerdown avoids races with click inside icons/images.
   useEffect(() => {
     function onDocPointerDown(e: PointerEvent) {
-      const root = ref.current;
+      const root = rootRef.current;
       if (!root) return;
       // Prefer composedPath to be robust across nested elements
       const path = (e.composedPath ? e.composedPath() : []) as Array<EventTarget>;
@@ -48,6 +60,15 @@ export default function VolumeDropdown({ volumes, selectedId, onSelect, onEdit, 
     document.addEventListener('keydown', onEsc);
     return () => { document.removeEventListener('pointerdown', onDocPointerDown); document.removeEventListener('keydown', onEsc); };
   }, []);
+
+  // When parent signals forceOpen or error, open the dropdown and focus the button
+  useEffect(() => {
+    if (forceOpen || error) {
+      setOpen(true);
+      const btn = rootRef.current?.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]');
+      btn?.focus();
+    }
+  }, [forceOpen, error]);
 
   const { headerLabel, isPlaceholder } = useMemo(() => {
     if (!selectedId) {
@@ -81,10 +102,10 @@ export default function VolumeDropdown({ volumes, selectedId, onSelect, onEdit, 
   }
 
   return (
-    <div ref={ref} className="relative select-none">
+    <div ref={rootRef} className="relative select-none">
       <button
         type="button"
-        className="w-full text-left bg-readowl-purple-extralight text-readowl-purple-extradark border-2 border-readowl-purple px-3 py-2 flex items-center justify-between"
+        className={`w-full text-left bg-readowl-purple-extralight text-readowl-purple-extradark border-2 px-3 py-2 flex items-center justify-between ${error ? 'border-red-600' : 'border-readowl-purple'} ${shake ? 'animate-shake' : ''}`}
         onClick={() => setOpen(v => { const next = !v; if (!next) setEditing({}); return next; })}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -96,7 +117,7 @@ export default function VolumeDropdown({ volumes, selectedId, onSelect, onEdit, 
       </button>
 
       <div
-        className={`${open ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'} absolute left-0 right-0 mt-1 bg-readowl-purple-extralight border-2 border-readowl-purple shadow-lg origin-top transition-all duration-200 max-h-72 overflow-auto z-50`}
+        className={`${open ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'} absolute left-0 right-0 mt-1 bg-readowl-purple-extralight border-2 ${error ? 'border-red-600' : 'border-readowl-purple'} shadow-lg origin-top transition-all duration-200 max-h-72 overflow-auto z-50`}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
@@ -182,4 +203,6 @@ export default function VolumeDropdown({ volumes, selectedId, onSelect, onEdit, 
       </div>
     </div>
   );
-}
+});
+
+export default VolumeDropdown;
