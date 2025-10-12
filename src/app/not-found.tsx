@@ -1,4 +1,4 @@
-import Navbar from "@/components/ui/Navbar";
+import Navbar from "@/components/ui/navbar/Navbar";
 import LandingHeader from "@/app/landing/about/LandingHeader";
 import ErrorView from "@/components/ui/error/ErrorView";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";

@@ -1,10 +1,10 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import InputWithIcon from "@/components/ui/InputWithIcon";
+import InputWithIcon from "@/components/ui/input/InputWithIcon";
 import Image from "next/image";
-import Button from "@/components/ui/Button";
-import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
+import Button from "@/components/ui/button/Button";
+import PasswordStrengthBar from "@/components/animation/PasswordStrengthBar";
 
 function ResetPasswordInner() {
   const search = useSearchParams();

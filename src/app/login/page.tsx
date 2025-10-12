@@ -1,12 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import InputWithIcon from "@/components/ui/InputWithIcon";
-import Button from "@/components/ui/Button";
-import GoogleButton from "@/components/ui/GoogleButton";
+import InputWithIcon from "@/components/ui/input/InputWithIcon";
+import Button from "@/components/ui/button/Button";
+import GoogleButton from "@/components/ui/button/GoogleButton";
 
 import { useState } from "react";
-import MagicNotification, { MagicNotificationProps } from "@/components/ui/MagicNotification";
+import MagicNotification, { MagicNotificationProps } from "@/components/ui/modal/MagicNotification";
 import { signIn } from "next-auth/react";
 
 function Login() {
@@ -70,7 +70,7 @@ function Login() {
   <div className="bg-readowl-purple-medium shadow-lg p-8 w-full max-w-md">
         {/* Logo and title */}
         <div className="flex flex-col items-center mb-6">
-          <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={64} height={64} />
+          <Image src="/icon.png" alt="Readowl Logo" width={64} height={64} />
           <span className="text-2xl font-bold text-white mt-2">Readowl</span>
         </div>
         {/* Google authentication button */}

@@ -1,7 +1,5 @@
 # 🦉 Readowl
 
------
-
 A web platform for publishing and reading books, focused on promoting amateur literature in Brazil and connecting readers with aspiring writers.  
 Developed using **Next.js**, **TypeScript**, and **Tailwind CSS**.
 
@@ -17,10 +15,10 @@ The platform aims to solve common issues found in other systems, such as ineffic
 | Name | Role |
 |---|---|
 | Luiz Alberto Cury Andalécio | Author & Main Developer (Next Project) |
-| Alexandre Monteiro Londe | Contributor (React project) |
-| Gabriel Lucas Silva Seabra | Contributor (React project) |
-| Jussie Lopes da Silva | Contributor (React project) |
-| Vitor Gabriel Resende Lopes Oliveira | Contributor (React project) |
+| Alexandre Monteiro Londe | Contributor (React Project) |
+| Gabriel Lucas Silva Seabra | Contributor (React Project) |
+| Jussie Lopes da Silva | Contributor (React Project) |
+| Vitor Gabriel Resende Lopes Oliveira | Contributor (React Project) |
 
 *The contributors above are developers from a separate pure React project who provide indirect support and insights to the development of this Next.js project.*
 
@@ -70,6 +68,8 @@ The platform aims to solve common issues found in other systems, such as ineffic
 - **VS Code**: Recommended editor.
 
 **VS Code Extensions:** Prisma, ESLint, Prettier - Code formatter, Tailwind CSS IntelliSense, EchoAPI
+
+-----
 
 ## 🚀 Getting Started (from scratch)
 
@@ -190,6 +190,8 @@ Open http://localhost:3000
 - Prisma fails to connect: verify DB exists and credentials are correct.
 - Gmail EAUTH/535: use an App Password, not the normal password. Consider port 465 with `SMTP_PORT=465` for SSL.
 
+-----
+
 ## 🧰 Development notes
 
 - Tech stack: Next.js (App Router), TypeScript, Tailwind CSS, Prisma, NextAuth, Zod, Nodemailer.
@@ -254,16 +256,6 @@ git commit -am "feat(carousel):
 ## 🪢 Branching Convention
 
 This document describes the versioning and branch organization standard for the Readowl project, using Git for a more organized and traceable workflow.
-
-## Index
-
-1.  [Branch Naming Convention](https://www.google.com/search?q=%231-branch-naming-convention)
-2.  [Local vs. Remote Branches (Origin)](https://www.google.com/search?q=%232-local-vs-remote-branches-origin)
-3.  [Development Workflow](https://www.google.com/search?q=%233-development-workflow)
-4.  [Commit Convention](https://www.google.com/search?q=%234-commit-convention)
-5.  [Pull Request (PR) Process](https://www.google.com/search?q=%235-pull-request-pr-process)
-
------
 
 ### 1. Branch Naming Convention
 

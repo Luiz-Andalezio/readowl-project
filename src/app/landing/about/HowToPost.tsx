@@ -1,5 +1,5 @@
 import React from 'react';
-import AppearCard from '@/components/ui/AppearCard';
+import AppearCard from '@/components/animation/AppearCard';
 
 const HowToPost: React.FC = () => {
   return (

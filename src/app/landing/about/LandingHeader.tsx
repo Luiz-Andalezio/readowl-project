@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Button from '../../../components/ui/Button';
+import Button from '../../../components/ui/button/Button';
 import PolicyDropdown from '../../../components/ui/PolicyDropdown';
 
 const Header: React.FC = () => {
@@ -12,7 +12,7 @@ const Header: React.FC = () => {
     <header className="bg-readowl-purple-medium shadow-sm">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={50} height={50} className="h-10 w-auto" />
+          <Image src="/icon.png" alt="Readowl Logo" width={50} height={50} className="h-10 w-auto" />
           <span className="text-2xl font-bold text-readowl-purple-extralight">Readowl</span>
         </div>
         {/* Desktop menu */}

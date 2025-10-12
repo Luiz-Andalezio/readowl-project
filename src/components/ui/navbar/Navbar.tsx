@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
-import Modal from './Modal';
+import Modal from '../modal/Modal';
 
 interface NavLink { label: string; href: string; };
 

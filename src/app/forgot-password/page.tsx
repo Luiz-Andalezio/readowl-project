@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import InputWithIcon from "@/components/ui/InputWithIcon";
+import InputWithIcon from "@/components/ui/input/InputWithIcon";
 import Image from "next/image";
-import Button from "@/components/ui/Button";
+import Button from "@/components/ui/button/Button";
 import Link from "next/link";
 
 export default function ForgotPasswordPage() {
