@@ -1,8 +1,7 @@
 "use client";
 import Image from 'next/image';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-
-export type Volume = { id: string; title: string; order: number };
+import type { Volume } from '@/types/volume';
 
 type Props = {
   volumes: Volume[];
@@ -120,13 +119,17 @@ export default function VolumeDropdown({ volumes, selectedId, onSelect, onEdit, 
                 <div className="relative">
                   <input
                     autoFocus
-                    value={editing[v.id]}
-                    onChange={(e) => setEditing(prev => ({ ...prev, [v.id]: e.target.value }))}
+                    value={(editing[v.id] ?? '').slice(0, 200)}
+                    maxLength={200}
+                    onChange={(e) => setEditing(prev => ({ ...prev, [v.id]: e.target.value.slice(0, 200) }))}
                     onKeyDown={(e) => { if (e.key === 'Enter') commitEdit(v.id); }}
                     onMouseDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="w-full bg-readowl-purple-extralight text-readowl-purple-extradark border-2 border-readowl-purple px-2 py-1 pr-16"
+                    className="w-full bg-readowl-purple-extralight text-readowl-purple-extradark border-2 border-readowl-purple pl-2 pr-36 py-1"
                   />
+                  <div className="pointer-events-none absolute right-16 top-1/2 -translate-y-1/2 text-[10.5px] text-readowl-purple-extradark/60 mr-2" aria-live="polite">
+                    {(editing[v.id] ?? '').length}/200
+                  </div>
                   <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
                     <button
                       onMouseDown={(e) => e.stopPropagation()}

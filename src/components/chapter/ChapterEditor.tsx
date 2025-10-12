@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const RNVR = (require('@tiptap/react') as { ReactNodeViewRenderer: (component: unknown, options?: unknown) => unknown }).ReactNodeViewRenderer;
@@ -19,9 +19,12 @@ export type ChapterEditorProps = {
   maxChars?: number;
 };
 
-export default function ChapterEditor({ value, onChange, maxChars = 500000 }: ChapterEditorProps) {
+export default function ChapterEditor({ value, onChange, maxChars = 50000 }: ChapterEditorProps) {
   const [mounted, setMounted] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [charCount, setCharCount] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
+  const lastGoodHtmlRef = useRef<string>(value || '<p></p>');
   const [linkOpen, setLinkOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
@@ -110,20 +113,32 @@ export default function ChapterEditor({ value, onChange, maxChars = 500000 }: Ch
       onUpdate({ editor }: any) {
         const text = editor.getText();
         if (typeof maxChars === 'number' && text.length > maxChars) {
+          // revert to the last valid content
+          editor.commands.setContent(lastGoodHtmlRef.current || '<p></p>', false);
           return;
         }
-        setIsEmpty(text.trim().length === 0);
-        onChange(editor.getHTML());
+        const trimmed = text.trim();
+        setIsEmpty(trimmed.length === 0);
+        setCharCount(text.length);
+        setWordCount(trimmed ? trimmed.split(/\s+/).length : 0);
+        const html = editor.getHTML();
+        lastGoodHtmlRef.current = html;
+        onChange(html);
       },
     },
-    [maxChars]
+    []
   );
 
   useEffect(() => {
     setMounted(true);
     if (editor && value !== editor.getHTML()) {
       editor.commands.setContent(value || '<p></p>', false);
-      setIsEmpty(editor.getText().trim().length === 0);
+      const textNow = editor.getText();
+      const trimmed = textNow.trim();
+      setIsEmpty(trimmed.length === 0);
+      setCharCount(textNow.length);
+      setWordCount(trimmed ? trimmed.split(/\s+/).length : 0);
+      lastGoodHtmlRef.current = value || '<p></p>';
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -246,6 +261,10 @@ export default function ChapterEditor({ value, onChange, maxChars = 500000 }: Ch
           <div className="absolute top-2 left-3 text-readowl-purple-extradark/40 pointer-events-none select-none">Conteúdo...</div>
         )}
         <EditorContent editor={editor} />
+        {/* Counter */}
+        <div className="absolute right-2 bottom-1 text-[11px] text-readowl-purple-extradark/60 select-none" aria-live="polite">
+          {charCount}/{maxChars} · {wordCount} palavra{wordCount === 1 ? '' : 's'}
+        </div>
       </div>
 
       {/* Link modal */}

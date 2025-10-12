@@ -5,7 +5,8 @@ import Modal from '@/components/ui/modal/Modal';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import ChapterEditor from '@/components/chapter/ChapterEditor';
 import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
-import VolumeDropdown, { type Volume } from '@/components/chapter/VolumeDropdown';
+import VolumeDropdown from '@/components/chapter/VolumeDropdown';
+import type { Volume } from '@/types/volume';
 import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
 
 export default function PostChapterPage() {
@@ -13,13 +14,14 @@ export default function PostChapterPage() {
   const slug = params?.slug as string;
   const router = useRouter();
 
-  const [loading, setLoading] = useState(true);
+  // removed unused loading state
   const [volumes, setVolumes] = useState<Volume[]>([]);
   const [newVolumeTitle, setNewVolumeTitle] = useState('');
   // volume inline editing handled inside VolumeDropdown
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [chapterTitle, setChapterTitle] = useState('');
+  const TITLE_MAX = 200;
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export default function PostChapterPage() {
       } catch (e) {
         console.error(e);
       } finally {
-        if (mounted) setLoading(false);
+        // no-op
       }
     }
     if (slug) load();
@@ -113,8 +115,6 @@ export default function PostChapterPage() {
     }
   }
 
-  if (loading) return <div className="px-4 py-10 text-center text-white/70">Carregando…</div>;
-
   return (
     <>
       {/* Breadcrumb with top offset so content doesn't sit under the fixed navbar */}
@@ -122,90 +122,95 @@ export default function PostChapterPage() {
         <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros', 'post-chapter': 'Adicionar capítulo' }} />
       </div>
 
-      <div className="pb-6">
+      <div className="px-4 py-6">
         <div className="max-w-4xl mx-auto">
-        {/* Header text exactly as requested */}
-        <h2 className="text-white text-center font-yusei text-xl mb-3">Adicionar capítulo em: “{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}”</h2>
-        <div className="bg-readowl-purple-extralight text-readowl-purple-extradark p-5 shadow-md font-ptserif">
-          <h1 className="text-2xl font-bold text-center mb-4">{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}</h1>
+          {/* Header text exactly as requested */}
+          <h2 className="text-white text-center font-yusei text-xl mb-3">Adicionar capítulo em: “{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}”</h2>
+          <div className="bg-readowl-purple-extralight text-readowl-purple-extradark p-5 shadow-md font-ptserif">
+            <h1 className="text-2xl font-bold text-center mb-4">{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}</h1>
 
-          {/* Volume create input with inline send */}
-          <div className="mb-3">
-            <VolumeCreateInput value={newVolumeTitle} onChange={setNewVolumeTitle} onSubmit={addVolume} />
-          </div>
-
-          {/* Volume dropdown styled as card list */}
-          <div className="mb-4">
-            <VolumeDropdown
-              volumes={volumes}
-              selectedId={selectedVolumeId}
-              onSelect={(id) => setSelectedVolumeId(id)}
-              onEdit={async (id, title) => { await saveVolumeEditProxy(id, title); }}
-              onDelete={(id) => setConfirmDeleteId(id)}
-            />
-          </div>
-
-          {/* Chapter title and editor with placeholders (no white areas) */}
-          <div className="mb-3">
-            <input
-              placeholder="Título do capítulo..."
-              value={chapterTitle}
-              onChange={(e) => setChapterTitle(e.target.value)}
-              className="w-full bg-readowl-purple-extralight text-readowl-purple-extradark px-1 py-2 text-3xl font-bold placeholder-readowl-purple-extradark/40 focus:outline-none focus:ring-0 border-0"
-            />
-          </div>
-          <div className="mb-4">
-            <ChapterEditor value={content} onChange={setContent} />
-          </div>
-
-          {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
-          <div className="flex items-center justify-center gap-6">
-            <ButtonWithIcon
-              variant="secondary"
-              onClick={() => setConfirmCancelOpen(true)}
-              iconUrl="/img/svg/generics/cancel2.svg"
-            >Cancelar</ButtonWithIcon>
-            <ButtonWithIcon
-              variant="primary"
-              disabled={submitting}
-              onClick={() => setConfirmSaveOpen(true)}
-              iconUrl="/img/svg/book/checkbook.svg"
-            >{submitting ? 'Salvando...' : 'Registrar'}</ButtonWithIcon>
-          </div>
-        </div>
-
-        <Modal
-          open={!!confirmDeleteId}
-          onClose={() => setConfirmDeleteId(null)}
-          title="Excluir volume"
-          actions={
-            <div className="flex gap-2">
-              <button onClick={() => setConfirmDeleteId(null)} className="px-3 py-1 border border-readowl-purple/30">Cancelar</button>
-              <button onClick={() => confirmDeleteId && deleteVolume(confirmDeleteId)} className="px-3 py-1 bg-red-600 text-white border-2 border-red-700">Excluir</button>
+            {/* Volume create input with inline send */}
+            <div className="mb-3">
+              <VolumeCreateInput value={newVolumeTitle} onChange={setNewVolumeTitle} onSubmit={addVolume} />
             </div>
-          }
-        >
-          <p>Ao excluir o volume, os capítulos dentro dele não serão apagados. Eles ficarão sem volume.</p>
-          <p>Tem certeza que deseja continuar?</p>
-        </Modal>
 
-        {/* Confirm Cancel */}
-        <Modal open={confirmCancelOpen} onClose={() => setConfirmCancelOpen(false)} title="Cancelar criação do capítulo?" widthClass="max-w-sm" >
-          <p>Você perderá os dados digitados deste capítulo.</p>
-          <div className="flex gap-3 justify-end mt-6">
-            <button onClick={() => setConfirmCancelOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
-            <a href={`/library/books/${slug}`} className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600">Descartar</a>
-          </div>
-        </Modal>
+            {/* Volume dropdown styled as card list */}
+            <div className="mb-4">
+              <VolumeDropdown
+                volumes={volumes}
+                selectedId={selectedVolumeId}
+                onSelect={(id) => setSelectedVolumeId(id)}
+                onEdit={async (id, title) => { await saveVolumeEditProxy(id, title); }}
+                onDelete={(id) => setConfirmDeleteId(id)}
+              />
+            </div>
 
-        {/* Confirm Save */}
-        <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar publicação" widthClass="max-w-sm" >
-          <p>Deseja publicar este capítulo agora?</p>
-          <div className="flex gap-3 justify-end mt-6">
-            <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
-            <button disabled={submitting} onClick={() => { setConfirmSaveOpen(false); submitChapter(); }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
+            {/* Chapter title with counter inside the input (right-aligned) */}
+            <div className="mb-3 relative">
+              <input
+                placeholder="Título do capítulo..."
+                value={chapterTitle.slice(0, TITLE_MAX)}
+                maxLength={TITLE_MAX}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChapterTitle(e.target.value.slice(0, TITLE_MAX))}
+                className="w-full bg-readowl-purple-extralight text-readowl-purple-extradark pl-1 pr-20 py-2 text-3xl font-bold placeholder-readowl-purple-extradark/60 focus:outline-none focus:ring-0 border-0"
+              />
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-readowl-purple-extradark/60" aria-live="polite">
+                {chapterTitle.length}/{TITLE_MAX}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <ChapterEditor value={content} onChange={setContent} maxChars={50000} />
+            </div>
+
+            {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
+            <div className="flex items-center justify-center gap-6">
+              <ButtonWithIcon
+                variant="secondary"
+                onClick={() => setConfirmCancelOpen(true)}
+                iconUrl="/img/svg/generics/cancel2.svg"
+              >Cancelar</ButtonWithIcon>
+              <ButtonWithIcon
+                variant="primary"
+                disabled={submitting}
+                onClick={() => setConfirmSaveOpen(true)}
+                iconUrl="/img/svg/book/checkbook.svg"
+              >{submitting ? 'Salvando...' : 'Registrar'}</ButtonWithIcon>
+            </div>
           </div>
-        </Modal>
+
+          <Modal
+            open={!!confirmDeleteId}
+            onClose={() => setConfirmDeleteId(null)}
+            title="Excluir volume"
+            actions={
+              <div className="flex gap-2">
+                <button onClick={() => setConfirmDeleteId(null)} className="px-3 py-1 border border-readowl-purple/30">Cancelar</button>
+                <button onClick={() => confirmDeleteId && deleteVolume(confirmDeleteId)} className="px-3 py-1 bg-red-600 text-white border-2 border-red-700">Excluir</button>
+              </div>
+            }
+          >
+            <p>Ao excluir o volume, os capítulos dentro dele não serão apagados. Eles ficarão sem volume.</p>
+            <p>Tem certeza que deseja continuar?</p>
+          </Modal>
+
+          {/* Confirm Cancel */}
+          <Modal open={confirmCancelOpen} onClose={() => setConfirmCancelOpen(false)} title="Cancelar criação do capítulo?" widthClass="max-w-sm" >
+            <p>Você perderá os dados digitados deste capítulo.</p>
+            <div className="flex gap-3 justify-end mt-6">
+              <button onClick={() => setConfirmCancelOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
+              <a href={`/library/books/${slug}`} className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600">Descartar</a>
+            </div>
+          </Modal>
+
+          {/* Confirm Save */}
+          <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar publicação" widthClass="max-w-sm" >
+            <p>Deseja publicar este capítulo agora?</p>
+            <div className="flex gap-3 justify-end mt-6">
+              <button onClick={() => setConfirmSaveOpen(false)} className="px-4 py-2 text-sm bg-white text-readowl-purple border border-readowl-purple/30 hover:bg-readowl-purple-extralight">Voltar</button>
+              <button disabled={submitting} onClick={() => { setConfirmSaveOpen(false); submitChapter(); }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
+            </div>
+          </Modal>
         </div>
       </div>
     </>
