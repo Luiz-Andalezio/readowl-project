@@ -94,7 +94,7 @@ function Register() {
             <div className="bg-readowl-purple-medium shadow-lg p-8 w-full max-w-md mt-10 mb-10">
                 {/* Logo and title */}
                 <div className="flex flex-col items-center mb-6">
-                    <Image src="/img/mascot/logo.png" alt="Readowl Logo" width={64} height={64} />
+                    <Image src="/icon.png" alt="Readowl Logo" width={64} height={64} />
                     <span className="text-2xl font-bold text-white mt-2">Readowl</span>
                 </div>
 
