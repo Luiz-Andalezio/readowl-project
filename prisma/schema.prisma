@@ -91,6 +91,10 @@ model Book {
 
   // Ratings received by this book
   ratings BookRating[]
+
+  // Volumes and chapters
+  volumes  Volume[]
+  chapters Chapter[]
 }
 
 // Auxiliary models for NextAuth
@@ -168,4 +172,37 @@ model BookRating {
 
   @@id([userId, bookId])
   @@index([bookId])
+}
+
+// Volume groups chapters inside a book. Deleting a volume should not delete chapters; they become unassigned.
+model Volume {
+  id        String   @id @default(cuid())
+  title     String   @db.VarChar(200)
+  order     Int      @default(0)
+  bookId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapters  Chapter[]
+
+  @@index([bookId])
+}
+
+// Chapter belongs to a book and may optionally belong to a volume.
+model Chapter {
+  id        String    @id @default(cuid())
+  title     String    @db.VarChar(200)
+  content   String    @db.Text
+  order     Int       @default(0)
+  bookId    String
+  volumeId  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  book     Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  volume   Volume? @relation(fields: [volumeId], references: [id], onDelete: SetNull)
+
+  @@index([bookId])
+  @@index([volumeId])
 }

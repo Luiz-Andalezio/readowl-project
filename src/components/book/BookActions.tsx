@@ -107,8 +107,7 @@ export default function BookActions({ book, className }: Props) {
                     <ButtonWithIcon
                         className="w-full justify-center items-center"
                         iconUrl="/img/svg/book/chapter.svg"
-                        variant="primary"
-                        onClick={() => { }}
+                        onClick={() => router.push(`/library/books/${slugify(book.title)}/post-chapter`)}
                     >
                         Adicionar capítulo
                     </ButtonWithIcon>

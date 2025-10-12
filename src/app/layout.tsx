@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, PT_Serif } from "next/font/google";
 import localFont from "next/font/local";
 import Providers from "@/components/ui/Providers";
 import Footer from "@/components/sections/Footer";
@@ -24,6 +24,14 @@ const yuseiMagic = localFont({
   display: "swap"
 });
 
+// PT Serif from Google Fonts
+const ptSerif = PT_Serif({
+  variable: "--font-pt-serif",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"]
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,7 +42,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/icon.png" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${yuseiMagic.variable} antialiased`}>
+  <body className={`${geistSans.variable} ${geistMono.variable} ${yuseiMagic.variable} ${ptSerif.variable} antialiased`}>
         <Providers>
           <NavGate />
           {children}

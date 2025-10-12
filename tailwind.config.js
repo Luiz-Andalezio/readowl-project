@@ -20,7 +20,8 @@ module.exports = {
         'readowl-purple-hover': '#A78CF0' //'#AD92F5'
       },
       fontFamily: {
-        yusei: ['var(--font-yusei-magic)', 'system-ui', 'sans-serif']
+        yusei: ['var(--font-yusei-magic)', 'system-ui', 'sans-serif'],
+        ptserif: ['var(--font-pt-serif)', 'serif']
       }
     },
   },

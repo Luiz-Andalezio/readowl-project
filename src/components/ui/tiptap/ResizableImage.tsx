@@ -212,7 +212,7 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
       {/* Link modal (NodeView-scoped) */}
       {linkOpen && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white text-readowl-purple border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
+          <div className="bg-white text-readowl-purple text-base leading-normal border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
             <h3 className="font-semibold mb-2">Adicionar link</h3>
             <input
               value={linkUrl}
@@ -232,7 +232,7 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
 
       {replaceOpen && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white text-readowl-purple border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
+          <div className="bg-white text-readowl-purple text-base leading-normal border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
             <h3 className="font-semibold mb-2">Substituir imagem por URL</h3>
             <input
               value={replaceUrl}
@@ -262,6 +262,7 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
                 />
               </div>
             </div>
+            <p className="text-sm mb-3">Apenas domínios permitidos (veja hosts em Configuração de imagens).</p>
             <div className="flex justify-end gap-2">
               <button onClick={() => setReplaceOpen(false)} className="px-3 py-1 border border-readowl-purple/30">Cancelar</button>
               <button onClick={applyReplace} className="px-3 py-1 bg-readowl-purple-light text-white">Substituir</button>
