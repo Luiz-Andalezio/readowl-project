@@ -34,11 +34,11 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
       <div
         role="button"
         tabIndex={0}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen((v) => { const nv = !v; if (!nv) setShowAll(false); return nv; })}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            setOpen((v) => !v);
+            setOpen((v) => { const nv = !v; if (!nv) setShowAll(false); return nv; });
           }
         }}
         className="w-full flex items-center justify-between px-3 py-2 text-white transition"
@@ -109,6 +109,9 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
       {/* Content */}
       <div className={`overflow-hidden transition-[max-height] duration-300 ${open ? 'max-h-[2000px]' : 'max-h-0'}`}>
         <div className="p-3 space-y-2">
+          {chapters.length === 0 && (
+            <div className="text-white/90 italic">Este volume ainda não possui capítulos.</div>
+          )}
           {first.map((c) => (
             <ChapterCard key={c.id} slug={slug} chapter={c} canManage={canManage} onEditChapter={onEditChapter} onDeleteChapter={onDeleteChapter} />
           ))}
