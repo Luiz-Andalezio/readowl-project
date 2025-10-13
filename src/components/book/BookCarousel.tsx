@@ -242,7 +242,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                         className={clsx('absolute z-20 left-0 top-1/2 -translate-y-1/2 pl-1 pr-2 py-2 text-readowl-purple-dark transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple', !canPrev && 'opacity-30 cursor-not-allowed')}
                     >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/img/svg/generics/chevron-left.svg" alt="Anterior" className="w-7 h-7 pointer-events-none select-none" />
+                        <img src="/img/svg/generics/purple/chevron-left.svg" alt="Anterior" className="w-7 h-7 pointer-events-none select-none" />
                     </button>
 
                     <div
@@ -291,7 +291,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                         className={clsx('absolute z-20 right-0 top-1/2 -translate-y-1/2 pr-1 pl-2 py-2 text-readowl-purple-dark transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple', !canNext && 'opacity-30 cursor-not-allowed')}
                     >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/img/svg/generics/chevron-right.svg" alt="Próximo" className="w-7 h-7 pointer-events-none select-none" />
+                        <img src="/img/svg/generics/purple/chevron-right.svg" alt="Próximo" className="w-7 h-7 pointer-events-none select-none" />
                     </button>
                 </div>
             )}
