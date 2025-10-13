@@ -186,12 +186,6 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
 
   return (
     <>
-      {/* Breadcrumb */}
-      <div className="w-full flex justify-center mt-14 sm:mt-16">
-        {/* Mantemos o padrão do BreadcrumbAuto, ajustando label para edição */}
-        {/* A rota base continua sendo home/biblioteca/livros/<obra>/editar-capítulo */}
-      </div>
-
       <div className="pb-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-white text-center font-yusei text-xl mb-3">Editar “{chapterTitle || initialChapter.title}” em “{bookTitle}”</h2>

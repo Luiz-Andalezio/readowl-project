@@ -28,11 +28,20 @@ export default async function EditChapterPage({ params }: PageProps) {
   if (!ch) return notFound();
   const initial = { id: ch.id, title: ch.title, content: ch.content, volumeId: ch.volumeId };
   return (
-    <EditChapterClient
-      slug={slug}
-      bookTitle={book.title}
-      initialChapter={initial}
-    />
+    <>
+      <div className="w-full flex justify-center mt-14 sm:mt-16">
+        <BreadcrumbAuto
+          anchor="static"
+          base="/home"
+          labelMap={{ library: 'Biblioteca', books: 'Livros', 'edit-chapter': 'Editar capítulo' }}
+        />
+      </div>
+      <EditChapterClient
+        slug={slug}
+        bookTitle={book.title}
+        initialChapter={initial}
+      />
+    </>
   );
 }
 
