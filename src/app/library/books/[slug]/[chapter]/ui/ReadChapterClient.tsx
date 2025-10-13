@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { useSession } from 'next-auth/react';
 
 type Payload = {
   book: { id: string; title: string };
@@ -16,7 +17,41 @@ type Payload = {
 
 export default function ReadChapterClient({ slug, chapterSlug, payload, canManage = false }: { slug: string; chapterSlug: string; payload: Payload; canManage?: boolean }) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const userId = session?.user?.id || '';
   const [dark, setDark] = React.useState(true); // default to dark to match app background
+
+  // Read preference from namespaced key (per user) or anon fallback; default is dark
+  React.useEffect(() => {
+    function loadPreferred() {
+      try {
+        const keyBase = 'readowl:chapter:theme';
+        const key = userId ? `${keyBase}:u:${userId}` : `${keyBase}:anon`;
+        const saved = localStorage.getItem(key)
+          // legacy fallback (older versions)
+          || localStorage.getItem(keyBase);
+        if (saved === 'light') { setDark(false); return; }
+        // default and any other value → dark
+        setDark(true);
+      } catch {
+        // keep default (dark)
+        setDark(true);
+      }
+    }
+    loadPreferred();
+  }, [userId]);
+
+  const toggleTheme = React.useCallback(() => {
+    setDark((d) => {
+      const next = !d;
+      try {
+        const keyBase = 'readowl:chapter:theme';
+        const key = userId ? `${keyBase}:u:${userId}` : `${keyBase}:anon`;
+        localStorage.setItem(key, next ? 'dark' : 'light');
+      } catch {}
+      return next;
+    });
+  }, [userId]);
 
   const indexHref = `/library/books/${slug}`;
   const prevHref = payload.prevSlug ? `/library/books/${slug}/${payload.prevSlug}` : null;
@@ -44,7 +79,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
       <div className="mt-14 sm:mt-16">
         <div className="container mx-auto px-3 md:px-6">
           <div className="flex justify-center">
-            <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros' }} tone={dark ? 'dark' : 'light'} shrink />
+            <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros' }} tone={dark ? 'dark' : 'light'} />
           </div>
           {canManage && (
             <div className="flex flex-wrap items-center justify-center gap-3">
@@ -57,7 +92,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               </a>
               <a href={`/library/books/${slug}/${chapterSlug}/edit-chapter`} className="inline-flex items-center">
                 <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
-                  <Image src="/img/svg/generics/white/edit.svg" alt="" width={18} height={18} />
+                  <Image src="/img/svg/book/edit-chapter.svg" alt="" width={18} height={18} />
                   Editar capítulo
                 </span>
               </a>
@@ -80,7 +115,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
           <div className="mx-auto max-w-4xl sm:hidden">
             <div className="flex justify-center">
               <button
-                onClick={() => setDark((d) => !d)}
+                onClick={toggleTheme}
                 aria-label={dark ? 'Modo claro' : 'Modo escuro'}
                 className="rounded-full w-11 h-11 flex items-center justify-center border-2 border-readowl-purple shadow-md bg-readowl-purple-light text-white hover:bg-readowl-purple-hover"
               >
@@ -112,7 +147,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
             </div>
             <div className="flex-none flex justify-center">
               <button
-                onClick={() => setDark((d) => !d)}
+                onClick={toggleTheme}
                 aria-label={dark ? 'Modo claro' : 'Modo escuro'}
                 className="rounded-full w-11 h-11 flex items-center justify-center border-2 border-readowl-purple shadow-md bg-readowl-purple-light text-white hover:bg-readowl-purple-hover"
               >
