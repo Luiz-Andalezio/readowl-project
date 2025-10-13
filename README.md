@@ -197,6 +197,30 @@ Open http://localhost:3000
 - Tech stack: Next.js (App Router), TypeScript, Tailwind CSS, Prisma, NextAuth, Zod, Nodemailer.
 - We added a `docker-compose.yml` entry for pgAdmin to simplify DB management in development.
 
+### 📑 Screens: Completed & To-Do
+
+| ✅ **Completed Screens** | Details |
+|---|---|
+| 🏠 Landing Page | Fully completed |
+| 🔐 Login & Registration | Fully completed |
+| 📖 Book Index | Book details, follow option, rating, volumes dropdown with chapter list |
+| 📚 Library | Carousel of created books |
+| 📝 Book CRUD | Full create, view, edit, delete |
+| 📦 Volume & Chapter CRUD | Create, edit, delete volumes and chapters |
+| ⚠️ Error Pages | Fully completed |
+
+| 🚧 **Screens To-Do** | Details |
+|---|---|
+| 🏡 Home Page | Banner carousel, featured carousels, recent chapters list |
+| 🔎 Book Search | With filters |
+| 📚 Followed Books Carousel | In library |
+| 💬 Comments Tab | On book index |
+| 📄 Chapter Index | Reactions-based rating and comments |
+| 🔔 Notifications | For created and followed books |
+| 👤 User Profile Edit | User self-edit screen |
+| 🛠️ Admin User Edit | General user management for admins |
+
+> 60% complete
 
 ### 📁 Suggested Project Structure
 
