@@ -18,11 +18,10 @@ type BreadcrumbProps = {
   showHome?: boolean; // optionally prefix with Home
   homeHref?: string;
   tone?: Tone; // visual tone for text colors
-  shrink?: boolean; // when true, use a clamp() font-size to keep it fitting on small screens
 };
 
 
-export function Breadcrumb({ items, className = "", anchor = "static", showHome = false, homeHref = "/home", tone = "dark", shrink = false }: BreadcrumbProps) {
+export function Breadcrumb({ items, className = "", anchor = "static", showHome = false, homeHref = "/home", tone = "dark" }: BreadcrumbProps) {
   const list: BreadcrumbItem[] = showHome ? [{ label: "Início", href: homeHref }, ...items] : items;
   const basePos =
     anchor === "top-left"
@@ -37,7 +36,7 @@ export function Breadcrumb({ items, className = "", anchor = "static", showHome 
   const linkHover = isLight ? "hover:text-readowl-purple-dark" : "hover:text-white";
   return (
     <nav aria-label="Breadcrumb" className={`${basePos} ${className}`}>
-      <ol className={`m-4 flex items-center ${shrink ? 'text-[clamp(11px,2.3vw,14px)]' : 'text-sm'} ${textBase}`}>
+      <ol className={`m-4 flex flex-wrap items-center break-words leading-tight text-sm ${textBase}`}>
         {list.map((item, idx) => {
           const isLast = idx === list.length - 1;
           return (
@@ -45,12 +44,12 @@ export function Breadcrumb({ items, className = "", anchor = "static", showHome 
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className={`${linkHover} transition-colors underline-offset-2 hover:underline`}
+                  className={`break-words ${linkHover} transition-colors underline-offset-2 hover:underline`}
                 >
                   {item.label}
                 </Link>
               ) : (
-                <span className={`${textMuted}`} aria-current={isLast ? "page" : undefined}>
+                <span className={`break-words ${textMuted}`} aria-current={isLast ? "page" : undefined}>
                   {item.label}
                 </span>
               )}
@@ -84,14 +83,12 @@ export function BreadcrumbAuto({
   className = "",
   anchor = "static",
   tone = "dark",
-  shrink = false,
 }: {
   base?: string;
   labelMap?: Record<string, string>;
   className?: string;
   anchor?: Anchor;
   tone?: Tone;
-  shrink?: boolean;
 }) {
   const pathname = usePathname() || base;
   // Simple error-context detection: 403, generic error, or Next.js not-found fallback
@@ -105,7 +102,7 @@ export function BreadcrumbAuto({
 
   if (isErrorContext) {
     // Render a single trail pointing to an error context, with Home prefix
-    return <Breadcrumb items={[{ label: "Erro" }]} showHome homeHref={base} className={className} anchor={anchor} tone={tone} shrink={shrink} />;
+    return <Breadcrumb items={[{ label: "Erro" }]} showHome homeHref={base} className={className} anchor={anchor} tone={tone} />;
   }
   const segments = pathname
     .replace(/^\/+/, "")
@@ -121,7 +118,7 @@ export function BreadcrumbAuto({
     items.push({ label, href: isLast ? undefined : acc });
   });
 
-  return <Breadcrumb items={items} showHome homeHref={base} className={className} anchor={anchor} tone={tone} shrink={shrink} />;
+  return <Breadcrumb items={items} showHome homeHref={base} className={className} anchor={anchor} tone={tone} />;
 }
 
 function deslug(s: string) {
