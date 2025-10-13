@@ -7,6 +7,7 @@ import Modal from '@/components/ui/modal/Modal';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import { slugify } from '@/lib/slug';
+import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
 
 type Tab = 'chapters' | 'comments';
 
@@ -21,6 +22,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
   const [loading, setLoading] = React.useState(true);
   const [volumes, setVolumes] = React.useState<VolumeDto[]>([]);
   const [chapters, setChapters] = React.useState<ChapterDto[]>([]);
+  const [newVolumeTitle, setNewVolumeTitle] = React.useState('');
   const canManage = typeof canManageProp === 'boolean' ? canManageProp : (!!session?.user && session.user.role === 'ADMIN');
   const router = useRouter();
 
@@ -60,6 +62,33 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
       setLoading(false);
     }
   }
+  async function createVolume() {
+    const title = newVolumeTitle.trim();
+    if (!title) return;
+    try {
+      const res = await fetch(`/api/books/${slug}/volumes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) {
+        // Optionally, show a toast; for now, just return
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      const vol: VolumeDto | null = data?.volume ? { id: data.volume.id, title: data.volume.title } : null;
+      if (vol) {
+        setVolumes((prev) => [...prev, vol].sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })));
+        setNewVolumeTitle('');
+      } else {
+        await refetchAll();
+        setNewVolumeTitle('');
+      }
+    } catch {
+      // fallback: refetch
+      await refetchAll();
+    }
+  }
   return (
   <div className=" bg-readowl-purple-dark/10 border-2 text-white border-readowl-purple shadow-md p-3">
       <div className="flex justify-center gap-3">
@@ -97,6 +126,12 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
                   {chapters.reduce((sum, c) => { const t = c.content.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim(); return sum + (t? t.split(/\s+/).length:0); },0).toLocaleString('pt-BR')} palavras
                 </div>
               </div>
+              {/* Create volume (owner/admin) */}
+              {canManage && (
+                <div className="mb-3">
+                  <VolumeCreateInput value={newVolumeTitle} onChange={setNewVolumeTitle} onSubmit={createVolume} />
+                </div>
+              )}
               {/* Volume sections */}
               <div className="space-y-3">
                 {volumes.map(v => (

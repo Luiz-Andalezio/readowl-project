@@ -55,7 +55,7 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
             className="p-1 hover:bg-white/30 rounded"
             onClick={() => onEditChapter?.(chapter.id)}
           >
-            <Image src="/img/svg/generics/white/edit.svg" alt="Editar" width={18} height={18} />
+            <Image src="/img/svg/book/edit-chapter.svg" alt="Editar" width={18} height={18} />
           </button>
           <button
             aria-label="Excluir capítulo"

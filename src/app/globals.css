@@ -40,3 +40,10 @@ body {
 	border-top: 1px solid #ffffff;
 	opacity: 1;
 }
+
+/* Light mode chapter content: hr should be extradark */
+.prose hr {
+  border: none;
+  border-top: 1px solid #23004B; /* readowl-purple.extradark */
+  opacity: 1;
+}
