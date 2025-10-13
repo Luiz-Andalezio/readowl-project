@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
@@ -8,6 +7,7 @@ import BookHeader from '../../../../components/book/BookHeader';
 import RatingBox from '../../../../components/book/RatingBox';
 import BookActions from '../../../../components/book/BookActions';
 import BookTabs from '../../../../components/book/BookTabs';
+import CoverZoom from '@/components/book/CoverZoom';
 import type { BookWithAuthorAndGenres } from '@/types/book';
 import { sanitizeSynopsisHtml } from '@/lib/sanitize';
 import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
@@ -50,14 +50,14 @@ export default async function BookPage({ params }: PageProps) {
           <div>
             <div className="flex justify-center items-center h-full">
                 {book.coverUrl ? (
-                    <Image
-                        src={book.coverUrl}
-                        alt={`Capa de ${book.title}`}
-                        width={300}
-                        height={400}
-                        sizes="(max-width: 768px) 100vw, 300px"
-                        className="w-full max-w-[250px] h-auto object-cover shadow-md"
-                    />
+                  <CoverZoom
+                    src={book.coverUrl}
+                    alt={`Capa de ${book.title}`}
+                    width={300}
+                    height={400}
+                    sizes="(max-width: 768px) 100vw, 300px"
+                    className="w-full max-w-[250px] h-auto shadow-md"
+                  />
                 ) : null}
             </div>
           </div>
