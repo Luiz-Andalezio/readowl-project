@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Navbar from "@/components/ui/Navbar";
+import Navbar from "@/components/ui/navbar/Navbar";
 import LandingHeader from "@/app/landing/about/LandingHeader";
 import Footer from "@/components/sections/Footer";
 import ErrorView from "@/components/ui/error/ErrorView";

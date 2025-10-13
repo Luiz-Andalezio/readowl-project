@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
 
         <div className="flex justify-center mb-4">
           <Image
-            src="/img/mascot/logo.png"
+            src="/icon.png"
             alt="Readowl Logo"
             width={64}
             height={64}

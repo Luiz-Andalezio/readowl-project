@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/ui/Navbar";
-import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
-import BookCarousel from "@/components/ui/BookCarousel";
+import Navbar from "@/components/ui/navbar/Navbar";
+import ButtonWithIcon from "@/components/ui/button/ButtonWithIcon";
+import BookCarousel from "@/components/book/BookCarousel";
 import { prisma } from "@/lib/prisma";
 import Link from 'next/link';
 import { BreadcrumbAuto } from "@/components/ui/Breadcrumb";

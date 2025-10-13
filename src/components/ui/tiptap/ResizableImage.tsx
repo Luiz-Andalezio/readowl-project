@@ -45,13 +45,14 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
     const dy = e.clientY - dragging.startY;
     let newW = dragging.startW;
     let newH = dragging.startH;
-    // Keep simple proportional resize for corner handles; edge handles change single dimension
+    // Edge handles: change single dimension. Make west/east behave intuitively with pointer movement.
     if (dragging.edge === 'e' || dragging.edge === 'w') {
-      newW = Math.max(20, dragging.startW + (dragging.edge === 'e' ? dx : -dx));
+      // Move right (dx>0) increases width; move left (dx<0) decreases width for both sides
+      newW = Math.max(20, dragging.startW + dx);
     } else if (dragging.edge === 'n' || dragging.edge === 's') {
       newH = Math.max(20, dragging.startH + (dragging.edge === 's' ? dy : -dy));
     } else {
-      // corner: scale proportionally by dx
+      // corner: scale proportionally by horizontal movement (dx) with same direction for E/W
       const scale = 1 + dx / Math.max(1, dragging.startW);
       newW = Math.max(20, Math.round(dragging.startW * scale));
       newH = Math.max(20, Math.round(dragging.startH * scale));
@@ -141,16 +142,16 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
   };
 
   return (
-    <div className="relative inline-block group align-top leading-none" data-node-view-wrapper>
+    <div className="relative inline-block group align-top leading-none text-[0]" data-node-view-wrapper>
       {/* image (wrap with anchor when href present to match renderHTML) */}
       {href ? (
         <a href={href} rel="nofollow noopener noreferrer" target="_blank" className="inline-block no-underline" style={{ textDecoration: 'none' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none inline-block align-top" />
+          <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none block align-top" />
         </a>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element 
-        <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none inline-block align-top" />
+        <img ref={imgRef} src={src} alt={alt} style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }} className="select-none block align-top" />
       )}
 
       {/* bubble toolbar */}
@@ -211,7 +212,7 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
       {/* Link modal (NodeView-scoped) */}
       {linkOpen && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white text-readowl-purple border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
+          <div className="bg-white text-readowl-purple text-base leading-normal border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
             <h3 className="font-semibold mb-2">Adicionar link</h3>
             <input
               value={linkUrl}
@@ -231,7 +232,7 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
 
       {replaceOpen && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white text-readowl-purple border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
+          <div className="bg-white text-readowl-purple text-base leading-normal border-2 border-readowl-purple/40 p-4 w-[90%] max-w-sm">
             <h3 className="font-semibold mb-2">Substituir imagem por URL</h3>
             <input
               value={replaceUrl}
@@ -261,6 +262,7 @@ export default function ResizableImage({ node, updateAttributes, selected, edito
                 />
               </div>
             </div>
+            <p className="text-sm mb-3">Apenas domínios permitidos (veja hosts em Configuração de imagens).</p>
             <div className="flex justify-end gap-2">
               <button onClick={() => setReplaceOpen(false)} className="px-3 py-1 border border-readowl-purple/30">Cancelar</button>
               <button onClick={applyReplace} className="px-3 py-1 bg-readowl-purple-light text-white">Substituir</button>

@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import Navbar from '@/components/ui/Navbar';
+import Navbar from '@/components/ui/navbar/Navbar';
 import { useSession } from 'next-auth/react';
 
 const HIDDEN_PREFIXES = ['/login', '/register', '/', '/landing', '/landing/contact', '/landing/privacy', '/landing/terms', '/landing/help', '/landing/security', '/forgot-password', '/reset-password', '/reset-password/success'];

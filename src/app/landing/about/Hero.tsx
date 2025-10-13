@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/button/Button';
 
 const Hero: React.FC = () => {
   const [mounted, setMounted] = useState(false);

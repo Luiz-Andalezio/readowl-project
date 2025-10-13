@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/ui/Navbar";
+import Navbar from "@/components/ui/navbar/Navbar";
 import { BreadcrumbAuto } from "@/components/ui/Breadcrumb";
 
 

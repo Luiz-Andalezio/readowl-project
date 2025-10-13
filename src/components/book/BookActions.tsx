@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
+import ButtonWithIcon from "@/components/ui/button/ButtonWithIcon";
 import { BookWithAuthorAndGenres } from "@/types/book";
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -107,8 +107,7 @@ export default function BookActions({ book, className }: Props) {
                     <ButtonWithIcon
                         className="w-full justify-center items-center"
                         iconUrl="/img/svg/book/chapter.svg"
-                        variant="primary"
-                        onClick={() => { }}
+                        onClick={() => router.push(`/library/books/${slugify(book.title)}/post-chapter`)}
                     >
                         Adicionar capítulo
                     </ButtonWithIcon>

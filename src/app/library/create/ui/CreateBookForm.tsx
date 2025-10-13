@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Modal from '@/components/ui/Modal';
-import ButtonWithIcon from '@/components/ui/ButtonWithIcon';
+import Modal from '@/components/ui/modal/Modal';
+import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import Image from 'next/image';
 import { CoverInput } from './CoverInput';
 import { BasicFields } from './BasicFields';
@@ -23,7 +23,7 @@ interface ValidationErrors {
     submit?: string;
 }
 
-// Lista oficial de gêneros (origem centralizada em /types/book)
+// Official genre list (centralized source in /types/book)
 const defaultGenres = [...BOOK_GENRES_MASTER].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
 const aspectTolerance = BOOK_COVER_RATIO_TOLERANCE;
@@ -62,12 +62,12 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
         setSelectedGenres(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]);
     };
 
-    // Cover Preview Validation
+    // Cover preview validation: checks aspect ratio and minimum dimensions
     useEffect(() => {
         if (!coverUrl) { setCoverValid(null); return; }
         let cancelled = false;
         setCoverLoading(true);
-        // Usa window.Image para evitar problemas de SSR e fornece tipagem ampla
+        // Use window.Image to avoid SSR issues and keep broad typing
         const ImgCtor = (typeof window !== 'undefined' ? (window as unknown as { Image: { new(): HTMLImageElement } }).Image : null);
         if (!ImgCtor) { setCoverValid(null); setCoverLoading(false); return; }
         const img = new ImgCtor();
@@ -85,7 +85,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
 
     const validate = useCallback((): ValidationErrors => {
         const v: ValidationErrors = {};
-        // Base schema validation (ignora cover ratio - tratamos manualmente)
+        // Base schema validation (ignores cover ratio - handled manually below)
         const parsed = createBookSchema.safeParse({
             title: title.trim(),
             synopsis: synopsis.trim(),
@@ -107,7 +107,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 }
             }
         }
-        // Cover specific async dimension validation messages override generic ones
+        // Cover-specific async dimension validation messages override generic ones
         if (!coverUrl.trim()) {
             v.coverUrl = 'É necessário uma URL da capa.';
         } else if (coverValid === false) {
@@ -119,7 +119,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
     }, [title, synopsis, releaseFrequency, coverUrl, coverValid, selectedGenres]);
 
     useEffect(() => {
-        // Atualiza erros mas evita animação automática (shake) antes de interação
+        // Keep errors up to date, but UI avoids auto "shake" before user interaction
         setErrors(validate());
     }, [title, synopsis, releaseFrequency, coverUrl, coverValid, selectedGenres, validate]);
 
@@ -166,7 +166,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                     className="w-10 h-10 mt-0.4"
                     aria-hidden="true"
                 />
-                <h1 className="text-3xl font-yusei text-center font-semibold text-white">CADASTRAR NOVO LIVRO</h1>
+                <h1 className="text-3xl font-yusei text-center font-semibold text-white">Registrar nova obra</h1>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <CoverInput
@@ -210,7 +210,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 <ButtonWithIcon
                     variant="secondary"
                     onClick={() => untouched ? window.location.assign(redirectAfter) : setConfirmCancelOpen(true)}
-                    iconUrl="/img/svg/generics/cancel2.svg"
+                    iconUrl="/img/svg/generics/purple/cancel.svg"
                 >Cancelar</ButtonWithIcon>
                 <ButtonWithIcon
                     variant="primary"
@@ -220,13 +220,13 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 >{submitting ? 'Salvando...' : 'Registrar'}</ButtonWithIcon>
             </div>
 
-            {/* Help Modal */}
+            {/* Help modal: teach how to provide a cover URL */}
             <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title="Como adicionar a capa" widthClass="max-w-lg">
                 <p>Para adicionar a capa, hospede sua imagem em um site como <strong>imgur.com</strong>, clique com o botão direito na imagem, selecione <em>Copiar endereço da imagem</em> e cole o link no campo. A imagem deve ter <strong>mínimo {BOOK_COVER_MIN_WIDTH}px de largura por {BOOK_COVER_MIN_HEIGHT}px de altura</strong> e proporção aproximada de 3:4.</p>
                 <p>Dica: Use imagens em formato JPG ou PNG otimizadas.</p>
             </Modal>
 
-            {/* Confirm Cancel */}
+            {/* Confirm cancel */}
             <Modal open={confirmCancelOpen} onClose={() => setConfirmCancelOpen(false)} title="Cancelar criação do livro?" widthClass="max-w-sm" >
                 <p>Você perderá todos os dados preenchidos.</p>
                 <div className="flex gap-3 justify-end mt-6">
@@ -235,7 +235,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 </div>
             </Modal>
 
-            {/* Confirm Save */}
+            {/* Confirm save */}
                         <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar registro" widthClass="max-w-sm" >
                 <p>Deseja salvar este novo livro?</p>
                 <div className="flex gap-3 justify-end mt-6">
@@ -244,12 +244,12 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 </div>
             </Modal>
 
-                        {/* Success Modal with stay to create another */}
+                        {/* Success modal: option to create another or go back */}
                         <Modal open={successModal} onClose={() => { setSuccessModal(false); window.location.href = redirectAfter; }} title="Livro criado!" widthClass="max-w-sm" >
                                 <p>Seu livro foi criado com sucesso.</p>
                                 <div className="flex justify-end mt-6 gap-3">
                                         <button onClick={() => {
-                                                // reset to create another
+                                                // Reset fields to create another book
                                                 setSuccessModal(false);
                                                 setTitle(''); setSynopsis(''); setReleaseFrequency(''); setCoverUrl(''); setSelectedGenres([]);
                                                 setCoverValid(null); setAttemptedSubmit(false);

@@ -33,7 +33,7 @@ export default async function EditBookPage({ params }: PageProps) {
       <div className="w-full flex justify-center mt-14 sm:mt-16">
         <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros', edit: 'Editar' }} />
       </div>
-      <main className="px-4 pb-6 md:px-8">
+      <main className="pb-6 md:px-8">
         <EditBookForm book={book} slug={slug} hasLocalPassword={hasLocalPassword} />
       </main>
     </>
