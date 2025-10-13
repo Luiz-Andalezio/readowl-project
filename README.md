@@ -201,13 +201,14 @@ Open http://localhost:3000
 
 | ✅ **Completed Screens** | Details |
 |---|---|
-| 🏠 Landing Page | Fully completed |
-| 🔐 Login & Registration | Fully completed |
+| 🏠 Landing Page | Header, terms, and infos |
+| 🔐 Login & Registration | Simple login/registration with passoword recovery and Google sign in option |
 | 📖 Book Index | Book details, follow option, rating, volumes dropdown with chapter list |
+| 📄 Chapter Index | Principal content and crud buttons |
 | 📚 Library | Carousel of created books |
 | 📝 Book CRUD | Full create, view, edit, delete |
 | 📦 Volume & Chapter CRUD | Create, edit, delete volumes and chapters |
-| ⚠️ Error Pages | Fully completed |
+| ⚠️ Error Pages | 403, 404, 500 and generic errors |
 
 | 🚧 **Screens To-Do** | Details |
 |---|---|
@@ -220,7 +221,7 @@ Open http://localhost:3000
 | 👤 User Profile Edit | User self-edit screen |
 | 🛠️ Admin User Edit | General user management for admins |
 
-> 60% complete
+> 62% complete
 
 ### 📁 Suggested Project Structure
 
