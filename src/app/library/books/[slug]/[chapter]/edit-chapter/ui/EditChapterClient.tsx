@@ -15,7 +15,7 @@ type InitialChapter = { id: string; title: string; content: string; volumeId: st
 export default function EditChapterClient({ slug, bookTitle, initialChapter }: { slug: string; bookTitle: string; initialChapter: InitialChapter }) {
   const router = useRouter();
 
-  // Volumes
+  // Volumes data for dropdown and modals
   const [volumes, setVolumes] = useState<Volume[]>([]);
   const [newVolumeTitle, setNewVolumeTitle] = useState('');
   const [confirmDeleteVolumeId, setConfirmDeleteVolumeId] = useState<string | null>(null);
@@ -55,7 +55,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
   const [confirmDeleteChapterOpen, setConfirmDeleteChapterOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
 
-  // Load volumes
+  // Load volumes list for the book
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -154,7 +154,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
       if (res.status === 403) { setError('Você não tem permissão para editar capítulos nesta obra.'); return; }
       if (res.status === 409) { setError('Já existe um capítulo com este título nesta obra.'); return; }
   if (!res.ok) throw new Error('Falha ao atualizar capítulo');
-  // Update baselines and show success modal
+  // Persist the new "baseline" (last saved snapshot) and show success modal
   setBaselineTitle(title);
   setBaselineContent(html);
   setBaselineVolumeId(selectedVolumeId || '');
@@ -192,12 +192,11 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
           <div className="bg-readowl-purple-extralight text-readowl-purple-extradark p-5 shadow-md font-ptserif">
             <h1 className="text-2xl font-bold text-center mb-4">{bookTitle}</h1>
 
-            {/* Criar volume */}
+            {/* Create volume input */}
             <div className="mb-3">
               <VolumeCreateInput value={newVolumeTitle} onChange={setNewVolumeTitle} onSubmit={addVolume} />
             </div>
-
-            {/* Seleção de volume */}
+            {/* Volume selection */}
             <div className="mb-4" ref={volRef}>
               <VolumeDropdown
                 ref={volRef as React.Ref<HTMLDivElement>}
@@ -214,8 +213,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
                 <p className="mt-1 text-sm text-red-600">Escolha um volume (se desejar a não atribuição de um, escolha &quot;Sem volume&quot;).</p>
               )}
             </div>
-
-            {/* Título */}
+            {/* Title input */}
             <div className="mb-3 relative">
               <input
                 placeholder="Título do capítulo..."
@@ -232,8 +230,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
                 <p className="mt-1 text-sm text-red-600">Informe o título do capítulo.</p>
               )}
             </div>
-
-            {/* Editor */}
+            {/* Chapter editor */}
             <div className="mb-4" ref={editorRef}>
               <div className={`border-2 ${computedContentError ? 'border-red-600' : 'border-transparent'} ${shakeContent ? 'animate-shake' : ''}`}>
                 <ChapterEditor value={content} onChange={setContent} maxChars={50000} />
@@ -297,7 +294,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
               >{submitting ? 'Salvando...' : 'Salvar alterações'}</ButtonWithIcon>
             </div>
           </div>
-            {/* Botão de excluir capítulo (estilo do Excluir obra) */}
+            {/* Delete chapter button (same style as Delete book) */}
             <div className="w-full max-w-6xl mx-auto mt-4 flex justify-center">
               <ButtonWithIcon
                 className="!bg-red-700 !text-white !border-red-900 hover:!bg-red-600"
@@ -309,8 +306,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
                 Excluir capítulo
               </ButtonWithIcon>
             </div>
-
-          {/* Modal excluir volume (mesmo da criação) */}
+          {/* Delete volume modal (same as in create flow) */}
           <Modal
             open={!!confirmDeleteVolumeId}
             onClose={() => setConfirmDeleteVolumeId(null)}
@@ -325,8 +321,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
             <p>Ao excluir o volume, os capítulos dentro dele não serão apagados. Eles ficarão sem volume.</p>
             <p>Tem certeza que deseja continuar?</p>
           </Modal>
-
-          {/* Confirmar cancelar edição */}
+          {/* Confirm cancel editing */}
           <Modal open={confirmCancelOpen} onClose={() => setConfirmCancelOpen(false)} title="Cancelar edição do capítulo?" widthClass="max-w-sm" >
             <p>Você perderá alterações não salvas deste capítulo.</p>
             <div className="flex gap-3 justify-end mt-6">
@@ -334,9 +329,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
               <a href={`/library/books/${slug}`} className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600">Descartar</a>
             </div>
           </Modal>
-
-
-          {/* Confirmar salvar */}
+          {/* Confirm save */}
           <Modal open={confirmSaveOpen} onClose={() => setConfirmSaveOpen(false)} title="Confirmar alterações" widthClass="max-w-sm" >
             <p>Deseja salvar as alterações deste capítulo?</p>
             <div className="flex gap-3 justify-end mt-6">
@@ -344,8 +337,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
               <button disabled={submitting} onClick={() => { setConfirmSaveOpen(false); submitUpdate(); }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple disabled:opacity-60 disabled:cursor-not-allowed">{submitting ? 'Salvando...' : 'Confirmar'}</button>
             </div>
           </Modal>
-
-          {/* Sucesso pós-salvar */}
+          {/* Post-save success */}
           <Modal open={successOpen} onClose={() => setSuccessOpen(false)} title="Capítulo atualizado!" widthClass="max-w-sm">
             <p>As alterações foram salvas.</p>
             <div className="flex gap-3 justify-end mt-6">
@@ -353,8 +345,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
               <a href={`/library/books/${slug}/${slugify(chapterTitle.trim() || baselineTitle)}`} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Ir para o capítulo</a>
             </div>
           </Modal>
-
-          {/* Confirmar excluir capítulo */}
+          {/* Confirm delete chapter */}
           <Modal open={confirmDeleteChapterOpen} onClose={() => setConfirmDeleteChapterOpen(false)} title="Excluir capítulo" widthClass="max-w-sm">
             <p>Tem certeza que deseja excluir este capítulo? Esta ação não pode ser desfeita.</p>
             <div className="flex gap-3 justify-end mt-6">

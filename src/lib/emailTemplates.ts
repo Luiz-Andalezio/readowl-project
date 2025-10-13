@@ -1,4 +1,4 @@
-// Alteração: aumente o padding do botão para deixá-lo maior
+// Change: increase button padding to make it larger
 export function passwordResetTemplate(params: { userName?: string | null; actionUrl: string; expiresMinutes: number }) {
   const { userName, actionUrl, expiresMinutes } = params;
   return `

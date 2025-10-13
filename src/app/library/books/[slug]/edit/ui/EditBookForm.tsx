@@ -249,7 +249,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                         >
                             Continuar editando
                         </button>
-                        <button onClick={() => { setSuccessOpen(false); window.location.href = `/library/books/${encodeURIComponent(slugify(title))}`; }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Voltar para o livro</button>
+                        <button onClick={() => { setSuccessOpen(false); window.location.href = `/library/books/${encodeURIComponent(slugify(title))}`; }} className="px-4 py-2 text-sm bg-readowl-purple-light text-white hover:bg-readowl-purple">Voltar ao índice</button>
                     </div>
                 </Modal>
             </div>

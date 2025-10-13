@@ -16,7 +16,7 @@ export default function PostChapterPage() {
   const slug = params?.slug as string;
   const router = useRouter();
 
-  // removed unused loading state
+  // Local state
   const [volumes, setVolumes] = useState<Volume[]>([]);
   const [newVolumeTitle, setNewVolumeTitle] = useState('');
   // volume inline editing handled inside VolumeDropdown
@@ -36,12 +36,12 @@ export default function PostChapterPage() {
     let mounted = true;
     async function load() {
       try {
-        // load volumes
+  // Load volumes
         const res = await fetch(`/api/books/${slug}/volumes`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Falha ao carregar volumes');
         const data = await res.json();
         if (mounted) setVolumes(data.volumes || []);
-        // load book title for header
+  // Load book title for header
         const rb = await fetch(`/api/books/${slug}`, { cache: 'no-store' });
         if (rb.ok) {
           const jb = await rb.json();
@@ -73,7 +73,7 @@ export default function PostChapterPage() {
     }
   }
 
-  // inline rename proxy used by dropdown component
+  // Inline rename proxy used by dropdown component
 
   async function saveVolumeEditProxy(id: string, title: string) {
     const res = await fetch(`/api/books/${slug}/volumes/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
@@ -95,11 +95,11 @@ export default function PostChapterPage() {
   }
 
   const [selectedVolumeId, setSelectedVolumeId] = useState<string>('');
-  // track if user explicitly chose a volume; required even for "Sem volume"
+  // Track if user explicitly chose a volume; required even for "Sem volume"
   const [volumeTouched, setVolumeTouched] = useState(false);
-  // maintain explicit selection state; default false until any selection occurs
+  // Maintain explicit selection state; default false until any selection occurs
   const [emptyExplicit, setEmptyExplicit] = useState(false);
-  // show validation styles only after user tries to submit
+  // Show validation styles only after user tries to submit
   const [showValidation, setShowValidation] = useState(false);
   // computed error flags
   const computedVolumeError = showValidation && ( !volumeTouched || (selectedVolumeId === '' && !emptyExplicit) );
