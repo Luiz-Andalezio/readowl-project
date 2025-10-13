@@ -210,7 +210,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 <ButtonWithIcon
                     variant="secondary"
                     onClick={() => untouched ? window.location.assign(redirectAfter) : setConfirmCancelOpen(true)}
-                    iconUrl="/img/svg/generics/cancel2.svg"
+                    iconUrl="/img/svg/generics/purple/cancel.svg"
                 >Cancelar</ButtonWithIcon>
                 <ButtonWithIcon
                     variant="primary"

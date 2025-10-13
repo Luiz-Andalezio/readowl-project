@@ -257,7 +257,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
                 } else {
                   setConfirmCancelOpen(true);
                 }
-              }} iconUrl="/img/svg/generics/cancel2.svg">Cancelar</ButtonWithIcon>
+              }} iconUrl="/img/svg/generics/purple/cancel.svg">Cancelar</ButtonWithIcon>
               <ButtonWithIcon
                 variant="primary"
                 disabled={(() => {

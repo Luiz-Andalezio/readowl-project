@@ -260,7 +260,7 @@ export default function PostChapterPage() {
                     setConfirmCancelOpen(true);
                   }
                 }}
-                iconUrl="/img/svg/generics/cancel2.svg"
+                iconUrl="/img/svg/generics/purple/cancel.svg"
               >Cancelar</ButtonWithIcon>
               <ButtonWithIcon
                 variant="primary"

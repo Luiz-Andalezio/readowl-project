@@ -201,7 +201,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                     <ButtonWithIcon
                         variant="secondary"
                         onClick={() => (changed ? setConfirmCancelOpen(true) : (window.location.href = `/library/books/${encodeURIComponent(slugify(baseline.title))}`))}
-                        iconUrl="/img/svg/generics/cancel2.svg"
+                        iconUrl="/img/svg/generics/purple/cancel.svg"
                     >
                         Cancelar
                     </ButtonWithIcon>

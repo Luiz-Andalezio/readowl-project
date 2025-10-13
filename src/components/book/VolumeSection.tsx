@@ -29,7 +29,7 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
   }, [name, title]);
 
   return (
-    <div className="border-2 border-readowl-purple rounded mb-3 bg-readowl-purple-extralight">
+    <div className="border-2 border-readowl-purple rounded mb-3 bg-readowl-purple-light">
       {/* Header (use div role=button to avoid nested button issues) */}
       <div
         role="button"
@@ -41,7 +41,7 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
             setOpen((v) => !v);
           }
         }}
-        className="w-full flex items-center justify-between px-3 py-2 text-readowl-purple-extradark hover:bg-readowl-purple-hover/20 transition"
+        className="w-full flex items-center justify-between px-3 py-2 text-white transition"
         aria-expanded={open}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -74,14 +74,14 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
                   aria-label="Salvar"
                   className={`p-1 ${canSave ? '' : 'opacity-40 cursor-not-allowed'}`}
                 >
-                  <Image src="/img/svg/generics/send.svg" alt="Salvar" width={18} height={18} />
+                  <Image src="/img/svg/generics/purple/send.svg" alt="Salvar" width={18} height={18} />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); setName(title); setEditing(false); }}
                   aria-label="Cancelar"
                   className="p-1"
                 >
-                  <Image src="/img/svg/generics/cancel2.svg" alt="Cancelar" width={18} height={18} />
+                  <Image src="/img/svg/generics/purple/cancel.svg" alt="Cancelar" width={18} height={18} />
                 </button>
               </div>
             </div>
@@ -93,10 +93,10 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
           {canManage && !editing ? (
             <>
               <button onClick={(e) => { e.stopPropagation(); setEditing(true); setName(title); }} aria-label="Editar" className="p-1 hover:bg-readowl-purple-hover/30 rounded">
-                <Image src="/img/svg/generics/edit.svg" alt="Editar" width={18} height={18} />
+                <Image src="/img/svg/generics/white/edit.svg" alt="Editar" width={18} height={18} />
               </button>
               <button onClick={(e) => { e.stopPropagation(); onDelete?.(volumeId); }} aria-label="Excluir" className="p-1 hover:bg-readowl-purple-hover/30 rounded">
-                <Image src="/img/svg/generics/delete.svg" alt="Excluir" width={18} height={18} />
+                <Image src="/img/svg/generics/white/delete.svg" alt="Excluir" width={18} height={18} />
               </button>
             </>
           ) : null}

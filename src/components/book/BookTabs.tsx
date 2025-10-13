@@ -61,8 +61,8 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
     }
   }
   return (
-  <div className=" bg-readowl-purple-light border-2 text-white border-readowl-purple shadow-md p-3">
-      <div className="flex gap-3 mb-3">
+  <div className=" bg-readowl-purple-dark/10 border-2 text-white border-readowl-purple shadow-md p-3">
+      <div className="flex justify-center gap-3">
         <SelectableIconButton
           iconUrl="/img/svg/book/chapter-purple.svg"
           size="sm"
@@ -84,7 +84,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
           Comentários
         </SelectableIconButton>
       </div>
-  <div className="bg-readowl-purple-dark/40 p-4 min-h-[120px]">
+  <div className="p-4 min-h-[120px]">
         {tab === 'chapters' ? (
           loading ? (
             <div className="text-white/80">Carregando…</div>

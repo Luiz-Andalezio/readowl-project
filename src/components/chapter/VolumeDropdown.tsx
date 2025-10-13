@@ -160,7 +160,7 @@ const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown
                       className={`p-1 ${canSave(v.id) ? '' : 'opacity-40 cursor-not-allowed'}`}
                       aria-label="Salvar"
                     >
-                      <Image src="/img/svg/generics/send.svg" alt="Salvar" width={18} height={18} />
+                      <Image src="/img/svg/generics/purple/send.svg" alt="Salvar" width={18} height={18} />
                     </button>
                     <button
                       onMouseDown={(e) => e.stopPropagation()}
@@ -169,7 +169,7 @@ const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown
                       aria-label="Cancelar"
                       className="p-1"
                     >
-                      <Image src="/img/svg/generics/cancel2.svg" alt="Cancelar" width={18} height={18} />
+                      <Image src="/img/svg/generics/purple/cancel.svg" alt="Cancelar" width={18} height={18} />
                     </button>
                   </div>
                 </div>
@@ -180,7 +180,7 @@ const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown
             <div className="flex items-center gap-2 ml-2">
               {editing[v.id] !== undefined ? null : (
                 <>
-                  <button onMouseDown={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setOpen(true); setEditing(prev => ({ ...prev, [v.id]: v.title })); }} aria-label="Editar" className="p-1"><Image src="/img/svg/generics/edit.svg" alt="Editar" width={18} height={18} /></button>
+                  <button onMouseDown={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setOpen(true); setEditing(prev => ({ ...prev, [v.id]: v.title })); }} aria-label="Editar" className="p-1"><Image src="/img/svg/generics/purple/edit.svg" alt="Editar" width={18} height={18} /></button>
                   <button
                     onMouseDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
@@ -193,7 +193,7 @@ const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown
                     aria-label="Excluir"
                     className="p-1"
                   >
-                    <Image src="/img/svg/generics/delete.svg" alt="Excluir" width={18} height={18} />
+                    <Image src="/img/svg/generics/purple/delete.svg" alt="Excluir" width={18} height={18} />
                   </button>
                 </>
               )}

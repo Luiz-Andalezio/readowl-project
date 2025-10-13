@@ -37,6 +37,10 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
     const d = new Date(chapter.createdAt);
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   })();
+  const timeStr = (() => {
+    const d = new Date(chapter.createdAt);
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  })();
   const words = wordsCountFromHtml(chapter.content);
   const chapterSlug = slugify(chapter.title);
 
@@ -48,24 +52,24 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
         <div className="absolute top-2 right-2 flex items-center gap-2">
           <button
             aria-label="Editar capítulo"
-            className="p-1 hover:bg-white/10 rounded"
+            className="p-1 hover:bg-white/30 rounded"
             onClick={() => onEditChapter?.(chapter.id)}
           >
-            <Image src="/img/svg/generics/edit.svg" alt="Editar" width={18} height={18} />
+            <Image src="/img/svg/generics/white/edit.svg" alt="Editar" width={18} height={18} />
           </button>
           <button
             aria-label="Excluir capítulo"
-            className="p-1 hover:bg-white/10 rounded"
+            className="p-1 hover:bg-white/30 rounded"
             onClick={() => onDeleteChapter?.(chapter.id)}
           >
-            <Image src="/img/svg/generics/delete.svg" alt="Excluir" width={18} height={18} />
+            <Image src="/img/svg/generics/white/delete.svg" alt="Excluir" width={18} height={18} />
           </button>
         </div>
       )}
       <Link href={`/library/books/${slug}/${chapterSlug}`} className="block pr-16">
         <h4 className={`truncate ${standalone ? 'text-lg md:text-xl font-bold' : 'text-base md:text-lg font-bold'}`}>{chapter.title}</h4>
       </Link>
-      <div className="text-sm opacity-90 mt-1">{dateStr}</div>
+      <div className="text-sm opacity-90 mt-1">{dateStr} · {timeStr}</div>
       <div className="text-sm opacity-90">{words.toLocaleString('pt-BR')} palavras</div>
     </div>
   );
