@@ -102,7 +102,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
       immediatelyRender: false,
       editorProps: {
         attributes: {
-          // Make the editor text purple like other inputs; links darker; hr extra dark inside the editor for visibility
+          // Style: editor text purple like other inputs; links darker; hr extra dark inside editor for visibility
           class:
             [
               'prose prose-sm max-w-none focus:outline-none',
@@ -116,7 +116,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               'prose-h3:text-readowl-purple-extradark',
               // links should be a darker purple
               'prose-a:text-readowl-purple-extradark',
-              // inside the editor, hr should be Readowl purple medium
+              // Inside the editor, hr should be Readowl purple medium
               'prose-hr:border-t prose-hr:border-readowl-purple-medium prose-hr:opacity-100'
             ].join(' '),
         },

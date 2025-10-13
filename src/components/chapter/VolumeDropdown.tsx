@@ -24,11 +24,11 @@ const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown
   const [open, setOpen] = useState(false);
   // Support multiple simultaneous edit operations keyed by volume id
   const [editing, setEditing] = useState<Record<string, string>>({});
-  // Track if the user explicitly selected the "Sem volume" option at least once
+  // Track if the user explicitly selected the "Sem volume" (No volume) option at least once
   const [emptyChosen, setEmptyChosen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  // expose root element to parent for focus/scroll
+  // Expose root element to parent for focus/scroll
   useImperativeHandle(ref, () => rootRef.current as HTMLDivElement);
 
   // Close on outside pointerdown / ESC. Using pointerdown avoids races with click inside icons/images.
@@ -72,7 +72,7 @@ const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown
 
   const { headerLabel, isPlaceholder } = useMemo(() => {
     if (!selectedId) {
-      // If user has explicitly selected "Sem volume", show it; otherwise placeholder
+  // If user has explicitly selected "Sem volume", show it; otherwise show placeholder
       return { headerLabel: emptyChosen ? 'Sem volume' : 'Selecione um volume...', isPlaceholder: !emptyChosen };
     }
     const found = volumes.find(v => v.id === selectedId);
