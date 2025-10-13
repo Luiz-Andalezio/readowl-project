@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import { slugify } from '@/lib/slug';
 import BookHeader from '../../../../components/book/BookHeader';
 import RatingBox from '../../../../components/book/RatingBox';
@@ -22,6 +24,8 @@ export default async function BookPage({ params }: PageProps) {
   const { slug } = await params;
   const book = (await getBookBySlug(slug)) as BookWithAuthorAndGenres | null;
   if (!book) return notFound();
+  const session = await getServerSession(authOptions);
+  const canManage = !!session?.user?.id && (session.user.id === book.authorId || session.user.role === 'ADMIN');
 
   // Fetch followers count for the meta section
   const followersCount = await prisma.bookFollow.count({ where: { bookId: book.id } });
@@ -103,7 +107,7 @@ export default async function BookPage({ params }: PageProps) {
           </div>
         </div>
         <div className="mt-6">
-          <BookTabs />
+          <BookTabs canManage={canManage} />
         </div>
       </section>
     </main>

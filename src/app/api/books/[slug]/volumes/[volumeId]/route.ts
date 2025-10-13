@@ -21,6 +21,9 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
   const body = await req.json().catch(() => null) as { title?: string } | null;
   const title = (body?.title || '').trim();
   if (!title) return NextResponse.json({ error: 'Título obrigatório' }, { status: 400 });
+  // Disallow an exact duplicate title (same book), excluding this volume
+  const dup = await prisma.volume.findFirst({ where: { bookId: book.id, title, NOT: { id: volumeId } }, select: { id: true } });
+  if (dup) return NextResponse.json({ error: 'Já existe um volume com este título nesta obra.' }, { status: 409 });
   const vol = await prisma.volume.update({ where: { id: volumeId }, data: { title } });
   return NextResponse.json({ volume: vol });
 }
