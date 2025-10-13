@@ -12,7 +12,7 @@ import NextImage from 'next/image';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
 import ResizableImage from '@/components/ui/tiptap/ResizableImage';
-import { normalizeHtmlSpacing } from '@/lib/sanitize';
+import { normalizeHtmlSpacing, getPlainTextLength } from '@/lib/sanitize';
 
 export type ChapterEditorProps = {
   value: string;
@@ -22,7 +22,8 @@ export type ChapterEditorProps = {
 
 export default function ChapterEditor({ value, onChange, maxChars = 50000 }: ChapterEditorProps) {
   const [mounted, setMounted] = useState(false);
-  const [isEmpty, setIsEmpty] = useState(true);
+  // Initialize emptiness from incoming value to avoid placeholder overlaying prefilled content
+  const [isEmpty, setIsEmpty] = useState(() => getPlainTextLength(value || '') === 0);
   const [charCount, setCharCount] = useState(0);
   const [wordCount, setWordCount] = useState(0);
   const lastGoodHtmlRef = useRef<string>(value || '<p></p>');
@@ -158,15 +159,18 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
 
   useEffect(() => {
     setMounted(true);
-    if (editor && value !== editor.getHTML()) {
+    if (!editor) return;
+    // Sync content only if it differs
+    if (value !== editor.getHTML()) {
       editor.commands.setContent(value || '<p></p>', false);
-      const textNow = editor.getText();
-      const trimmed = textNow.trim();
-      setIsEmpty(trimmed.length === 0);
-      setCharCount(textNow.length);
-      setWordCount(trimmed ? trimmed.split(/\s+/).length : 0);
-      lastGoodHtmlRef.current = value || '<p></p>';
     }
+    // Always recompute emptiness and counters from current editor state
+    const textNow = editor.getText();
+    const trimmed = textNow.trim();
+    setIsEmpty(trimmed.length === 0);
+    setCharCount(textNow.length);
+    setWordCount(trimmed ? trimmed.split(/\s+/).length : 0);
+    lastGoodHtmlRef.current = editor.getHTML();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
