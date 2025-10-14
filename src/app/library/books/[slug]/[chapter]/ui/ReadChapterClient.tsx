@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
-import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useSession } from 'next-auth/react';
 
 type Payload = {
@@ -79,7 +79,17 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
       <div className="mt-14 sm:mt-16">
         <div className="container mx-auto px-3 md:px-6">
           <div className="flex justify-center">
-            <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros' }} tone={dark ? 'dark' : 'light'} />
+            <Breadcrumb
+              anchor="static"
+              tone={dark ? 'dark' : 'light'}
+              items={[
+                { label: 'Início', href: '/home' },
+                { label: 'Biblioteca', href: '/library' },
+                { label: 'Livros', href: '/library' },
+                { label: payload.book.title, href: `/library/books/${slug}` },
+                { label: payload.chapter.title }
+              ]}
+            />
           </div>
           {canManage && (
             <div className="flex flex-wrap items-center justify-center gap-3">
@@ -163,14 +173,14 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
 
           {/* Book title centered, then aligned info under with content width */}
           <header className="mt-6">
-            <h2 className="text-center font-ptserif font-bold text-3xl md:text-3xl">
+            <h2 className="text-center font-ptserif font-bold text-3xl md:text-4xl">
               <Link href={indexHref} className="hover:underline">
                 {payload.book.title}
               </Link>
             </h2>
             <div className="mx-auto max-w-4xl">
               {payload.volumeTitle ? (
-                <div className="mt-4 font-bold">
+                <div className="mt-10 font-bold">
                   {payload.volumeTitle}
                 </div>
               ) : null}

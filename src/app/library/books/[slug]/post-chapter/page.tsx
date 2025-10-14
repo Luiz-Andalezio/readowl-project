@@ -7,7 +7,7 @@ import ChapterEditor from '@/components/chapter/ChapterEditor';
 import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
 import VolumeDropdown from '@/components/chapter/VolumeDropdown';
 import type { Volume } from '@/types/volume';
-import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { slugify } from '@/lib/slug';
 import { getPlainTextLength } from '@/lib/sanitize';
 
@@ -184,7 +184,16 @@ export default function PostChapterPage() {
     <>
       {/* Breadcrumb with top offset so content doesn't sit under the fixed navbar */}
       <div className="w-full flex justify-center mt-14 sm:mt-16">
-        <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros', 'post-chapter': 'Adicionar capítulo' }} />
+        <Breadcrumb
+          anchor="static"
+          items={[
+            { label: 'Início', href: '/home' },
+            { label: 'Biblioteca', href: '/library' },
+            { label: 'Livros', href: '/library' },
+            { label: bookTitle || decodeURIComponent(slug).replace(/-/g, ' '), href: `/library/books/${slug}` },
+            { label: 'Adicionar capítulo' }
+          ]}
+        />
       </div>
 
       <div className="pb-6">
