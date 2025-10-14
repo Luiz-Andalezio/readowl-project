@@ -85,19 +85,19 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
             <div className="flex flex-wrap items-center justify-center gap-3">
               <a href={`/library/books/${slug}/edit`} className="inline-flex items-center">
                 <span className="sr-only">Editar obra</span>
-                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
+                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
                   <Image src="/img/svg/generics/white/edit.svg" alt="" width={18} height={18} />
                   Editar obra
                 </span>
               </a>
               <a href={`/library/books/${slug}/${chapterSlug}/edit-chapter`} className="inline-flex items-center">
-                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
+                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
                   <Image src="/img/svg/book/edit-chapter.svg" alt="" width={18} height={18} />
                   Editar capítulo
                 </span>
               </a>
               <a href={`/library/books/${slug}/post-chapter`} className="inline-flex items-center">
-                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
+                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
                   <Image src="/img/svg/book/chapter.svg" alt="" width={18} height={18} />
                   Adicionar capítulo
                 </span>

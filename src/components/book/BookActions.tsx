@@ -119,8 +119,8 @@ export default function BookActions({ book, className }: Props) {
                     onClick={toggleFollow}
                     disabled={loadingFollow}
                     className={`${baseStyle} ${following
-                            ? "bg-readowl-purple-dark text-readowl-purple-light border-readowl-purple shadow-md"
-                            : "bg-readowl-purple-light text-white border-readowl-purple hover:bg-readowl-purple-hover shadow-md"
+                            ? "bg-readowl-purple-dark text-readowl-purple-light border-readowl-purple rounded-md shadow-md"
+                            : "bg-readowl-purple-light text-white border-readowl-purple rounded-md hover:bg-readowl-purple-hover shadow-md"
                         } ${loadingFollow ? "opacity-75 cursor-not-allowed" : ""}`}
                 >
                     <Image
