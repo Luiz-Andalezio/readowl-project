@@ -19,6 +19,13 @@ export default async function Library() {
         select: { id: true, title: true, coverUrl: true }
     });
 
+    // Load books followed by current user
+    const followed = await prisma.book.findMany({
+        where: { followers: { some: { userId: session.user.id } } },
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, title: true, coverUrl: true },
+    });
+
     return (
         <>
             <Navbar />
@@ -37,13 +44,21 @@ export default async function Library() {
                         </ButtonWithIcon>
                     </Link>
                 </div>
-                <div className="px-4 md:px-10 max-w-7xl mx-auto">
+                <div className="pb-6 md:px-10 max-w-7xl mx-auto">
                     <BookCarousel
                         books={myBooks}
                         title="Minha Autoria!"
                         iconSrc="/img/svg/book/author.svg"
                         itemsPerView={5}
                     />
+                    {followed.length > 0 && (
+                        <BookCarousel
+                            books={followed}
+                            title="Seguidos!"
+                            iconSrc="/img/svg/generics/white/owl.svg"
+                            itemsPerView={5}
+                        />
+                    )}
                 </div>
             </main>
         </>
