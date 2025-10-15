@@ -17,6 +17,7 @@ export default function BookActions({ book, className }: Props) {
     const [following, setFollowing] = React.useState(false);
     const [loadingFollow, setLoadingFollow] = React.useState(false);
     const router = useRouter();
+    const [loadingStart, setLoadingStart] = React.useState(false);
 
     const isOwner = session?.user?.id === book.authorId;
     const isAdmin = session?.user?.role === "ADMIN";
@@ -90,6 +91,25 @@ export default function BookActions({ book, className }: Props) {
         }
     }
 
+    async function startReading() {
+        if (loadingStart) return;
+        setLoadingStart(true);
+        const slug = slugify(book.title);
+        try {
+            const res = await fetch(`/api/books/${slug}/chapters/first`, { cache: 'no-store' });
+            if (!res.ok) {
+                // Sem capítulos ou erro → fica na página atual
+                return;
+            }
+            const data = await res.json();
+            if (data?.slug) {
+                router.push(`/library/books/${slug}/${data.slug}`);
+            }
+        } finally {
+            setLoadingStart(false);
+        }
+    }
+
     return (
         <div
             className={`flex flex-col h-full justify-center items-center md:items-end gap-3 mt-4 md:mt-0 min-w-0 ${className || ""}`}
@@ -133,11 +153,11 @@ export default function BookActions({ book, className }: Props) {
                     {following ? "Seguindo" : "Seguir"}
                 </button>
                 <ButtonWithIcon
-                    className="flex-1 w-full justify-center items-center"
+                    className={`flex-1 w-full justify-center items-center ${loadingStart ? 'opacity-75 cursor-not-allowed' : ''}`}
                     iconUrl="/img/svg/navbar/book1.svg"
-                    onClick={() => { }}
+                    onClick={startReading}
                 >
-                    Iniciar
+                    {loadingStart ? 'Abrindo...' : 'Iniciar'}
                 </ButtonWithIcon>
             </div>
         </div>
