@@ -175,7 +175,7 @@ export default function BookActions({ book, className }: Props) {
                     />
                     {following ? "Seguindo" : "Seguir"}
                 </button>
-                {firstChapterSlug !== null && (
+                {typeof firstChapterSlug === 'string' ? (
                     <ButtonWithIcon
                         className={`flex-1 w-full justify-center items-center ${loadingStart ? 'opacity-75 cursor-not-allowed' : ''}`}
                         iconUrl="/img/svg/navbar/book1.svg"
@@ -183,6 +183,9 @@ export default function BookActions({ book, className }: Props) {
                     >
                         {loadingStart ? 'Abrindo...' : 'Iniciar'}
                     </ButtonWithIcon>
+                ) : (
+                    // Placeholder keeps Follow button width when Start is hidden (sm+ only)
+                    <span className="hidden sm:block flex-1 w-full" aria-hidden="true" />
                 )}
             </div>
         </div>
