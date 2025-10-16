@@ -133,7 +133,40 @@ Details:
 
 Your `.env` should already point `DATABASE_URL` to `postgresql://readowl:readowl@localhost:5433/readowl?schema=public`.
 
-If you want to manage the DB via GUI, reuse the existing pgAdmin from the React project (container `readowl_pgadmin`) at http://localhost:5050.
+If you want to manage the DB via GUI, you have two options:
+
+- Reuse the existing pgAdmin from the React project (container `readowl_pgadmin`) at http://localhost:5050; or
+- Use the built-in pgAdmin service included in this project's docker-compose at http://localhost:5051.
+
+#### Using the built-in pgAdmin (Option 3)
+
+We include a `pgadmin` service in `docker-compose.yml`. To start it alongside Postgres:
+
+```bash
+docker compose up -d postgres pgadmin
+```
+
+Access http://localhost:5051 and log in using the credentials defined in your `.env`:
+
+```env
+PGADMIN_DEFAULT_EMAIL=admin@example.com
+PGADMIN_DEFAULT_PASSWORD=admin
+```
+
+Notes:
+- These variables are optional; if not set, the defaults above are used.
+- On Linux, we map `host.docker.internal` inside the container to reach the Postgres running on the host ports.
+
+Create the server inside pgAdmin:
+1. Right-click “Servers” > Create > Server…
+2. General tab: Name: `readowl-local`
+3. Connection tab:
+        - Host: `host.docker.internal` (from inside pgAdmin container)
+        - Port: `5433`
+        - Maintenance DB: `readowl`
+        - Username: `readowl`
+        - Password: `readowl`
+4. Save
 
 #### Create a server in pgAdmin (GUI steps)
 
@@ -189,6 +222,51 @@ Open http://localhost:3000
 - If using Dockerized Postgres, ensure the port mapping matches your `DATABASE_URL`.
 - Prisma fails to connect: verify DB exists and credentials are correct.
 - Gmail EAUTH/535: use an App Password, not the normal password. Consider port 465 with `SMTP_PORT=465` for SSL.
+
+### 10) Full reset (Docker + Prisma)
+
+Use these steps if you want to completely reset containers, volumes and Prisma migrations/state for this Next.js project only.
+
+1. Stop and remove containers (pgAdmin and Postgres):
+
+        ```bash
+        docker rm -f readowl_next_pgadmin readowl_next_db 2>/dev/null || true
+        ```
+
+2. Remove volumes (wipes data):
+
+        ```bash
+        docker volume rm -f readowl-next_readowl_next_pgdata 2>/dev/null || true
+        ```
+
+3. Clear Prisma migrations (squash to a fresh baseline):
+
+        ```bash
+        rm -rf prisma/migrations/*
+        ```
+
+4. Bring Postgres back and recreate migrations:
+
+        ```bash
+        docker compose up -d postgres
+        npx prisma generate
+        npx prisma migrate dev --name init
+        ```
+
+5. (Optional) Bring up pgAdmin again:
+
+        ```bash
+        docker compose up -d pgadmin
+        ```
+
+6. Log into pgAdmin (http://localhost:5051) with `.env` credentials:
+
+        ```env
+        PGADMIN_DEFAULT_EMAIL=admin@example.com
+        PGADMIN_DEFAULT_PASSWORD=admin
+        ```
+
+If login fails with "incorrect password", remove the existing pgAdmin container to allow the new credentials to take effect and start it again (step 1 then 5).
 
 -----
 
