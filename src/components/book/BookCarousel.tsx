@@ -7,7 +7,7 @@ import clsx from 'clsx';
 // Minimal data needed to render a book card
 export interface CarouselBook { id: string; title: string; coverUrl: string | null; }
 // Component props (itemsPerView is a hint; layout recalculates responsively)
-interface BookCarouselProps { books: CarouselBook[]; title: string; iconSrc: string; itemsPerView?: number; }
+interface BookCarouselProps { books: CarouselBook[]; title: string; iconSrc: string; itemsPerView?: number; emptyMessage?: string; }
 
 // Fallback image used when a book has no cover
 const FALLBACK_COVER = '/img/svg/navbar/book1.svg';
@@ -17,7 +17,7 @@ function smoothScroll(el: HTMLElement, left: number, prefersReduced: boolean) {
     el.scrollTo({ left, behavior: prefersReduced ? 'auto' : 'smooth' });
 }
 
-export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSrc, itemsPerView = 5 }) => {
+export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSrc, itemsPerView = 5, emptyMessage = 'Nenhuma obra registrada.' }) => {
     // Refs to DOM nodes we need for measuring / event binding
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -231,7 +231,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                 </div>
             </div>
 
-            {books.length === 0 && <div className="text-sm text-readowl-purple-extralight mt-6 px-2">Nenhuma obra registrada.</div>}
+            {books.length === 0 && <div className="text-sm text-readowl-purple-extralight mt-6 px-2">{emptyMessage}</div>}
 
             {books.length > 0 && (
                 <div className="relative mt-5">

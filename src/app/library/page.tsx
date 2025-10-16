@@ -51,14 +51,13 @@ export default async function Library() {
                         iconSrc="/img/svg/book/author.svg"
                         itemsPerView={5}
                     />
-                    {followed.length > 0 && (
-                        <BookCarousel
-                            books={followed}
-                            title="Seguidos!"
-                            iconSrc="/img/svg/generics/white/owl.svg"
-                            itemsPerView={5}
-                        />
-                    )}
+                    <BookCarousel
+                        books={followed}
+                        title="Seguidos!"
+                        iconSrc="/img/svg/generics/white/owl.svg"
+                        itemsPerView={5}
+                        emptyMessage="Nenhuma obra seguida."
+                    />
                 </div>
             </main>
         </>
