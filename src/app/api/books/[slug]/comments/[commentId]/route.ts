@@ -11,8 +11,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ slug: str
   const c = await prisma.comment.findUnique({ where: { id: commentId }, include: { user: true } });
   if (!c) return NextResponse.json({ error: 'Comentário não encontrado' }, { status: 404 });
   const isOwner = c.userId === session.user.id;
-  const isAdmin = session.user.role === 'ADMIN';
-  if (!isOwner && !isAdmin) return NextResponse.json({ error: 'Proibido' }, { status: 403 });
+  if (!isOwner) return NextResponse.json({ error: 'Proibido' }, { status: 403 });
   const body = await req.json().catch(() => ({}));
   const content = (body?.content || '').toString();
   if (!content.trim()) return NextResponse.json({ error: 'Conteúdo vazio' }, { status: 400 });
@@ -31,9 +30,7 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ slug: s
   if (!c) return NextResponse.json({ error: 'Comentário não encontrado' }, { status: 404 });
   const isOwner = c.userId === session.user.id;
   const isAdmin = session.user.role === 'ADMIN';
-  // Extra permission: book author can delete any comment under their own book (book-level or chapter-level)
   const isBookAuthor = c.book?.authorId === session.user.id;
-  // Guard against cross-book deletion via mismatched slug
   if (c.book && slugify(c.book.title) !== slug) {
     return NextResponse.json({ error: 'Comentário não pertence a este livro' }, { status: 400 });
   }

@@ -271,8 +271,8 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               comments={comments}
               total={count}
               likeApi={async (id, willLike) => { const res = await fetch(`/api/books/${slug}/comments/${id}/like`, { method: willLike ? 'POST' : 'DELETE' }); const data = await res.json().catch(() => ({})); return Number(data?.count || 0); }}
-              // Edit: only comment owner or admin
-              canEdit={(c) => !!session?.user?.id && (session.user.id === c.user?.id || session.user.role === 'ADMIN')}
+              // Edit: only comment owner (admins cannot edit others' comments)
+              canEdit={(c) => !!session?.user?.id && session.user.id === c.user?.id}
               // Delete: comment owner/admin OR book owner (canManage prop coming from server page)
               canDelete={() => !!session?.user?.id && (session.user.role === 'ADMIN' || canManage)}
               // Back-compat: unused
