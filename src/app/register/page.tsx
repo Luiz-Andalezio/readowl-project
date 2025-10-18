@@ -75,11 +75,24 @@ function Register() {
                 }
                 return;
             }
-            // Registration successful
-            setNotice({ type: "success", message: "Cadastro concluído! Faça login." });
-            setForm({ username: "", email: "", password: "", confirmPassword: "" });
-            // Redirect immediately to login page
-            router.push("/login");
+            // Registration successful -> auto sign-in with the same credentials
+            // Prefer non-redirect signIn to capture outcome, then route manually
+            const result = await signIn("credentials", {
+                redirect: false,
+                email: form.email,
+                password: form.password,
+                // persist session similar to OAuth default
+                remember: "true",
+                callbackUrl: "/home",
+            });
+            if (result?.error) {
+                // Fallback: if for algum motivo falhar o sign-in automático, direciona para login
+                setNotice({ type: "success", message: "Cadastro concluído! Faça login." });
+                router.push("/login");
+                return;
+            }
+            // Go to home (or whatever URL NextAuth suggests)
+            router.push(result?.url || "/home");
     } catch {
             // Handle unexpected errors
             setError({ password: "Ocorreu um erro desconhecido." });
