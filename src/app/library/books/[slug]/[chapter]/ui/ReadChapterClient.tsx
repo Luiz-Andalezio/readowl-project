@@ -271,7 +271,12 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               comments={comments}
               total={count}
               likeApi={async (id, willLike) => { const res = await fetch(`/api/books/${slug}/comments/${id}/like`, { method: willLike ? 'POST' : 'DELETE' }); const data = await res.json().catch(() => ({})); return Number(data?.count || 0); }}
-              canEditDelete={(c) => !!session?.user?.id && (session.user.id === c.user?.id || session.user.role === 'ADMIN')}
+              // Edit: only comment owner or admin
+              canEdit={(c) => !!session?.user?.id && (session.user.id === c.user?.id || session.user.role === 'ADMIN')}
+              // Delete: comment owner/admin OR book owner (canManage prop coming from server page)
+              canDelete={() => !!session?.user?.id && (session.user.role === 'ADMIN' || canManage)}
+              // Back-compat: unused
+              canEditDelete={() => false}
               onReply={async (parentId, html) => { await fetch(`/api/books/${slug}/chapters/${chapterSlug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html, parentId }) }); await refetch(); }}
               onEdit={async (id, html) => { await fetch(`/api/books/${slug}/comments/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) }); await refetch(); }}
               onDelete={async (id) => { await fetch(`/api/books/${slug}/comments/${id}`, { method: 'DELETE' }); await refetch(); }}

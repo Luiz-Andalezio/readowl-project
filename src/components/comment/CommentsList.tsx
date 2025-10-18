@@ -20,13 +20,17 @@ type Props = {
   comments: CommentDto[];
   total: number;
   likeApi: (commentId: string, willLike: boolean) => Promise<number>; // returns new count
-  canEditDelete: (c: CommentDto) => boolean;
+  // Who can edit a comment (content). Typically comment owner or admin.
+  canEditDelete: (c: CommentDto) => boolean; // deprecated: kept for backward compatibility; used for edit and delete when granular props are not provided
+  // Optional granular permissions (override delete or edit separately)
+  canEdit?: (c: CommentDto) => boolean;
+  canDelete?: (c: CommentDto) => boolean;
   onReply: (parentId: string, html: string) => Promise<void>;
   onEdit: (id: string, html: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 };
 
-export default function CommentsList({ comments, total, likeApi, canEditDelete, onReply, onEdit, onDelete }: Props) {
+export default function CommentsList({ comments, total, likeApi, canEditDelete, canEdit, canDelete, onReply, onEdit, onDelete }: Props) {
   useSession();
   const [replyTo, setReplyTo] = React.useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = React.useState<string | null>(null);
@@ -57,7 +61,8 @@ export default function CommentsList({ comments, total, likeApi, canEditDelete, 
   };
 
   const renderItem = (c: CommentDto, depth = 0, parentAuthor?: string, parentText?: string): React.ReactNode => {
-    const isOwnerOrAdmin = canEditDelete(c);
+  const canEditEval = typeof canEdit === 'function' ? canEdit(c) : canEditDelete(c);
+  const canDeleteEval = typeof canDelete === 'function' ? canDelete(c) : canEditDelete(c);
     const when = new Date(c.createdAt);
     const date = when.toLocaleDateString('pt-BR');
     const time = when.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -102,10 +107,14 @@ export default function CommentsList({ comments, total, likeApi, canEditDelete, 
               <div className="mt-2 prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: c.content }} />
             )}
           </div>
-          {isOwnerOrAdmin && (
+          {(canEditEval || canDeleteEval) && (
             <div className="flex items-start gap-2 ml-2">
-              <button onClick={() => setEditingId(c.id)} aria-label="Editar" className="text-white/80 hover:text-white"><Pencil size={18} /></button>
-              <button onClick={() => setConfirmDelete(c.id)} aria-label="Excluir" className="text-white/80 hover:text-white"><Trash2 size={18} /></button>
+              {canEditEval ? (
+                <button onClick={() => setEditingId(c.id)} aria-label="Editar" className="text-white/80 hover:text-white"><Pencil size={18} /></button>
+              ) : null}
+              {canDeleteEval ? (
+                <button onClick={() => setConfirmDelete(c.id)} aria-label="Excluir" className="text-white/80 hover:text-white"><Trash2 size={18} /></button>
+              ) : null}
             </div>
           )}
         </div>

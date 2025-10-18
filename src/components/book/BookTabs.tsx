@@ -206,7 +206,12 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
                   const data = await res.json().catch(() => ({}));
                   return Number(data?.count || 0);
                 }}
-                canEditDelete={(c: CommentDto) => !!session?.user?.id && (session.user.id === c.user?.id || session.user.role === 'ADMIN')}
+                // Edit: only comment owner or admin
+                canEdit={(c: CommentDto) => !!session?.user?.id && (session.user.id === c.user?.id || session.user.role === 'ADMIN')}
+                // Delete: comment owner or admin, OR book owner (canManage)
+                canDelete={() => !!session?.user?.id && (session.user.role === 'ADMIN' || canManage)}
+                // Back-compat: not used when canEdit/canDelete provided
+                canEditDelete={() => false}
                 onReply={async (parentId, html) => {
                   await fetch(`/api/books/${slug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html, parentId }) });
                   await refetchAll();
