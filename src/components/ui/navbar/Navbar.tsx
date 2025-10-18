@@ -184,7 +184,7 @@ export default function FloatingNavbar() {
                             className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 text-white transition"
                         >Cancelar</button>
                         <button
-                            onClick={() => { setLogoutOpen(false); signOut({ callbackUrl: '/login' }); }}
+                            onClick={() => { setLogoutOpen(false); signOut({ callbackUrl: '/landing' }); }}
                             className="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-500 text-white shadow transition"
                         >Sair</button>
                     </>

@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useSession } from 'next-auth/react';
+import CommentInput from '@/components/comment/CommentInput';
+import CommentsList, { type CommentDto } from '@/components/comment/CommentsList';
 
 type Payload = {
   book: { id: string; title: string };
@@ -71,6 +73,34 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
   const containerClass = dark
     ? 'prose prose-invert max-w-4xl mx-auto font-ptserif'
     : 'prose max-w-4xl mx-auto font-ptserif';
+
+  // Comments for this chapter
+  const [comments, setComments] = React.useState<CommentDto[]>([]);
+  const [count, setCount] = React.useState(0);
+  React.useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        const r = await fetch(`/api/books/${slug}/chapters/${chapterSlug}/comments`, { cache: 'no-store' });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (!ignore) {
+          setComments(data.comments || []);
+          setCount((data.comments || []).length + (data.comments || []).reduce((acc: number, it: CommentDto) => acc + (it.replies?.length || 0), 0));
+        }
+      } catch { }
+    }
+    load();
+    return () => { ignore = true; };
+  }, [slug, chapterSlug]);
+
+  async function refetch() {
+    const r = await fetch(`/api/books/${slug}/chapters/${chapterSlug}/comments`, { cache: 'no-store' });
+    if (!r.ok) return;
+    const data = await r.json();
+    setComments(data.comments || []);
+    setCount((data.comments || []).length + (data.comments || []).reduce((acc: number, it: CommentDto) => acc + (it.replies?.length || 0), 0));
+  }
 
 
   return (
@@ -231,6 +261,21 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
                 <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.nextSlug}`)} iconUrl="/img/svg/generics/white/arrow-right.svg" variant="primary">Próximo</ButtonWithIcon>
               ) : null}
             </div>
+          </div>
+        </div>
+        {/* Comments */}
+        <div className="relative rounded-md p-4 md:p-6 font-ptserif mt-6">
+          <CommentInput onSubmit={async (html) => { await fetch(`/api/books/${slug}/chapters/${chapterSlug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) }); await refetch(); }} />
+          <div className="mt-4">
+            <CommentsList
+              comments={comments}
+              total={count}
+              likeApi={async (id, willLike) => { const res = await fetch(`/api/books/${slug}/comments/${id}/like`, { method: willLike ? 'POST' : 'DELETE' }); const data = await res.json().catch(() => ({})); return Number(data?.count || 0); }}
+              canEditDelete={(c) => !!session?.user?.id && (session.user.id === c.user?.id || session.user.role === 'ADMIN')}
+              onReply={async (parentId, html) => { await fetch(`/api/books/${slug}/chapters/${chapterSlug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html, parentId }) }); await refetch(); }}
+              onEdit={async (id, html) => { await fetch(`/api/books/${slug}/comments/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) }); await refetch(); }}
+              onDelete={async (id) => { await fetch(`/api/books/${slug}/comments/${id}`, { method: 'DELETE' }); await refetch(); }}
+            />
           </div>
         </div>
       </div>

@@ -51,6 +51,12 @@ model User {
   // Ratings given by this user
   ratings BookRating[]
 
+  // Comments authored by this user
+  comments Comment[]
+
+  // Comment likes by this user
+  commentLikes CommentLike[]
+
   // Password recovery
   passwordResetTokens PasswordResetToken[]
 
@@ -95,6 +101,9 @@ model Book {
   // Volumes and chapters
   volumes  Volume[]
   chapters Chapter[]
+
+  // Comments on this book
+  comments Comment[]
 }
 
 // Auxiliary models for NextAuth
@@ -203,6 +212,53 @@ model Chapter {
   book     Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
   volume   Volume? @relation(fields: [volumeId], references: [id], onDelete: SetNull)
 
+  // Comments on this chapter
+  comments Comment[]
+
   @@index([bookId])
   @@index([volumeId])
+}
+
+// User comments on books and chapters. Replies are modeled via self-relation (parentId).
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Author
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Target book (required)
+  bookId String
+  book   Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // Optional chapter when the comment is for a specific chapter
+  chapterId String?
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  // Replies
+  parentId String?
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  likes CommentLike[]
+
+  @@index([bookId])
+  @@index([chapterId])
+  @@index([parentId])
+}
+
+// A user can like a comment at most once
+model CommentLike {
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+  @@index([commentId])
 }

@@ -36,6 +36,19 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build readowl-next",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }

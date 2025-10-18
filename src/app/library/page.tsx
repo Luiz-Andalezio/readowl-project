@@ -40,7 +40,7 @@ export default async function Library() {
                             iconUrl="/img/svg/book/checkbook.svg"
                             iconAlt="Livro"
                         >
-                            Registrar uma obra
+                            Criar uma obra
                         </ButtonWithIcon>
                     </Link>
                 </div>

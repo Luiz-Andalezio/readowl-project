@@ -1,5 +1,7 @@
 "use client";
 import React from 'react';
+import CommentInput from '@/components/comment/CommentInput';
+import CommentsList, { type CommentDto } from '@/components/comment/CommentsList';
 import SelectableIconButton from '@/components/ui/button/SelectableIconButton';
 import VolumeSection from './VolumeSection';
 import ChapterCard from './ChapterCard';
@@ -23,6 +25,8 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
   const [volumes, setVolumes] = React.useState<VolumeDto[]>([]);
   const [chapters, setChapters] = React.useState<ChapterDto[]>([]);
   const [newVolumeTitle, setNewVolumeTitle] = React.useState('');
+  const [comments, setComments] = React.useState<CommentDto[]>([]);
+  const [commentsCount, setCommentsCount] = React.useState(0);
   const canManage = typeof canManageProp === 'boolean' ? canManageProp : (!!session?.user && session.user.role === 'ADMIN');
   const router = useRouter();
 
@@ -35,14 +39,17 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
     async function load() {
       try {
         setLoading(true);
-        const [v, c] = await Promise.all([
+        const [v, c, co] = await Promise.all([
           fetch(`/api/books/${slug}/volumes`).then(r => r.ok ? r.json() : Promise.reject(r)),
           fetch(`/api/books/${slug}/chapters`).then(r => r.ok ? r.json() : Promise.reject(r)),
+          fetch(`/api/books/${slug}/comments`).then(r => r.ok ? r.json() : Promise.reject(r)),
         ]);
         if (ignore) return;
-        setVolumes((v.volumes || []).sort((a: VolumeDto,b: VolumeDto)=>a.title.localeCompare(b.title,'pt-BR',{sensitivity:'base'})));
-        setChapters((c.chapters || []).sort((a: ChapterDto,b: ChapterDto)=>a.title.localeCompare(b.title,'pt-BR',{sensitivity:'base'})));
-      } catch {}
+        setVolumes((v.volumes || []).sort((a: VolumeDto, b: VolumeDto) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })));
+        setChapters((c.chapters || []).sort((a: ChapterDto, b: ChapterDto) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })));
+        setComments(co.comments || []);
+        setCommentsCount((co.comments || []).length + (co.comments || []).reduce((acc: number, it: CommentDto) => acc + (it.replies?.length || 0), 0));
+      } catch { }
       finally { if (!ignore) setLoading(false); }
     }
     if (slug) load();
@@ -52,12 +59,15 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
   async function refetchAll() {
     setLoading(true);
     try {
-      const [v, c] = await Promise.all([
+      const [v, c, co] = await Promise.all([
         fetch(`/api/books/${slug}/volumes`).then(r => r.ok ? r.json() : Promise.reject(r)),
         fetch(`/api/books/${slug}/chapters`).then(r => r.ok ? r.json() : Promise.reject(r)),
+        fetch(`/api/books/${slug}/comments`).then(r => r.ok ? r.json() : Promise.reject(r)),
       ]);
-      setVolumes((v.volumes || []).sort((a: VolumeDto,b: VolumeDto)=>a.title.localeCompare(b.title,'pt-BR',{sensitivity:'base'})));
-      setChapters((c.chapters || []).sort((a: ChapterDto,b: ChapterDto)=>a.title.localeCompare(b.title,'pt-BR',{sensitivity:'base'})));
+      setVolumes((v.volumes || []).sort((a: VolumeDto, b: VolumeDto) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })));
+      setChapters((c.chapters || []).sort((a: ChapterDto, b: ChapterDto) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })));
+      setComments(co.comments || []);
+      setCommentsCount((co.comments || []).length + (co.comments || []).reduce((acc: number, it: CommentDto) => acc + (it.replies?.length || 0), 0));
     } finally {
       setLoading(false);
     }
@@ -90,7 +100,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
     }
   }
   return (
-  <div className=" bg-readowl-purple-dark/10 border-2 text-white border-readowl-purple shadow-md p-3">
+    <div className=" bg-readowl-purple-dark/10 border-2 text-white border-readowl-purple shadow-md p-3">
       <div className="flex justify-center gap-3">
         <SelectableIconButton
           iconUrl="/img/svg/book/chapter-purple.svg"
@@ -113,7 +123,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
           Comentários
         </SelectableIconButton>
       </div>
-  <div className="p-4 min-h-[120px]">
+      <div className="p-4 min-h-[120px]">
         {tab === 'chapters' ? (
           loading ? (
             <div className="text-white/80">Carregando…</div>
@@ -121,9 +131,9 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
             <div>
               {/* Counters */}
               <div className="flex items-center justify-between text-white/90 mb-2">
-                <div className="text-sm">{volumes.length} volume{volumes.length===1?'':'s'} · {chapters.length} capítulo{chapters.length===1?'':'s'}</div>
+                <div className="text-sm">{volumes.length} volume{volumes.length === 1 ? '' : 's'} · {chapters.length} capítulo{chapters.length === 1 ? '' : 's'}</div>
                 <div className="text-sm">
-                  {chapters.reduce((sum, c) => { const t = c.content.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim(); return sum + (t? t.split(/\s+/).length:0); },0).toLocaleString('pt-BR')} palavras
+                  {chapters.reduce((sum, c) => { const t = c.content.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim(); return sum + (t ? t.split(/\s+/).length : 0); }, 0).toLocaleString('pt-BR')} palavras
                 </div>
               </div>
               {/* Create volume (owner/admin) */}
@@ -144,7 +154,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
                     canManage={canManage}
                     onRename={async (id, newTitle) => {
                       await fetch(`/api/books/${slug}/volumes/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: newTitle }) });
-                      setVolumes(prev => prev.map(x => x.id===id? { ...x, title: newTitle } : x).sort((a,b)=>a.title.localeCompare(b.title,'pt-BR',{sensitivity:'base'})));
+                      setVolumes(prev => prev.map(x => x.id === id ? { ...x, title: newTitle } : x).sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })));
                     }}
                     onDelete={(id) => {
                       const v = volumes.find(x => x.id === id) || null;
@@ -172,8 +182,8 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
                         chapter={c}
                         standalone
                         canManage={canManage}
-                        onEditChapter={(id) => { const ch = chapters.find(x=>x.id===id); if (!ch) return; router.push(`/library/books/${slug}/${slugify(ch.title)}/edit-chapter`); }}
-                        onDeleteChapter={(id) => { const ch = chapters.find(x=>x.id===id) || null; setChapterToDelete(ch); }}
+                        onEditChapter={(id) => { const ch = chapters.find(x => x.id === id); if (!ch) return; router.push(`/library/books/${slug}/${slugify(ch.title)}/edit-chapter`); }}
+                        onDeleteChapter={(id) => { const ch = chapters.find(x => x.id === id) || null; setChapterToDelete(ch); }}
                       />
                     ))}
                   </div>
@@ -182,7 +192,36 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
             </div>
           )
         ) : (
-          <div>Comentários (em breve)</div>
+          <div>
+            <CommentInput onSubmit={async (html) => {
+              await fetch(`/api/books/${slug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) });
+              await refetchAll();
+            }} />
+            <div className="mt-4">
+              <CommentsList
+                comments={comments}
+                total={commentsCount}
+                likeApi={async (id, willLike) => {
+                  const res = await fetch(`/api/books/${slug}/comments/${id}/like`, { method: willLike ? 'POST' : 'DELETE' });
+                  const data = await res.json().catch(() => ({}));
+                  return Number(data?.count || 0);
+                }}
+                canEditDelete={(c: CommentDto) => !!session?.user?.id && (session.user.id === c.user?.id || session.user.role === 'ADMIN')}
+                onReply={async (parentId, html) => {
+                  await fetch(`/api/books/${slug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html, parentId }) });
+                  await refetchAll();
+                }}
+                onEdit={async (id, html) => {
+                  await fetch(`/api/books/${slug}/comments/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) });
+                  await refetchAll();
+                }}
+                onDelete={async (id) => {
+                  await fetch(`/api/books/${slug}/comments/${id}`, { method: 'DELETE' });
+                  await refetchAll();
+                }}
+              />
+            </div>
+          </div>
         )}
       </div>
 
@@ -193,7 +232,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
         title="Excluir volume?"
         widthClass="max-w-md"
       >
-  <p>Os capítulos dentro deste volume serão movidos para &quot;Sem volume&quot;. Deseja continuar?</p>
+        <p>Os capítulos dentro deste volume serão movidos para &quot;Sem volume&quot;. Deseja continuar?</p>
         <div className="flex gap-2 justify-end mt-4">
           <button onClick={() => setVolumeToDelete(null)} className="px-3 py-1 border border-readowl-purple/30 text-white/90">Cancelar</button>
           <button

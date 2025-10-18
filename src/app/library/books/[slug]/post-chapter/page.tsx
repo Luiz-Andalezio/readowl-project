@@ -314,7 +314,7 @@ export default function PostChapterPage() {
                   setConfirmSaveOpen(true);
                 }}
                 iconUrl="/img/svg/book/checkbook.svg"
-              >{submitting ? 'Salvando...' : 'Registrar'}</ButtonWithIcon>
+              >{submitting ? 'Salvando...' : 'Criar'}</ButtonWithIcon>
             </div>
           </div>
 
