@@ -59,6 +59,27 @@ The platform aims to solve common issues found in other systems, such as ineffic
 - **Password Strength**: `PasswordStrengthBar` uses a local heuristic and optionally loads `zxcvbn` for enhanced feedback.
 - **Environment Variables**: See `.env.example` for required settings.
 
+### 👀 Views (Chapter reads)
+
+- Auth-only: only logged-in reads are counted. No IP collection or storage.
+- Bot filter: common crawler user-agents are ignored.
+- Author skip: the book author’s own reads don’t count.
+- Dedupe: one view per user per chapter is counted at most once every 2 minutes (Redis SET NX PX; in-memory fallback).
+- Endpoints:
+        - POST `/api/books/:slug/chapters/:chapterSlug/view` — record a view.
+        - GET `/api/books/:slug/chapters/:chapterSlug/views` — returns `{ count }` for the chapter.
+        - GET `/api/books/:slug/views` — returns `{ count }` across all chapters of the book.
+- UI integration:
+        - The chapter reading page posts a view on mount and shows the live count.
+        - The book header shows total views via a small client fetcher.
+
+Note: In monorepo workspaces with multiple lockfiles, set `outputFileTracingRoot` in `next.config.ts` to the workspace root to silence the Next.js warning.
+### Rules for views
+
+- Chapter: view count visible only to the book author and administrators (403 for others).
+- Book: total views are public and displayed in the book header.
+- Views are recorded only for authenticated users; the author's own views are not counted; deduplication enforces at most one view per user per chapter every 2 minutes.
+
 #### **Database**
 - **PostgreSQL**: Data storage.
 

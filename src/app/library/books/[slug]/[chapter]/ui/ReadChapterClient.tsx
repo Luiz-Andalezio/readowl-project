@@ -1,6 +1,5 @@
 "use client";
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
@@ -8,9 +7,10 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useSession } from 'next-auth/react';
 import CommentInput from '@/components/comment/CommentInput';
 import CommentsList, { type CommentDto } from '@/components/comment/CommentsList';
+import { Eye, SunMedium, Moon, ArrowLeft, ArrowRight, BookText, Pencil, FilePlus2, FilePenLine } from 'lucide-react';
 
 type Payload = {
-  book: { id: string; title: string };
+  book: { id: string; title: string; authorName?: string | null };
   chapter: { id: string; title: string; content: string; createdAt: string | Date };
   prevSlug: string | null;
   nextSlug: string | null;
@@ -74,6 +74,27 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
     ? 'prose prose-invert max-w-4xl mx-auto font-ptserif'
     : 'prose max-w-4xl mx-auto font-ptserif';
 
+  // Views: POST a view on mount (auth-only) and fetch count
+  const [views, setViews] = React.useState<number | null>(null);
+  const [canSeeViews, setCanSeeViews] = React.useState<boolean>(true);
+  React.useEffect(() => {
+    let ignore = false;
+    (async () => {
+      try {
+        // Fire-and-forget view record; ignore errors
+        await fetch(`/api/books/${slug}/chapters/${chapterSlug}/view`, { method: 'POST' });
+      } catch {}
+      try {
+        const r = await fetch(`/api/books/${slug}/chapters/${chapterSlug}/views`, { cache: 'no-store' });
+        if (r.status === 403) { if (!ignore) setCanSeeViews(false); return; }
+        if (!r.ok) return;
+        const data = await r.json();
+        if (!ignore) { setViews(Number(data?.count || 0)); setCanSeeViews(true); }
+      } catch {}
+    })();
+    return () => { ignore = true; };
+  }, [slug, chapterSlug]);
+
   // Comments for this chapter
   const [comments, setComments] = React.useState<CommentDto[]>([]);
   const [count, setCount] = React.useState(0);
@@ -126,19 +147,19 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               <a href={`/library/books/${slug}/edit`} className="inline-flex items-center">
                 <span className="sr-only">Editar obra</span>
                 <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
-                  <Image src="/img/svg/generics/white/edit.svg" alt="" width={18} height={18} />
+                  <Pencil size={18} />
                   Editar obra
                 </span>
               </a>
               <a href={`/library/books/${slug}/${chapterSlug}/edit-chapter`} className="inline-flex items-center">
                 <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
-                  <Image src="/img/svg/book/edit-chapter.svg" alt="" width={18} height={18} />
+                  <FilePenLine size={18} />
                   Editar capítulo
                 </span>
               </a>
               <a href={`/library/books/${slug}/post-chapter`} className="inline-flex items-center">
                 <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
-                  <Image src="/img/svg/book/chapter.svg" alt="" width={18} height={18} />
+                  <FilePlus2 size={18} />
                   Adicionar capítulo
                 </span>
               </a>
@@ -159,19 +180,19 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
                 aria-label={dark ? 'Modo claro' : 'Modo escuro'}
                 className="rounded-full w-11 h-11 flex items-center justify-center border-2 border-readowl-purple shadow-md bg-readowl-purple-light text-white hover:bg-readowl-purple-hover"
               >
-                <Image src={dark ? '/img/svg/color-mode/bright-mode.svg' : '/img/svg/color-mode/dark-mode.svg'} alt="" width={20} height={20} />
+                {dark ? <SunMedium size={20} /> : <Moon size={20} />}
               </button>
             </div>
             {(prevHref || nextHref) ? (
               <div className="mt-3 flex items-center justify-between">
                 <div className="flex-1 flex justify-start">
                   {prevHref ? (
-                    <ButtonWithIcon onClick={() => router.push(prevHref)} iconUrl="/img/svg/generics/white/arrow-left.svg" variant="primary">Anterior</ButtonWithIcon>
+                    <ButtonWithIcon onClick={() => router.push(prevHref)} icon={<ArrowLeft size={20} />} variant="primary">Anterior</ButtonWithIcon>
                   ) : null}
                 </div>
                 <div className="flex-1 flex justify-end">
                   {nextHref ? (
-                    <ButtonWithIcon onClick={() => router.push(nextHref)} iconUrl="/img/svg/generics/white/arrow-right.svg" variant="primary">Próximo</ButtonWithIcon>
+                    <ButtonWithIcon onClick={() => router.push(nextHref)} icon={<ArrowRight size={20} />} variant="primary">Próximo</ButtonWithIcon>
                   ) : null}
                 </div>
               </div>
@@ -182,7 +203,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
           <div className="mx-auto max-w-4xl hidden sm:flex items-center justify-between gap-3">
             <div className="flex-1 flex justify-start">
               {prevHref ? (
-                <ButtonWithIcon onClick={() => router.push(prevHref)} iconUrl="/img/svg/generics/white/arrow-left.svg" variant="primary">Anterior</ButtonWithIcon>
+                <ButtonWithIcon onClick={() => router.push(prevHref)} icon={<ArrowLeft size={20} />} variant="primary">Anterior</ButtonWithIcon>
               ) : null}
             </div>
             <div className="flex-none flex justify-center">
@@ -191,12 +212,12 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
                 aria-label={dark ? 'Modo claro' : 'Modo escuro'}
                 className="rounded-full w-11 h-11 flex items-center justify-center border-2 border-readowl-purple shadow-md bg-readowl-purple-light text-white hover:bg-readowl-purple-hover"
               >
-                <Image src={dark ? '/img/svg/color-mode/bright-mode.svg' : '/img/svg/color-mode/dark-mode.svg'} alt="" width={20} height={20} />
+                {dark ? <SunMedium size={20} /> : <Moon size={20} />}
               </button>
             </div>
             <div className="flex-1 flex justify-end">
               {nextHref ? (
-                <ButtonWithIcon onClick={() => router.push(nextHref)} iconUrl="/img/svg/generics/white/arrow-right.svg" variant="primary">Próximo</ButtonWithIcon>
+                <ButtonWithIcon onClick={() => router.push(nextHref)} icon={<ArrowRight size={20} />} variant="primary">Próximo</ButtonWithIcon>
               ) : null}
             </div>
           </div>
@@ -208,6 +229,12 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
                 {payload.book.title}
               </Link>
             </h2>
+            {/* Author centered, smaller than title */}
+            {payload.book.authorName ? (
+              <div className="mt-1 text-center font-ptserif font-bold text-base md:text-lg">
+                por {payload.book.authorName}
+              </div>
+            ) : null}
             <div className="mx-auto max-w-4xl">
               {payload.volumeTitle ? (
                 <div className="mt-10 font-bold">
@@ -217,6 +244,16 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               <h1 className="mt-1 text-3xl md:text-4xl font-ptserif text-left">
                 {payload.chapter.title}
               </h1>
+              {canSeeViews && (
+                <div className="mt-2 text-sm opacity-80">
+                  <span className="inline-flex items-center gap-2">
+                    <Eye size={18} className={dark ? 'text-white' : 'text-readowl-purple-extradark'} />
+                    <span className={dark ? 'text-white' : 'text-readowl-purple-extradark'}>
+                      {views !== null ? `${views.toLocaleString('pt-BR')} visualizações` : '0'}
+                    </span>
+                  </span>
+                </div>
+              )}
             </div>
           </header>
 
@@ -242,7 +279,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               </div>
             ) : null}
             <div className="mt-3 flex justify-center">
-              <ButtonWithIcon onClick={() => router.push(indexHref)} iconUrl="/img/svg/navbar/book1.svg" variant="primary">Índice</ButtonWithIcon>
+              <ButtonWithIcon onClick={() => router.push(indexHref)} icon={<BookText size={20} />} variant="primary">Índice</ButtonWithIcon>
             </div>
           </div>
 
@@ -254,7 +291,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               ) : null}
             </div>
             <div className="flex-none flex justify-center">
-              <ButtonWithIcon onClick={() => router.push(indexHref)} iconUrl="/img/svg/navbar/book1.svg" variant="primary">Índice</ButtonWithIcon>
+              <ButtonWithIcon onClick={() => router.push(indexHref)} icon={<BookText size={20} />} variant="primary">Índice</ButtonWithIcon>
             </div>
             <div className="flex-1 flex justify-end">
               {payload.nextSlug ? (
@@ -265,7 +302,8 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
         </div>
         {/* Comments */}
         <div className="relative rounded-md p-4 md:p-6 font-ptserif mt-6">
-          <CommentInput onSubmit={async (html) => { await fetch(`/api/books/${slug}/chapters/${chapterSlug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) }); await refetch(); }} />
+      <label className={`block mb-2 font-semibold ${dark ? 'text-white' : 'text-readowl-purple-extradark'}`}>Deixe um comentário:</label>
+      <CommentInput onSubmit={async (html) => { await fetch(`/api/books/${slug}/chapters/${chapterSlug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) }); await refetch(); }} />
           <div className="mt-4">
             <CommentsList
               comments={comments}

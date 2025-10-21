@@ -14,6 +14,7 @@ if (missingGoogle) {
 
 export const authOptions: NextAuthOptions = {
 	adapter: PrismaAdapter(prisma),
+	debug: process.env.NEXTAUTH_DEBUG === 'true',
 	providers: [
 		...(missingGoogle
 			? []
@@ -57,6 +58,56 @@ export const authOptions: NextAuthOptions = {
 		// 	path: "/",
 		// },
 	callbacks: {
+		async signIn({ user, account, profile }) {
+			// Proactively link Google account to existing user with same email to avoid OAuthAccountNotLinked.
+			if (account?.provider === 'google') {
+				const p = profile as Record<string, unknown> | null | undefined;
+				const email = (p?.['email'] as string | undefined) || (user?.email as string | undefined);
+				const emailVerified = (p?.['email_verified'] as boolean | undefined) === undefined ? true : !!p?.['email_verified'];
+				if (email && emailVerified) {
+					try {
+						const existing = await prisma.user.findUnique({ where: { email } });
+						if (existing) {
+							// If no Account is linked yet for this providerAccountId, create it pointing to the existing user
+							const providerAccountId = account.providerAccountId as string | undefined;
+							if (providerAccountId) {
+								const already = await prisma.account.findUnique({
+									where: { provider_providerAccountId: { provider: account.provider, providerAccountId } },
+								});
+								if (!already) {
+									// lightweight audit log (console + db table later)
+									console.info('[Auth][Link]', {
+										provider: account.provider,
+										providerAccountId,
+										userId: existing.id,
+										email,
+										ts: new Date().toISOString(),
+									});
+									await prisma.account.create({
+										data: {
+											userId: existing.id,
+											type: account.type as string,
+											provider: account.provider,
+											providerAccountId,
+											refresh_token: (account as Record<string, unknown>)['refresh_token'] as string | null | undefined,
+											access_token: (account as Record<string, unknown>)['access_token'] as string | null | undefined,
+											expires_at: (account as Record<string, unknown>)['expires_at'] as number | null | undefined,
+											token_type: (account as Record<string, unknown>)['token_type'] as string | null | undefined,
+											scope: (account as Record<string, unknown>)['scope'] as string | null | undefined,
+											id_token: (account as Record<string, unknown>)['id_token'] as string | null | undefined,
+											session_state: (account as Record<string, unknown>)['session_state'] as string | null | undefined,
+										},
+									});
+								}
+							}
+						}
+					} catch (e) {
+						console.warn('[Auth] Account linking warning:', e);
+					}
+				}
+			}
+			return true;
+		},
 		async session({ session, token }) {
 			const t = token as JWT & { role?: AppRole; authProvider?: string; stepUpAt?: number; remember?: boolean; credentialVersion?: number };
 			if (session.user && token.sub) {

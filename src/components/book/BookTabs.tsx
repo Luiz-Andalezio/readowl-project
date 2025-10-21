@@ -3,6 +3,7 @@ import React from 'react';
 import CommentInput from '@/components/comment/CommentInput';
 import CommentsList, { type CommentDto } from '@/components/comment/CommentsList';
 import SelectableIconButton from '@/components/ui/button/SelectableIconButton';
+import { BookText, MessageSquareText } from 'lucide-react';
 import VolumeSection from './VolumeSection';
 import ChapterCard from './ChapterCard';
 import Modal from '@/components/ui/modal/Modal';
@@ -103,7 +104,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
     <div className=" bg-readowl-purple-dark/10 border-2 text-white border-readowl-purple shadow-md p-3">
       <div className="flex justify-center gap-3">
         <SelectableIconButton
-          iconUrl="/img/svg/book/chapter-purple.svg"
+          icon={<BookText size={18} />}
           size="sm"
           fullWidth={false}
           selected={tab === 'chapters'}
@@ -113,7 +114,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
           Capítulos
         </SelectableIconButton>
         <SelectableIconButton
-          iconUrl="/img/svg/comment/comment.svg"
+          icon={<MessageSquareText size={18} />}
           size="sm"
           fullWidth={false}
           selected={tab === 'comments'}
@@ -193,6 +194,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
           )
         ) : (
           <div>
+            <label className="block mb-2 font-semibold">Deixe um comentário:</label>
             <CommentInput onSubmit={async (html) => {
               await fetch(`/api/books/${slug}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: html }) });
               await refetchAll();
@@ -224,6 +226,7 @@ export default function BookTabs({ canManage: canManageProp }: { canManage?: boo
                   await fetch(`/api/books/${slug}/comments/${id}`, { method: 'DELETE' });
                   await refetchAll();
                 }}
+                headerClassName="text-white"
               />
             </div>
           </div>

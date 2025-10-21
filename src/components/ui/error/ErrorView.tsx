@@ -15,7 +15,11 @@ export default function ErrorView({message, imgSrc, className = "", offsetUnderN
         {imgSrc ? (
           <div className="mb-6 flex justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imgSrc} className="block max-w-[320px] md:max-w-[420px] h-auto object-contain" />
+            <img
+              src={imgSrc}
+              alt=""
+              className="block max-w-[320px] md:max-w-[420px] h-auto object-contain"
+            />
           </div>
         ) : null}
         <p className="text-readowl-purple-extralight text-base md:text-lg">{message}</p>

@@ -4,6 +4,7 @@ import Image from 'next/image';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
     variant?: 'primary' | 'secondary';
+    icon?: React.ReactNode;
     iconUrl?: string;
     iconAlt?: string;
 }
@@ -12,6 +13,7 @@ const ButtonWithIcon: React.FC<ButtonProps> = ({
     children,
     className,
     variant = 'primary',
+    icon,
     iconUrl,
     iconAlt = 'Ícone',
     ...props
@@ -25,9 +27,11 @@ const ButtonWithIcon: React.FC<ButtonProps> = ({
 
     return (
         <button className={`${baseStyle} ${styles[variant]} ${className || ''}`} {...props}>
-            {iconUrl && (
+            {icon ? (
+                <span className="w-5 h-5 inline-flex items-center justify-center">{icon}</span>
+            ) : iconUrl ? (
                 <Image src={iconUrl} alt={iconAlt} width={20} height={20} className="w-5 h-5" />
-            )}
+            ) : null}
             <span className="flex-1 text-left">{children}</span>
         </button>
     );

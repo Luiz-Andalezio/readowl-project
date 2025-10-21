@@ -1,0 +1,34 @@
+services:
+  # Dedicated Postgres for the Next.js project.
+  # Exposes 5433 on the host to avoid clashing with any other Postgres you may have.
+  postgres:
+    image: postgres:16-alpine
+    container_name: readowl_next_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: readowl
+      POSTGRES_PASSWORD: readowl
+      POSTGRES_DB: readowl
+    ports:
+      - "5433:5432"
+    volumes:
+      - readowl_next_pgdata:/var/lib/postgresql/data
+
+  # Optional: pgAdmin for managing the Postgres of this project.
+  # Reads default admin credentials from environment variables if provided.
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: readowl_next_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5051:80" # Access pgAdmin at http://localhost:5051
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # allow pgAdmin container to reach host ports on Linux
+    depends_on:
+      - postgres
+
+volumes:
+  readowl_next_pgdata:

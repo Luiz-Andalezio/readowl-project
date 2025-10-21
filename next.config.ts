@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Silence monorepo/multiple lockfiles workspace root warning
+  outputFileTracingRoot: '/home/luiz/ADS/5 Quinto Período/LabESOF',
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'illusia.com.br' }, // Your own domain or project host

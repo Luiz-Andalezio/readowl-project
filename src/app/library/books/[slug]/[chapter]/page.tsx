@@ -69,7 +69,7 @@ export default async function ReadChapterPage({ params }: PageProps) {
 
   // DTO for client
   const payload = {
-    book: { id: book.id, title: book.title },
+    book: { id: book.id, title: book.title, authorName: book.author?.name || 'Autor desconhecido' },
     chapter: { id: current.id, title: current.title, content: current.content, createdAt: current.createdAt },
     prevSlug: prev ? slugify(prev.title) : null,
     nextSlug: next ? slugify(next.title) : null,

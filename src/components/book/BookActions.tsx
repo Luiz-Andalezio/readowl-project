@@ -1,11 +1,11 @@
 "use client";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 import ButtonWithIcon from "@/components/ui/button/ButtonWithIcon";
 import { BookWithAuthorAndGenres } from "@/types/book";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/slug";
+import { BookText, FilePlus2, Bookmark } from 'lucide-react';
 
 type Props = {
     book: BookWithAuthorAndGenres;
@@ -141,7 +141,7 @@ export default function BookActions({ book, className }: Props) {
                 <div className="flex flex-col gap-3 w-full justify-center items-center mt-7 max-w-[340px] mx-auto md:mx-0 md:w-[340px] md:self-end min-w-0">
                     <ButtonWithIcon
                         className="w-full justify-center items-center"
-                        iconUrl="/img/svg/navbar/book1.svg"
+                        icon={<BookText size={20} />}
                         variant="primary"
                         onClick={() => router.push(`/library/books/${slugify(book.title)}/edit`)}
                     >
@@ -149,7 +149,7 @@ export default function BookActions({ book, className }: Props) {
                     </ButtonWithIcon>
                     <ButtonWithIcon
                         className="w-full justify-center items-center"
-                        iconUrl="/img/svg/book/chapter.svg"
+                        icon={<FilePlus2 size={20} />}
                         onClick={() => router.push(`/library/books/${slugify(book.title)}/post-chapter`)}
                     >
                         Adicionar capítulo
@@ -166,19 +166,13 @@ export default function BookActions({ book, className }: Props) {
                             : "bg-readowl-purple-light text-white border-readowl-purple rounded-md hover:bg-readowl-purple-hover shadow-md"
                         } ${loadingFollow ? "opacity-75 cursor-not-allowed" : ""}`}
                 >
-                    <Image
-                        src="/img/svg/book/bookmark-purple.svg"
-                        alt={following ? "Seguindo" : "Seguir"}
-                        width={20}
-                        height={20}
-                        className={following ? "invert-0" : "invert-[100%] brightness-0"}
-                    />
+                    <Bookmark size={20} className={following ? '' : ''} />
                     {following ? "Seguindo" : "Seguir"}
                 </button>
                 {typeof firstChapterSlug === 'string' ? (
                     <ButtonWithIcon
                         className={`flex-1 w-full justify-center items-center ${loadingStart ? 'opacity-75 cursor-not-allowed' : ''}`}
-                        iconUrl="/img/svg/navbar/book1.svg"
+                        icon={<BookText size={20} />}
                         onClick={startReading}
                     >
                         {loadingStart ? 'Abrindo...' : 'Iniciar'}

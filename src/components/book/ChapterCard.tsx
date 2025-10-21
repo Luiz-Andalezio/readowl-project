@@ -1,8 +1,8 @@
 "use client";
 import Link from 'next/link';
-import Image from 'next/image';
 import React from 'react';
 import { slugify } from '@/lib/slug';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 
 export type ChapterView = {
   id: string;
@@ -43,6 +43,20 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
   })();
   const words = wordsCountFromHtml(chapter.content);
   const chapterSlug = slugify(chapter.title);
+  const [views, setViews] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    let ignore = false;
+    (async () => {
+      if (!canManage) return; // only author/admin sees per-chapter views
+      try {
+        const res = await fetch(`/api/books/${slug}/chapters/${chapterSlug}/views`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!ignore) setViews(Number(data?.count || 0));
+      } catch {}
+    })();
+    return () => { ignore = true; };
+  }, [slug, chapterSlug, canManage]);
 
   return (
     <div
@@ -55,14 +69,14 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
             className="p-1 hover:bg-white/30 rounded"
             onClick={() => onEditChapter?.(chapter.id)}
           >
-            <Image src="/img/svg/book/edit-chapter.svg" alt="Editar" width={18} height={18} />
+            <Pencil size={18} />
           </button>
           <button
             aria-label="Excluir capítulo"
             className="p-1 hover:bg-white/30 rounded"
             onClick={() => onDeleteChapter?.(chapter.id)}
           >
-            <Image src="/img/svg/generics/white/delete.svg" alt="Excluir" width={18} height={18} />
+            <Trash2 size={18} />
           </button>
         </div>
       )}
@@ -70,6 +84,12 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
         <h4 className={`truncate ${standalone ? 'text-lg md:text-xl font-bold' : 'text-base md:text-lg font-bold'}`}>{chapter.title}</h4>
       </Link>
       <div className="text-sm opacity-90 mt-1">{dateStr} · {timeStr}</div>
+      {canManage && (
+        <div className="text-sm opacity-90 mt-1 inline-flex items-center gap-1">
+          <Eye size={16} />
+          <span>{views !== null ? views.toLocaleString('pt-BR') : '—'}</span>
+        </div>
+      )}
       <div className="text-sm opacity-90">{words.toLocaleString('pt-BR')} palavras</div>
     </div>
   );

@@ -1,8 +1,9 @@
-import Image from 'next/image';
 import { BookWithAuthorAndGenres, BookStatus } from '@/types/book';
 import FollowersCountClient from './FollowersCountClient';
+import ViewsCountClient from './ViewsCountClient';
 import RatingSummaryClient from './RatingSummaryClient';
 import { slugify } from '@/lib/slug';
+import { BookMarked, User2, Eye, Bookmark, Star, CalendarDays, Activity, CheckCircle2, PauseCircle, Hourglass } from 'lucide-react';
 
 type Props = {
     book: BookWithAuthorAndGenres;
@@ -13,16 +14,10 @@ type Props = {
 };
 
 const ICON_SIZE = 18;
-
-const icon = (src: string, alt: string) => (
-    <Image
-        src={src}
-        alt={alt}
-        width={ICON_SIZE}
-        height={ICON_SIZE}
-        className="inline-block mr-2 align-text-bottom shrink-0"
-        priority
-    />
+const IconWrap = ({ children }: { children: React.ReactNode }) => (
+    <span className="inline-flex items-center justify-center mr-2 align-text-bottom shrink-0" style={{ width: ICON_SIZE, height: ICON_SIZE }}>
+        {children}
+    </span>
 );
 
 const statusLabelMap: Record<BookStatus, string> = {
@@ -53,7 +48,7 @@ export default function BookHeader({ book, mode, followersCount, ratingAvg, rati
                             <span className="whitespace-normal break-words">{book.title}</span>
                         </h1>
                         <div className="mt-2 font-semibold flex md:text-xl text-white/90 flex-wrap">
-                            {icon('/img/svg/book/label.svg', 'Gêneros')}
+                            <IconWrap><BookMarked size={ICON_SIZE} /></IconWrap>
                             <span className="whitespace-normal break-words leading-snug">
                                 {book.genres
                                     .map(g => g.name)
@@ -65,26 +60,26 @@ export default function BookHeader({ book, mode, followersCount, ratingAvg, rati
                 ) : (
                     <dl className="grid grid-cols-1 gap-1 text-base md:text-lg text-white/90 mt-3">
                         <div className="flex items-center">
-                            {icon('/img/svg/book/author.svg', 'Autor')}
+                            <IconWrap><User2 size={ICON_SIZE} /></IconWrap>
                             <dt className="sr-only">Autor</dt>
                             <dd>{book.author?.name || 'Autor desconhecido'}</dd>
                         </div>
                         <div className="flex items-center">
-                            {icon('/img/svg/book/view.svg', 'Views')}
+                            <IconWrap><Eye size={ICON_SIZE} /></IconWrap>
                             <dt className="sr-only">Visualizações</dt>
-                            <dd>{book.views.toLocaleString('pt-BR')}</dd>
+                            <dd><ViewsCountClient slug={slug} initialCount={undefined} /></dd>
                         </div>
                         <div className="flex items-center">
-                            {icon('/img/svg/book/bookmark.svg', 'Salvos')}
+                            <IconWrap><Bookmark size={ICON_SIZE} /></IconWrap>
                             <dt className="sr-only">Salvos</dt>
                                                         <dd>
                                                                 {typeof followersCount === 'number'
                                                                     ? <FollowersCountClient slug={slug} initialCount={followersCount} />
-                                                                    : '—'}
+                                                                    : '0'}
                                                         </dd>
                         </div>
                         <div className="flex items-center">
-                            {icon('/img/svg/book/stars.svg', 'Média de Avaliações')}
+                            <IconWrap><Star size={ICON_SIZE} /></IconWrap>
                             <dt className="sr-only">Avaliações</dt>
                             <dd>
                                 {typeof ratingCount === 'number'
@@ -93,18 +88,17 @@ export default function BookHeader({ book, mode, followersCount, ratingAvg, rati
                             </dd>
                         </div>
                         <div className="flex items-center">
-                            {icon('/img/svg/book/date.svg', 'Frequência')}
+                            <IconWrap><CalendarDays size={ICON_SIZE} /></IconWrap>
                             <dt className="sr-only">Frequência</dt>
                             <dd>{book.releaseFrequency || '—'}</dd>
                         </div>
                         <div className="flex items-center">
-                            {icon(
-                                book.status === 'ONGOING' ? '/img/svg/book/status/active.svg'
-                                : book.status === 'COMPLETED' ? '/img/svg/book/status/finished.svg'
-                                : book.status === 'PAUSED' ? '/img/svg/book/status/paused.svg'
-                                : '/img/svg/book/status/hiatus.svg',
-                                'Status'
-                            )}
+                            <IconWrap>
+                              {book.status === 'ONGOING' ? <Activity size={ICON_SIZE} />
+                                : book.status === 'COMPLETED' ? <CheckCircle2 size={ICON_SIZE} />
+                                : book.status === 'PAUSED' ? <PauseCircle size={ICON_SIZE} />
+                                : <Hourglass size={ICON_SIZE} />}
+                            </IconWrap>
                             <dt className="sr-only">Status</dt>
                             <dd>
                                 {statusLabelMap[book.status] || statusLabelMap.ONGOING}

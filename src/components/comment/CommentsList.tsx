@@ -28,9 +28,10 @@ type Props = {
   onReply: (parentId: string, html: string) => Promise<void>;
   onEdit: (id: string, html: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  headerClassName?: string; // style for the top "X comentários" line
 };
 
-export default function CommentsList({ comments, total, likeApi, canEditDelete, canEdit, canDelete, onReply, onEdit, onDelete }: Props) {
+export default function CommentsList({ comments, total, likeApi, canEditDelete, canEdit, canDelete, onReply, onEdit, onDelete, headerClassName }: Props) {
   useSession();
   const [replyTo, setReplyTo] = React.useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = React.useState<string | null>(null);
@@ -139,7 +140,7 @@ export default function CommentsList({ comments, total, likeApi, canEditDelete, 
 
   return (
     <div>
-      <div className="mb-2 text-white">{total} comentário{total === 1 ? '' : 's'}.</div>
+      <div className={`mb-2 ${headerClassName ?? 'text-white'}`}>{total} comentário{total === 1 ? '' : 's'}.</div>
       <div>
         {(() => {
           // Group flat list by parentId and render: parents first, then all descendants directly below (one-level indent), preserving order.
