@@ -48,7 +48,7 @@ export default function BookHeader({ book, mode, followersCount, ratingAvg, rati
                             <span className="whitespace-normal break-words">{book.title}</span>
                         </h1>
                         <div className="mt-2 font-semibold flex md:text-xl text-white/90 flex-wrap">
-                            <IconWrap><BookMarked size={ICON_SIZE} /></IconWrap>
+                            <IconWrap><BookMarked size={20} /></IconWrap>
                             <span className="whitespace-normal break-words leading-snug">
                                 {book.genres
                                     .map(g => g.name)

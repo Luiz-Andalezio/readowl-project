@@ -46,12 +46,13 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {editing ? (
-            <div className="relative w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="relative w-full" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
               <input
                 value={name}
                 maxLength={200}
                 onChange={(e) => setName(e.target.value.slice(0, 200))}
                 onKeyDown={(e) => {
+                  e.stopPropagation();
                   if (e.key === 'Enter') {
                     if (canSave) {
                       onRename?.(volumeId, name.trim());
@@ -62,7 +63,7 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
                     setEditing(false);
                   }
                 }}
-                className="w-full bg-white border border-readowl-purple px-2 py-1 pr-36"
+                className="w-full bg-white text-readowl-purple-extradark border border-readowl-purple px-2 py-1 pr-36"
               />
               <div className="pointer-events-none absolute right-16 top-1/2 -translate-y-1/2 text-[10.5px] text-readowl-purple-extradark/60 mr-2" aria-live="polite">
                 {name.length}/200
