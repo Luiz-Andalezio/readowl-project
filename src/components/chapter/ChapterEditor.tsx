@@ -8,7 +8,7 @@ import Link from '@tiptap/extension-link';
 import ImageExtension from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
-import NextImage from 'next/image';
+import { Undo2, Redo2, Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code as CodeIcon, Link as LinkIcon, Image as ImageIcon, List as ListIcon, ListOrdered, Eraser } from 'lucide-react';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
 import ResizableImage from '@/components/ui/tiptap/ResizableImage';
@@ -186,10 +186,10 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
       <div className="flex flex-wrap items-center gap-2 text-readowl-purple-medium bg-readowl-purple-extralight px-2 py-1 border-b border-readowl-purple/10">
         {/* Undo/Redo */}
         <button title="Desfazer" onClick={() => editor?.chain().focus().undo().run()} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
-          <NextImage src="/img/svg/tiptap/arrow-undo.svg" width={18} height={18} alt="Undo" />
+          <Undo2 size={18} />
         </button>
         <button title="Refazer" onClick={() => editor?.chain().focus().redo().run()} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
-          <NextImage src="/img/svg/tiptap/arrow-redo.svg" width={18} height={18} alt="Redo" />
+          <Redo2 size={18} />
         </button>
 
         <span className="mx-1 opacity-40">|</span>
@@ -226,39 +226,39 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
 
         {/* Bold/Italic/Underline/Strike/Code */}
         <button title="Negrito" onClick={() => editor?.chain().focus().toggleBold().run()} className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <NextImage src="/img/svg/tiptap/bold.svg" width={18} height={18} alt="B" />
+          <Bold size={18} />
         </button>
         <button title="Itálico" onClick={() => editor?.chain().focus().toggleItalic().run()} className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('italic') ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <NextImage src="/img/svg/tiptap/italic.svg" width={18} height={18} alt="I" />
+          <Italic size={18} />
         </button>
         <button title="Sublinhado" onClick={() => editor?.chain().focus().toggleUnderline().run()} className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('underline') ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <NextImage src="/img/svg/tiptap/underlined.svg" width={18} height={18} alt="U" />
+          <UnderlineIcon size={18} />
         </button>
         <button title="Tachado" onClick={() => editor?.chain().focus().toggleStrike().run()} className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <NextImage src="/img/svg/tiptap/strikethrough.svg" width={18} height={18} alt="S" />
+          <Strikethrough size={18} />
         </button>
         <button title="Código" onClick={() => editor?.chain().focus().toggleCode().run()} className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 ${editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <NextImage src="/img/svg/tiptap/code.svg" width={18} height={18} alt="</>" />
+          <CodeIcon size={18} />
         </button>
 
         <span className="mx-1 opacity-40">|</span>
 
         {/* Link & Image */}
         <button title="Link" onClick={() => { setLinkUrl(''); setLinkOpen(true); }} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
-          <NextImage src="/img/svg/tiptap/add-link.svg" width={18} height={18} alt="Link" />
+          <LinkIcon size={18} />
         </button>
         <button title="Imagem" onClick={() => { setImageUrl(''); setImageWidth(''); setImageHeight(''); setImageOpen(true); }} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
-          <NextImage src="/img/svg/tiptap/add-image.svg" width={18} height={18} alt="Imagem" />
+          <ImageIcon size={18} />
         </button>
 
         <span className="mx-1 opacity-40">|</span>
 
         {/* Lists */}
         <button title="Lista" onClick={() => editor?.chain().focus().toggleBulletList().run()} className={`px-1 py-0.5 hover:bg-readowl-purple-extralight/40 ${editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <NextImage src="/img/svg/tiptap/bulleted-list.svg" width={18} height={18} alt="•" />
+          <ListIcon size={18} />
         </button>
         <button title="Num." onClick={() => editor?.chain().focus().toggleOrderedList().run()} className={`px-1 py-0.5 hover:bg-readowl-purple-extralight/40 ${editor?.isActive('orderedList') ? 'bg-readowl-purple-extralight/60' : ''}`}>
-          <NextImage src="/img/svg/tiptap/numbered-list.svg" width={18} height={18} alt="1." />
+          <ListOrdered size={18} />
         </button>
 
         <span className="mx-1 opacity-40">|</span>
@@ -317,7 +317,7 @@ export default function ChapterEditor({ value, onChange, maxChars = 50000 }: Cha
           </span>
         </button>
         <button title="Limpar formatação" onClick={() => editor?.chain().focus().clearNodes().unsetAllMarks().run()} className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40">
-          <NextImage src="/img/svg/tiptap/format-clear.svg" width={18} height={18} alt="Limpar formatação" />
+          <Eraser size={18} />
         </button>
       </div>
 

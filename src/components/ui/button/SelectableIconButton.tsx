@@ -52,7 +52,7 @@ export default function SelectableIconButton({
     lg: 'text-xl px-7 py-3',
   };
 
-  const baseStyle = `font-yusei font-semibold border-2 border-readowl-purple rounded-md transition-colors duration-300 flex items-center justify-start gap-2 ${fullWidth ? 'w-full' : ''} ${sizeClasses[size]}`;
+  const baseStyle = `font-ptserif font-semibold border-2 border-readowl-purple rounded-md transition-colors duration-300 flex items-center justify-start gap-2 ${fullWidth ? 'w-full' : ''} ${sizeClasses[size]}`;
 
   const style = isSelected
     ? 'bg-readowl-purple-dark text-readowl-purple-light'

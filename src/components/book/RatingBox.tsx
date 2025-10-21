@@ -1,19 +1,19 @@
 "use client";
-import Image from 'next/image';
 import React from 'react';
+import { Star } from 'lucide-react';
  
 
 type Props = { bookId: string; slug: string };
 
-function starSrc(score: number) {
-    switch (score) {
-        case 1: return '/img/svg/book/aval/star1.svg';
-        case 2: return '/img/svg/book/aval/star2.svg';
-        case 3: return '/img/svg/book/aval/star3.svg';
-        case 4: return '/img/svg/book/aval/star4.svg';
-        case 5: return '/img/svg/book/aval/star5.svg';
-        default: return '/img/svg/book/aval/star.svg';
-    }
+// Helper to render a star; filled when active, outline when not
+function StarIcon({ active }: { active: boolean }) {
+    return (
+        <Star
+            className="w-16 h-16 text-yellow-400 drop-shadow"
+            strokeWidth={1.5}
+            fill={active ? 'currentColor' : 'none'}
+        />
+    );
 }
 
 export default function RatingBox({ bookId, slug }: Props) {
@@ -88,9 +88,7 @@ export default function RatingBox({ bookId, slug }: Props) {
             <div className="inline-flex items-center gap-3 select-none">
                 {Array.from({ length: 5 }).map((_, i) => {
                     const idx = i + 1;
-                    // For our sprite approach, render starN (1..5) only once per state based on display
-                    // and default 'star' for positions beyond display
-                    const src = display >= idx ? starSrc(display) : starSrc(0);
+                    const active = display >= idx;
                     return (
                         <button
                             key={idx}
@@ -100,7 +98,7 @@ export default function RatingBox({ bookId, slug }: Props) {
                             onClick={() => setRating(idx)}
                             className="transition-transform duration-150 ease-out hover:scale-110 active:scale-95"
                         >
-                            <Image src={src} alt={`${idx}`} width={90} height={90} className="transition-all duration-150 hover:brightness-110" />
+                            <StarIcon active={!!active} />
                         </button>
                     );
                 })}

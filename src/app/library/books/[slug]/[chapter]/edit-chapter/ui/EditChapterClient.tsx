@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
 import VolumeDropdown from '@/components/chapter/VolumeDropdown';
 import ChapterEditor from '@/components/chapter/ChapterEditor';
+import { X, BookText, Trash2 } from 'lucide-react';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import Modal from '@/components/ui/modal/Modal';
 import type { Volume } from '@/types/volume';
@@ -188,7 +189,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
     <>
       <div className="pb-6">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-white text-center font-yusei text-xl mb-3">Editar “{chapterTitle || initialChapter.title}” em “{bookTitle}”</h2>
+          <h2 className="text-white text-center font-ptserif text-xl mb-3">Editar “{chapterTitle || initialChapter.title}” em “{bookTitle}”</h2>
           <div className="bg-readowl-purple-extralight text-readowl-purple-extradark p-5 shadow-md font-ptserif">
             <h1 className="text-2xl font-bold text-center mb-4">{bookTitle}</h1>
 
@@ -254,7 +255,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
                 } else {
                   setConfirmCancelOpen(true);
                 }
-              }} iconUrl="/img/svg/generics/purple/cancel.svg">Cancelar</ButtonWithIcon>
+              }} icon={<X className="w-5 h-5" />}>Cancelar</ButtonWithIcon>
               <ButtonWithIcon
                 variant="primary"
                 disabled={(() => {
@@ -290,7 +291,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
                   if (!dirty) return;
                   setConfirmSaveOpen(true);
                 }}
-                iconUrl="/img/svg/book/checkbook.svg"
+                icon={<BookText className="w-5 h-5" />}
               >{submitting ? 'Salvando...' : 'Salvar alterações'}</ButtonWithIcon>
             </div>
           </div>
@@ -299,7 +300,7 @@ export default function EditChapterClient({ slug, bookTitle, initialChapter }: {
               <ButtonWithIcon
                 className="!bg-red-700 !text-white !border-red-900 hover:!bg-red-600"
                 variant="secondary"
-                iconUrl="/img/svg/book/book-delete.svg"
+                icon={<Trash2 className="w-5 h-5" />}
                 iconAlt="Excluir capítulo"
                 onClick={() => setConfirmDeleteChapterOpen(true)}
               >

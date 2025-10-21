@@ -146,19 +146,19 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
             <div className="flex flex-wrap items-center justify-center gap-3">
               <a href={`/library/books/${slug}/edit`} className="inline-flex items-center">
                 <span className="sr-only">Editar obra</span>
-                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
+                <span className="font-ptserif text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
                   <Pencil size={18} />
                   Editar obra
                 </span>
               </a>
               <a href={`/library/books/${slug}/${chapterSlug}/edit-chapter`} className="inline-flex items-center">
-                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
+                <span className="font-ptserif text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
                   <FilePenLine size={18} />
                   Editar capítulo
                 </span>
               </a>
               <a href={`/library/books/${slug}/post-chapter`} className="inline-flex items-center">
-                <span className="font-yusei text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
+                <span className="font-ptserif text-lg font-semibold py-2 px-6 border-2 border-readowl-purple rounded-md shadow-md transition-colors duration-300 flex items-center gap-2 bg-readowl-purple-light text-white hover:bg-readowl-purple-hover">
                   <FilePlus2 size={18} />
                   Adicionar capítulo
                 </span>
@@ -246,10 +246,10 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               </h1>
               {canSeeViews && (
                 <div className="mt-2 text-sm opacity-80">
-                  <span className="inline-flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1">
                     <Eye size={18} className={dark ? 'text-white' : 'text-readowl-purple-extradark'} />
                     <span className={dark ? 'text-white' : 'text-readowl-purple-extradark'}>
-                      {views !== null ? `${views.toLocaleString('pt-BR')} visualizações` : '0'}
+                      {views !== null ? `${views.toLocaleString('pt-BR')}` : '0'}
                     </span>
                   </span>
                 </div>
@@ -268,12 +268,12 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
               <div className="flex items-center justify-between">
                 <div className="flex-1 flex justify-start">
                   {payload.prevSlug ? (
-                    <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.prevSlug}`)} iconUrl="/img/svg/generics/white/arrow-left.svg" variant="primary">Anterior</ButtonWithIcon>
+                    <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.prevSlug}`)} icon={<ArrowLeft size={20} />} variant="primary">Anterior</ButtonWithIcon>
                   ) : null}
                 </div>
                 <div className="flex-1 flex justify-end">
                   {payload.nextSlug ? (
-                    <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.nextSlug}`)} iconUrl="/img/svg/generics/white/arrow-right.svg" variant="primary">Próximo</ButtonWithIcon>
+                    <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.nextSlug}`)} icon={<ArrowRight size={20} />} variant="primary">Próximo</ButtonWithIcon>
                   ) : null}
                 </div>
               </div>
@@ -287,7 +287,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
           <div className="mt-8 mx-auto max-w-4xl hidden sm:flex items-center justify-between gap-3">
             <div className="flex-1 flex justify-start">
               {payload.prevSlug ? (
-                <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.prevSlug}`)} iconUrl="/img/svg/generics/white/arrow-left.svg" variant="primary">Anterior</ButtonWithIcon>
+                <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.prevSlug}`)} icon={<ArrowLeft size={20} />} variant="primary">Anterior</ButtonWithIcon>
               ) : null}
             </div>
             <div className="flex-none flex justify-center">
@@ -295,7 +295,7 @@ export default function ReadChapterClient({ slug, chapterSlug, payload, canManag
             </div>
             <div className="flex-1 flex justify-end">
               {payload.nextSlug ? (
-                <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.nextSlug}`)} iconUrl="/img/svg/generics/white/arrow-right.svg" variant="primary">Próximo</ButtonWithIcon>
+                <ButtonWithIcon onClick={() => router.push(`/library/books/${slug}/${payload.nextSlug}`)} icon={<ArrowRight size={20} />} variant="primary">Próximo</ButtonWithIcon>
               ) : null}
             </div>
           </div>

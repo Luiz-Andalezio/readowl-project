@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import Image from 'next/image';
+import { Send, X, Pencil, Trash2 } from 'lucide-react';
 import ChapterCard, { ChapterView } from './ChapterCard';
 
 type Props = {
@@ -75,14 +75,14 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
                   aria-label="Salvar"
                   className={`p-1 ${canSave ? '' : 'opacity-40 cursor-not-allowed'}`}
                 >
-                  <Image src="/img/svg/generics/purple/send.svg" alt="Salvar" width={18} height={18} />
+                  <Send size={18} className="text-readowl-purple-medium" />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); setName(title); setEditing(false); }}
                   aria-label="Cancelar"
                   className="p-1"
                 >
-                  <Image src="/img/svg/generics/purple/cancel.svg" alt="Cancelar" width={18} height={18} />
+                  <X size={18} className="text-readowl-purple-medium" />
                 </button>
               </div>
             </div>
@@ -93,11 +93,11 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
         <div className="flex items-center gap-2">
           {canManage && !editing ? (
             <>
-              <button onClick={(e) => { e.stopPropagation(); setEditing(true); setName(title); }} aria-label="Editar" className="p-1 hover:bg-readowl-purple-hover/30 rounded">
-                <Image src="/img/svg/generics/white/edit.svg" alt="Editar" width={18} height={18} />
+              <button onClick={(e) => { e.stopPropagation(); setEditing(true); setName(title); }} aria-label="Editar" className="p-1 hover:bg-readowl-purple-hover/30 rounded text-white">
+                <Pencil size={18} />
               </button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete?.(volumeId); }} aria-label="Excluir" className="p-1 hover:bg-readowl-purple-hover/30 rounded">
-                <Image src="/img/svg/generics/white/delete.svg" alt="Excluir" width={18} height={18} />
+              <button onClick={(e) => { e.stopPropagation(); onDelete?.(volumeId); }} aria-label="Excluir" className="p-1 hover:bg-readowl-purple-hover/30 rounded text-white">
+                <Trash2 size={18} />
               </button>
             </>
           ) : null}

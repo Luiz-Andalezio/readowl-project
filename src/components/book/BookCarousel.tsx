@@ -3,21 +3,26 @@ import React, { useRef, useState, useEffect, useCallback } from 'react'; // Core
 import Link from 'next/link';
 import { slugify } from '@/lib/slug';
 import clsx from 'clsx';
+import { BookMarked, ChevronLeft, ChevronRight, Book } from 'lucide-react';
 
 // Minimal data needed to render a book card
 export interface CarouselBook { id: string; title: string; coverUrl: string | null; }
 // Component props (itemsPerView is a hint; layout recalculates responsively)
-interface BookCarouselProps { books: CarouselBook[]; title: string; iconSrc: string; itemsPerView?: number; emptyMessage?: string; }
+interface BookCarouselProps { books: CarouselBook[]; title: string; icon?: React.ReactNode; itemsPerView?: number; emptyMessage?: string; }
 
-// Fallback image used when a book has no cover
-const FALLBACK_COVER = '/img/svg/navbar/book1.svg';
+// Fallback placeholder used when a book has no cover
+const FALLBACK_PLACEHOLDER = (
+    <div className="w-full h-full flex items-center justify-center bg-readowl-purple-extralight text-readowl-purple-medium">
+        <Book size={36} />
+    </div>
+);
 
 // Helper to scroll horizontally honoring user reduced‑motion preference
 function smoothScroll(el: HTMLElement, left: number, prefersReduced: boolean) {
     el.scrollTo({ left, behavior: prefersReduced ? 'auto' : 'smooth' });
 }
 
-export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSrc, itemsPerView = 5, emptyMessage = 'Nenhuma obra registrada.' }) => {
+export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon = <BookMarked size={20} />, itemsPerView = 5, emptyMessage = 'Nenhuma obra registrada.' }) => {
     // Refs to DOM nodes we need for measuring / event binding
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -224,10 +229,9 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
     return (
         <section className="mt-8 w-full" ref={containerRef} tabIndex={0} aria-roledescription="carousel">
             <div className="relative">
-                <div className="flex items-center justify-center gap-2 bg-readowl-purple-medium px-6 sm:px-8 py-2 text-white font-yusei text-lg select-none shadow mx-auto max-w-full">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={iconSrc} alt="Icone" className="w-5 h-5 opacity-90" />
-                    <h2 className="text-sm sm:text-base md:text-lg font-yusei tracking-wide">{title}</h2>
+                <div className="flex items-center justify-center gap-2 bg-readowl-purple-medium px-6 sm:px-8 py-2 text-white font-ptserif text-lg select-none shadow mx-auto max-w-full">
+                    <span className="w-5 h-5 inline-flex items-center justify-center">{icon}</span>
+                    <h2 className="text-sm sm:text-base md:text-lg font-ptserif tracking-wide">{title}</h2>
                 </div>
             </div>
 
@@ -241,8 +245,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                         onClick={() => scrollByCards(-1)}
                         className={clsx('absolute z-20 left-0 top-1/2 -translate-y-1/2 pl-1 pr-2 py-2 text-readowl-purple-dark transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple', !canPrev && 'opacity-30 cursor-not-allowed')}
                     >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/img/svg/generics/purple/chevron-left.svg" alt="Anterior" className="w-7 h-7 pointer-events-none select-none" />
+                        <ChevronLeft className="w-7 h-7 pointer-events-none select-none text-readowl-purple-medium" />
                     </button>
 
                     <div
@@ -261,14 +264,18 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                                 className="group relative flex-shrink-0 overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark"
                                 style={{ width: cardWidth, aspectRatio: '3 / 4' }}
                             >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                    src={b.coverUrl || FALLBACK_COVER}
-                                    alt={b.title}
-                                    draggable={false}
-                                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07]"
-                                    loading="lazy"
-                                />
+                                {b.coverUrl ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={b.coverUrl}
+                                        alt={b.title}
+                                        draggable={false}
+                                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07]"
+                                        loading="lazy"
+                                    />
+                                ) : (
+                                    FALLBACK_PLACEHOLDER
+                                )}
                                 <div className="absolute inset-0 flex flex-col justify-end">
                                     <div className="pointer-events-none mt-auto w-full px-2 pb-1 pt-8 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
                                         <p
@@ -290,8 +297,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, iconSr
                         onClick={() => scrollByCards(1)}
                         className={clsx('absolute z-20 right-0 top-1/2 -translate-y-1/2 pr-1 pl-2 py-2 text-readowl-purple-dark transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple', !canNext && 'opacity-30 cursor-not-allowed')}
                     >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/img/svg/generics/purple/chevron-right.svg" alt="Próximo" className="w-7 h-7 pointer-events-none select-none" />
+                        <ChevronRight className="w-7 h-7 pointer-events-none select-none text-readowl-purple-medium" />
                     </button>
                 </div>
             )}

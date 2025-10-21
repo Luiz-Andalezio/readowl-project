@@ -26,7 +26,7 @@ export default function BookActions({ book, className }: Props) {
 
     // Base style for the "Seguir" button
     const baseStyle =
-        "flex-1 text-left font-yusei text-lg font-semibold py-2 px-6 border-2 transition-colors duration-300 flex items-center justify-start gap-2 w-full";
+        "flex-1 text-left font-ptserif text-lg font-semibold py-2 px-6 border-2 transition-colors duration-300 flex items-center justify-start gap-2 w-full";
 
     // Fetch initial follow status
     React.useEffect(() => {

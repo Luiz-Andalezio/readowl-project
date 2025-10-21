@@ -10,6 +10,7 @@ import type { Volume } from '@/types/volume';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { slugify } from '@/lib/slug';
 import { getPlainTextLength } from '@/lib/sanitize';
+import { X, BookText } from 'lucide-react';
 
 export default function PostChapterPage() {
   const params = useParams<{ slug: string }>();
@@ -199,7 +200,7 @@ export default function PostChapterPage() {
       <div className="pb-6">
         <div className="max-w-4xl mx-auto">
           {/* Header text exactly as requested */}
-          <h2 className="text-white text-center font-yusei text-xl mb-3">Adicionar capítulo em: “{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}”</h2>
+          <h2 className="text-white text-center font-ptserif text-xl mb-3">Adicionar capítulo em: “{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}”</h2>
           <div className="bg-readowl-purple-extralight text-readowl-purple-extradark p-5 shadow-md font-ptserif">
             <h1 className="text-2xl font-bold text-center mb-4">{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}</h1>
 
@@ -269,7 +270,7 @@ export default function PostChapterPage() {
                     setConfirmCancelOpen(true);
                   }
                 }}
-                iconUrl="/img/svg/generics/purple/cancel.svg"
+                icon={<X className="w-5 h-5" />}
               >Cancelar</ButtonWithIcon>
               <ButtonWithIcon
                 variant="primary"
@@ -313,7 +314,7 @@ export default function PostChapterPage() {
                   }
                   setConfirmSaveOpen(true);
                 }}
-                iconUrl="/img/svg/book/checkbook.svg"
+                icon={<BookText className="w-5 h-5" />}
               >{submitting ? 'Salvando...' : 'Criar'}</ButtonWithIcon>
             </div>
           </div>

@@ -15,7 +15,7 @@ type Props = {
 
 const ICON_SIZE = 18;
 const IconWrap = ({ children }: { children: React.ReactNode }) => (
-    <span className="inline-flex items-center justify-center mr-2 align-text-bottom shrink-0" style={{ width: ICON_SIZE, height: ICON_SIZE }}>
+    <span className="inline-flex items-center justify-center mr-2 shrink-0" style={{ width: ICON_SIZE, height: ICON_SIZE }}>
         {children}
     </span>
 );
@@ -36,19 +36,11 @@ export default function BookHeader({ book, mode, followersCount, ratingAvg, rati
             <div className="min-w-0">
                 {isTitleGenres ? (
                     <>
-                        <h1 className="font-yusei font-bold text-5xl md:text-5xl leading-normal break-words pb-1">
-                            {/* <Image
-                                src="/img/svg/book/book2.svg"
-                                alt="Livro"
-                                width={56}
-                                height={56}
-                                className="inline-block mr-1 align-text-bottom shrink-0 w-10 h-10 md:w-12 md:h-12 mt-2"
-                                priority
-                            /> */}
+                        <h1 className="font-ptserif font-bold text-5xl md:text-5xl leading-normal break-words pb-1">
                             <span className="whitespace-normal break-words">{book.title}</span>
                         </h1>
-                        <div className="mt-2 font-semibold flex md:text-xl text-white/90 flex-wrap">
-                            <IconWrap><BookMarked size={20} /></IconWrap>
+                        <div className="mt-2 font-semibold flex items-center md:text-xl text-white/90 flex-wrap">
+                            <IconWrap><BookMarked size={ICON_SIZE} /></IconWrap>
                             <span className="whitespace-normal break-words leading-snug">
                                 {book.genres
                                     .map(g => g.name)
