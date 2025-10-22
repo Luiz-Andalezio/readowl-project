@@ -58,6 +58,15 @@
 				"$eslint-stylish"
 			],
 			"group": "build"
+		},
+		{
+			"label": "build-next",
+			"type": "shell",
+			"command": "npm run -s build",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }
