@@ -4,7 +4,7 @@ import { slugify } from '@/lib/slug';
 import EditBookForm from './ui/EditBookForm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
 
 interface PageProps { params: Promise<{ slug: string }> }
 

@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Send } from 'lucide-react';
+import { SendHorizontal } from 'lucide-react';
 
 type Props = {
   value: string;
@@ -31,7 +31,7 @@ export default function VolumeCreateInput({ value, onChange, onSubmit }: Props) 
         aria-label="Criar volume"
         className={`absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded ${canSubmit ? '' : 'opacity-40 cursor-not-allowed'}`}
       >
-        <Send size={22} className="text-readowl-purple-medium" />
+        <SendHorizontal size={22} className="text-readowl-purple-medium" />
       </button>
     </div>
   );

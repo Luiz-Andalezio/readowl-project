@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
-import ReadChapterClient from './ui/ReadChapterClient';
+import ReadChapterClient from '../../../../client/chapter/ReadChapterClient';
 
 interface PageProps { params: Promise<{ slug: string; chapter: string }> }
 

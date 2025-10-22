@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/ui/modal/Modal';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
-import { BookText, X } from 'lucide-react';
+import { BookPlus, X, Check } from 'lucide-react';
 import { CoverInput } from './CoverInput';
 import { BasicFields } from './BasicFields';
 import { GenreSelector } from './GenreSelector';
@@ -158,7 +158,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
     return (
     <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium p-8 shadow-2xl">
             <div className="flex items-center justify-center gap-3 mb-8">
-                <BookText className="w-10 h-10 text-white/90" aria-hidden="true" />
+                <BookPlus className="w-10 h-10 text-white/90" aria-hidden="true" />
                 <h1 className="text-3xl font-ptserif text-center font-semibold text-white">Criar nova obra</h1>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -209,7 +209,7 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                     variant="primary"
                     disabled={!canSubmit || submitting}
                     onClick={() => setConfirmSaveOpen(true)}
-                    icon={<BookText className="w-5 h-5" />}
+                    icon={<Check className="w-5 h-5" />}
                 >{submitting ? 'Salvando...' : 'Criar'}</ButtonWithIcon>
             </div>
 

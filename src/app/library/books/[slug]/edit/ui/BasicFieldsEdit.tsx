@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Type, FileText, Calendar } from 'lucide-react';
+import { Type, FileText, CalendarDays } from 'lucide-react';
 import { BOOK_TITLE_MAX, BOOK_SYNOPSIS_MAX, BOOK_FREQ_MAX } from '@/types/book';
 import SynopsisEditor from '@/components/ui/tiptap/SynopsisEditor';
 
@@ -75,7 +75,7 @@ export const BasicFieldsEdit: React.FC<BasicFieldsEditProps> = ({
 
       <div>
         <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-          <Calendar className="w-4 h-4 opacity-80" aria-hidden />
+          <CalendarDays className="w-4 h-4 opacity-80" aria-hidden />
           Frequência de Lançamento (opcional)
         </label>
         <div className="relative">

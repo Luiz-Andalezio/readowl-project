@@ -8,7 +8,7 @@ import { signIn } from 'next-auth/react';
 import CoverAndStatus from './CoverAndStatus';
 import BasicFieldsEdit from './BasicFieldsEdit';
 import GenreSelectorEdit from './GenreSelectorEdit';
-import { BookText, X, Trash2 } from 'lucide-react';
+import { BookText, X, Check, BookX } from 'lucide-react';
 
 type Genre = { id: string; name: string };
 type Author = { id: string; name: string | null; image: string | null; role: string };
@@ -205,7 +205,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                     >
                         Cancelar
                     </ButtonWithIcon>
-                    <ButtonWithIcon variant="primary" disabled={!canSubmit || submitting} onClick={() => setConfirmSaveOpen(true)} icon={<BookText className="w-5 h-5" />}>{submitting ? 'Salvando...' : 'Salvar'}</ButtonWithIcon>
+                    <ButtonWithIcon variant="primary" disabled={!canSubmit || submitting} onClick={() => setConfirmSaveOpen(true)} icon={<Check className="w-5 h-5" />}>{submitting ? 'Salvando...' : 'Salvar'}</ButtonWithIcon>
                 </div>
 
                 {/* Modals */}
@@ -261,7 +261,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                 <ButtonWithIcon
                     className="!bg-red-700 !text-white !border-red-900 hover:!bg-red-600"
                     variant="secondary"
-                    icon={<Trash2 className="w-5 h-5" />}
+                    icon={<BookX className="w-5 h-5" />}
                     iconAlt="Excluir"
                     onClick={() => setConfirmDeleteOpen(true)}
                 >

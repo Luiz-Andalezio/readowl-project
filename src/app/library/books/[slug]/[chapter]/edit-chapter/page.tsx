@@ -3,8 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import EditChapterClient from './ui/EditChapterClient';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
+import EditChapterClient from '../../../../../client/chapter/EditChapterClient';
 
 interface PageProps { params: Promise<{ slug: string; chapter: string }> }
 

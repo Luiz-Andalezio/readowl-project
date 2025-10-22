@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import Navbar from '@/components/ui/navbar/Navbar';
 import CreateBookForm from '@/app/library/create/ui/CreateBookForm';
-import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { BreadcrumbAuto } from '@/components/ui/navbar/Breadcrumb';
 
 export default async function CreateBookPage() {
     const session = await getServerSession(authOptions);

@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
-import VolumeDropdown from '@/components/chapter/VolumeDropdown';
-import ChapterEditor from '@/components/chapter/ChapterEditor';
+import VolumeCreateInput from '@/components/volume/VolumeCreateInput';
+import VolumeDropdown from '@/components/volume/VolumeDropdown';
+import ChapterEditor from '@/app/library/books/[slug]/[chapter]/edit-chapter/ui/ChapterEditor';
 import { X, BookText, Trash2 } from 'lucide-react';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import Modal from '@/components/ui/modal/Modal';

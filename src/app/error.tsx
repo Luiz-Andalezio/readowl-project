@@ -5,7 +5,7 @@ import LandingHeader from "@/app/landing/about/LandingHeader";
 import Footer from "@/components/sections/Footer";
 import ErrorView from "@/components/ui/error/ErrorView";
 import { useSession } from "next-auth/react";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Breadcrumb } from "@/components/ui/navbar/Breadcrumb";
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const { data: session } = useSession();

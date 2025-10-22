@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react';
-import { Send, X, Pencil, Trash2 } from 'lucide-react';
+import { SendHorizontal, X, Pencil, Trash2 } from 'lucide-react';
 import type { Volume } from '@/types/volume';
 
 type Props = {
@@ -160,7 +160,7 @@ const VolumeDropdown = forwardRef<HTMLDivElement, Props>(function VolumeDropdown
                       className={`p-1 ${canSave(v.id) ? '' : 'opacity-40 cursor-not-allowed'}`}
                       aria-label="Salvar"
                     >
-                      <Send size={18} className="text-readowl-purple-medium" />
+                      <SendHorizontal size={18} className="text-readowl-purple-medium" />
                     </button>
                     <button
                       onMouseDown={(e) => e.stopPropagation()}

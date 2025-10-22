@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, Book, Search as SearchIcon, LogOut as LogOutIcon, User as UserIcon } from 'lucide-react';
+import { Bell, LibrarySquare, Search as SearchIcon, LogOut as LogOutIcon, User as UserIcon } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import Modal from '../modal/Modal';
@@ -73,7 +73,7 @@ export default function FloatingNavbar() {
                         {/* Center nav (desktop) */}
                         <nav className="hidden md:flex items-center gap-6 text-sm font-medium ml-4">
                             {links.map(l => {
-                                const Icon = l.href.startsWith('/notifications') ? Bell : Book;
+                                const Icon = l.href.startsWith('/notifications') ? Bell : LibrarySquare;
                                 return (
                                     <button
                                         key={l.href}
@@ -150,7 +150,7 @@ export default function FloatingNavbar() {
                         </form>
                         <nav className="flex flex-col gap-1">
                             {links.map(l => {
-                                const Icon = l.href.startsWith('/notifications') ? Bell : Book;
+                                const Icon = l.href.startsWith('/notifications') ? Bell : LibrarySquare;
                                 return (
                                     <button key={l.href} onClick={() => go(l.href)} className={`flex items-center gap-2 text-left px-3 py-2 text-sm font-medium transition-colors ${pathname?.startsWith(l.href) ? 'bg-readowl-purple-dark/40 text-white' : 'text-readowl-purple-extralight/85 hover:bg-readowl-purple-light/20 hover:text-white'}`}>
                                         <Icon className="w-5 h-5" />

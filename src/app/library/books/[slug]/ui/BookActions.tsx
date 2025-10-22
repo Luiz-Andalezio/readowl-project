@@ -5,7 +5,7 @@ import { BookWithAuthorAndGenres } from "@/types/book";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/slug";
-import { BookText, FilePlus2, Bookmark } from 'lucide-react';
+import { BookText, FilePlus2, Bookmark, Pencil } from 'lucide-react';
 
 type Props = {
     book: BookWithAuthorAndGenres;
@@ -141,7 +141,7 @@ export default function BookActions({ book, className }: Props) {
                 <div className="flex flex-col gap-3 w-full justify-center items-center mt-7 max-w-[340px] mx-auto md:mx-0 md:w-[340px] md:self-end min-w-0">
                     <ButtonWithIcon
                         className="w-full justify-center items-center"
-                        icon={<BookText size={20} />}
+                        icon={<Pencil size={20} />}
                         variant="primary"
                         onClick={() => router.push(`/library/books/${slugify(book.title)}/edit`)}
                     >

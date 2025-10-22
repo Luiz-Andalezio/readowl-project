@@ -1,9 +1,9 @@
 import { BookWithAuthorAndGenres, BookStatus } from '@/types/book';
-import FollowersCountClient from './FollowersCountClient';
-import ViewsCountClient from './ViewsCountClient';
-import RatingSummaryClient from './RatingSummaryClient';
+import FollowersCountClient from '../../../../client/book/FollowersCountClient';
+import ViewsCountClient from '../../../../client/book/ViewsCountClient';
+import RatingSummaryClient from '../../../../client/book/RatingSummaryClient';
 import { slugify } from '@/lib/slug';
-import { BookMarked, User2, Eye, Bookmark, Star, CalendarDays, Activity, CheckCircle2, PauseCircle, Hourglass } from 'lucide-react';
+import { Tags, User2, Eye, Bookmark, Star, CalendarDays, Activity, CheckCheck, PauseCircle, Hourglass } from 'lucide-react';
 
 type Props = {
     book: BookWithAuthorAndGenres;
@@ -40,7 +40,7 @@ export default function BookHeader({ book, mode, followersCount, ratingAvg, rati
                             <span className="whitespace-normal break-words">{book.title}</span>
                         </h1>
                         <div className="mt-2 font-semibold flex items-center md:text-xl text-white/90 flex-wrap">
-                            <IconWrap><BookMarked size={ICON_SIZE} /></IconWrap>
+                            <IconWrap><Tags size={ICON_SIZE} /></IconWrap>
                             <span className="whitespace-normal break-words leading-snug">
                                 {book.genres
                                     .map(g => g.name)
@@ -87,7 +87,7 @@ export default function BookHeader({ book, mode, followersCount, ratingAvg, rati
                         <div className="flex items-center">
                             <IconWrap>
                               {book.status === 'ONGOING' ? <Activity size={ICON_SIZE} />
-                                : book.status === 'COMPLETED' ? <CheckCircle2 size={ICON_SIZE} />
+                                : book.status === 'COMPLETED' ? <CheckCheck size={ICON_SIZE} />
                                 : book.status === 'PAUSED' ? <PauseCircle size={ICON_SIZE} />
                                 : <Hourglass size={ICON_SIZE} />}
                             </IconWrap>

@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Send, X, Pencil, Trash2 } from 'lucide-react';
+import { SendHorizontal, X, Pencil, Trash2 } from 'lucide-react';
 import ChapterCard, { ChapterView } from './ChapterCard';
 
 type Props = {
@@ -75,7 +75,7 @@ export default function VolumeSection({ title, volumeId, chapters, canManage = f
                   aria-label="Salvar"
                   className={`p-1 ${canSave ? '' : 'opacity-40 cursor-not-allowed'}`}
                 >
-                  <Send size={18} className="text-readowl-purple-medium" />
+                  <SendHorizontal size={18} className="text-readowl-purple-medium" />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); setName(title); setEditing(false); }}

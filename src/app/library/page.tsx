@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/ui/navbar/Navbar";
 import ButtonWithIcon from "@/components/ui/button/ButtonWithIcon";
 import BookCarousel from "@/components/book/BookCarousel";
-import { User2, Bookmark, BookText } from 'lucide-react';
+import { BookUser, BookMarked, BookPlus } from 'lucide-react';
 import { prisma } from "@/lib/prisma";
 import Link from 'next/link';
-import { BreadcrumbAuto } from "@/components/ui/Breadcrumb";
+import { BreadcrumbAuto } from "@/components/ui/navbar/Breadcrumb";
 
 export default async function Library() {
     const session = await getServerSession(authOptions);
@@ -38,7 +38,7 @@ export default async function Library() {
                     <Link href="/library/create">
                         <ButtonWithIcon
                             variant="primary"
-                            icon={<BookText size={20} />}
+                            icon={<BookPlus size={20} />}
                         >
                             Criar uma obra
                         </ButtonWithIcon>
@@ -48,13 +48,13 @@ export default async function Library() {
                     <BookCarousel
                         books={myBooks}
                         title="Minha Autoria!"
-                        icon={<User2 size={20} />}
+                        icon={<BookUser size={20} />}
                         itemsPerView={5}
                     />
                     <BookCarousel
                         books={followed}
                         title="Seguidos!"
-                        icon={<Bookmark size={20} />}
+                        icon={<BookMarked size={20} />}
                         itemsPerView={5}
                         emptyMessage="Nenhuma obra seguida."
                     />

@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Tag } from 'lucide-react';
+import { Tags } from 'lucide-react';
 
 export interface GenreSelectorEditProps {
   filteredGenres: string[];
@@ -15,7 +15,7 @@ export const GenreSelectorEdit: React.FC<GenreSelectorEditProps> = ({ filteredGe
   return (
     <div className="lg:col-span-3 w-full mt-4">
       <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-        <Tag className="w-4 h-4 opacity-80" aria-hidden />
+        <Tags className="w-4 h-4 opacity-80" aria-hidden />
         Gêneros
       </label>
   <div className="w-full bg-readowl-purple-extradark/70 border border-white/10 p-3 max-h-48 overflow-y-auto">

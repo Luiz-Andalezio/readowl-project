@@ -10,7 +10,7 @@ import Modal from '@/components/ui/modal/Modal';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import { slugify } from '@/lib/slug';
-import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
+import VolumeCreateInput from '@/components/volume/VolumeCreateInput';
 
 type Tab = 'chapters' | 'comments';
 

@@ -7,7 +7,7 @@ import GoogleButton from "@/components/ui/button/GoogleButton";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PasswordStrengthBar from "@/components/animation/PasswordStrengthBar";
+import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
 import { signIn } from "next-auth/react";
 import { User as UserIcon, Mail, Key, Eye, EyeOff } from "lucide-react";
 

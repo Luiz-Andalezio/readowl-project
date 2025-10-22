@@ -3,14 +3,14 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { slugify } from '@/lib/slug';
-import BookHeader from '../../../../components/book/BookHeader';
-import RatingBox from '../../../../components/book/RatingBox';
-import BookActions from '../../../../components/book/BookActions';
-import BookTabs from '../../../../components/book/BookTabs';
-import CoverZoom from '@/components/book/CoverZoom';
+import BookHeader from './ui/BookHeader';
+import RatingBox from './ui/RatingBox';
+import BookActions from './ui/BookActions';
+import BookTabs from './ui/BookTabs';
+import CoverZoom from '@/app/library/books/[slug]/ui/CoverZoom';
 import type { BookWithAuthorAndGenres } from '@/types/book';
 import { sanitizeSynopsisHtml } from '@/lib/sanitize';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
 
 interface PageProps { params: Promise<{ slug: string }> }
 

@@ -3,7 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
 import { useSession } from 'next-auth/react';
 import CommentInput from '@/components/comment/CommentInput';
 import CommentsList, { type CommentDto } from '@/components/comment/CommentsList';

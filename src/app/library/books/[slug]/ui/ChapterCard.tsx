@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import React from 'react';
 import { slugify } from '@/lib/slug';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, FilePenLine, Trash2 } from 'lucide-react';
 
 export type ChapterView = {
   id: string;
@@ -69,7 +69,7 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
             className="p-1 hover:bg-white/30 rounded"
             onClick={() => onEditChapter?.(chapter.id)}
           >
-            <Pencil size={18} />
+            <FilePenLine size={18} />
           </button>
           <button
             aria-label="Excluir capítulo"
@@ -83,13 +83,13 @@ export default function ChapterCard({ slug, chapter, standalone = false, canMana
       <Link href={`/library/books/${slug}/${chapterSlug}`} className="block pr-16">
         <h4 className={`truncate ${standalone ? 'text-lg md:text-xl font-bold' : 'text-base md:text-lg font-bold'}`}>{chapter.title}</h4>
       </Link>
-      <div className="text-sm opacity-90 mt-1">{dateStr} · {timeStr}</div>
       {canManage && (
-        <div className="text-sm opacity-90 mt-1 inline-flex items-center gap-1">
+        <div className="text-sm opacity-90 inline-flex items-center gap-1">
           <Eye size={16} />
           <span>{views !== null ? views.toLocaleString('pt-BR') : '—'}</span>
         </div>
       )}
+      <div className="text-sm opacity-90">{dateStr} · {timeStr}</div>
       <div className="text-sm opacity-90">{words.toLocaleString('pt-BR')} palavras</div>
     </div>
   );

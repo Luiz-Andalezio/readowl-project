@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Book, PlayCircle, CheckCircle, PauseCircle, CircleDot } from 'lucide-react';
+import { BookImage, Activity, CheckCheck, PauseCircle, Hourglass } from 'lucide-react';
 import { BOOK_COVER_MIN_HEIGHT, BOOK_COVER_MIN_WIDTH, BOOK_STATUS, BOOK_STATUS_LABEL } from '@/types/book';
 
 export interface CoverAndStatusProps {
@@ -33,7 +33,7 @@ export const CoverAndStatus: React.FC<CoverAndStatusProps> = ({
   return (
     <div>
       <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-        <Book className="w-4 h-4 opacity-80" aria-hidden />
+        <BookImage className="w-4 h-4 opacity-80" aria-hidden />
         URL da Capa
   <button type="button" onClick={onHelp} className="w-5 h-5 bg-readowl-purple-dark text-white text-xs flex items-center justify-center">?</button>
       </label>
@@ -74,10 +74,10 @@ export default CoverAndStatus;
 type StatusValue = typeof BOOK_STATUS[number];
 
 const statusIconComp: Record<StatusValue, React.ComponentType<{ className?: string }>> = {
-  ONGOING: PlayCircle,
-  COMPLETED: CheckCircle,
+  ONGOING: Activity,
+  COMPLETED: CheckCheck,
   PAUSED: PauseCircle,
-  HIATUS: CircleDot,
+  HIATUS: Hourglass,
 };
 
 const StatusDropdown: React.FC<{ status: StatusValue; onStatus: (s: StatusValue) => void }> = ({ status, onStatus }) => {

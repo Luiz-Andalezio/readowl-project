@@ -3,7 +3,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import InputWithIcon from "@/components/ui/input/InputWithIcon";
 import Button from "@/components/ui/button/Button";
-import PasswordStrengthBar from "@/components/animation/PasswordStrengthBar";
+import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
 import { Key, Eye, EyeOff } from "lucide-react";
 
 function ResetPasswordInner() {
