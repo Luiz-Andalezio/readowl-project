@@ -98,7 +98,7 @@ This guide walks you from zero to running the app locally with a Dockerized Post
 
 ### 1) Prerequisites
 
-- Node.js 18+ and pnpm or npm
+- Node.js 20+ and pnpm or npm
 - Docker Desktop or Docker Engine
 - A PostgreSQL instance (local/native or in Docker). If you already have one, you can keep using it.
 - Optional: Google Cloud project for OAuth2 (we provide example credentials for local dev)
@@ -111,12 +111,26 @@ cd readowl-next
 npm install
 ```
 
+Tip: if your Node is below 20, install Node 20 LTS with nvm:
+
+```bash
+# Install nvm (once)
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# Install and use Node 20 LTS
+nvm install 20
+nvm use 20
+node -v
+npm -v
+```
+
 ### 3) Environment variables
 
 Copy `.env.example` to `.env` and fill values. For local development, an example:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/readowl-next_db?schema=public"
+DATABASE_URL="postgresql://readowl:readowl@localhost:5433/readowl?schema=public"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="<a-strong-random-secret>"
 
@@ -143,8 +157,36 @@ We ship a dedicated Postgres service for this project via Docker Compose. It exp
 Bring it up:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d
 ```
+>If you want to use pgadmin web, run: "docker compose up -d postgres"
+
+If you get errors like "docker: 'compose' is not a docker command" or "unknown shorthand flag: 'd' in -d", your Docker does not have the Compose v2 plugin. Fix it using the official Docker repository (Ubuntu/Mint based on Ubuntu 24.04 "Noble"):
+
+1. Prereqs and Docker GPG key
+
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates curl gnupg
+        sudo install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.asc >/dev/null
+        sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+2. Add the Docker apt repository (uses the Ubuntu base codename on Mint via $UBUNTU_CODENAME)
+
+        source /etc/os-release
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${UBUNTU_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+        sudo apt-get update
+
+3. Install Compose v2 and verify
+
+        sudo apt-get install -y docker-compose-plugin
+        docker compose version
+
+If you prefer the legacy binary and already have it installed:
+
+        docker-compose up -d
+
+Both commands target the same `postgres` service defined in `docker-compose.yml`.
 
 Details:
 - Container name: `readowl_next_db`
