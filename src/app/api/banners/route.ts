@@ -1,95 +1,105 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
-import prisma from '@/lib/prisma';
-import { z } from 'zod';
-import { Prisma } from '@prisma/client';
-import crypto from 'crypto';
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { z } from "zod";
+import { randomUUID } from "crypto";
 
-const BannerSchema = z.object({
-  name: z.string().min(1).max(150),
-  imageUrl: z.string().url(),
-  linkUrl: z.string().url().or(z.literal('').transform(() => '')),
-  order: z.number().int().min(0),
-});
-
-const PayloadSchema = z.object({
-  banners: z.array(BannerSchema).max(50),
-});
-
-type BannerRow = { name: string; imageUrl: string; linkUrl: string; order: number };
-
-async function ensureBannerTable() {
-  // Create table if it does not exist (minimal schema compatible with our queries)
-  const sql = `
-    CREATE TABLE IF NOT EXISTS "Banner" (
-      "name"     text NOT NULL,
-      "imageUrl" text NOT NULL,
-      "linkUrl"  text NOT NULL,
-      "order"    integer NOT NULL
-    );
-  `;
-  await prisma.$executeRawUnsafe(sql);
+// Helpers and Zod schema for incoming banners
+function isHttpUrl(v: string): boolean {
+  try {
+    const u = new URL(v);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
+const urlOrPath = z
+  .string()
+  .trim()
+  .min(1, "URL obrigatória")
+  .max(1000)
+  .refine((v) => isHttpUrl(v) || v.startsWith("/"), "Use uma URL http(s) ou um caminho relativo começando com /");
+
+const BannerSchema = z.object({
+  name: z.string().trim().min(1, "Nome é obrigatório").max(200),
+  imageUrl: urlOrPath,
+  linkUrl: urlOrPath,
+});
+
+const BannerArraySchema = z
+  .array(BannerSchema)
+  .max(50, "Limite de 50 banners");
+
+async function ensureBannerTable() {
+  // Create table if not exists using raw SQL to avoid schema drift issues
+  await prisma.$executeRawUnsafe(
+    `CREATE TABLE IF NOT EXISTS "Banner" (
+      "id" TEXT PRIMARY KEY,
+      "name" VARCHAR(200) NOT NULL,
+      "imageUrl" VARCHAR(1000) NOT NULL,
+      "linkUrl" VARCHAR(1000) NOT NULL,
+      "position" INTEGER NOT NULL DEFAULT 0,
+      "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );`
+  );
+}
 
 export async function GET() {
   try {
-    await ensureBannerTable();
-    const rows = await prisma.$queryRaw<BannerRow[]>`SELECT "name", "imageUrl", "linkUrl", "order" FROM "Banner" ORDER BY "order" ASC`;
-    return NextResponse.json({ banners: rows });
-  } catch {
-    // If table is missing (no migration yet), return empty set to avoid breaking home page
-    return NextResponse.json({ banners: [] });
+    try {
+      const rows = await prisma.banner.findMany({
+        orderBy: [{ position: "asc" }, { createdAt: "asc" }],
+        select: { id: true, name: true, imageUrl: true, linkUrl: true, position: true },
+      });
+      return NextResponse.json(rows, { headers: { "Cache-Control": "no-store" } });
+    } catch {
+      await ensureBannerTable();
+      return NextResponse.json([], { headers: { "Cache-Control": "no-store" } });
+    }
+  } catch (e) {
+    console.error("GET /api/banners error", e);
+    return NextResponse.json({ error: "Erro interno ao buscar banners" }, { status: 500 });
   }
 }
 
 export async function PUT(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user?.role !== 'ADMIN') {
-    return new NextResponse('Forbidden', { status: 403 });
-  }
-  let body: unknown;
   try {
-    body = await req.json();
-  } catch {
-    return new NextResponse('Invalid JSON', { status: 400 });
-  }
-  const parsed = PayloadSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
-  const { banners } = parsed.data;
-  try {
-    await ensureBannerTable();
-    await prisma.$executeRaw`DELETE FROM "Banner"`;
-
-    for (const b of banners) {
-      const now = new Date();
-      const id = crypto.randomUUID();
-      try {
-        // Try full insert including id/createdAt/updatedAt (works when NOT NULL without defaults)
-        await prisma.$executeRaw(Prisma.sql`
-          INSERT INTO "Banner" ("id", "name", "imageUrl", "linkUrl", "order", "createdAt", "updatedAt")
-          VALUES (${id}, ${b.name.trim()}, ${b.imageUrl.trim()}, ${b.linkUrl.trim()}, ${b.order}, ${now}, ${now})
-        `);
-      } catch (err) {
-        // If columns don't exist (older/minimal schema), fallback to minimal insert
-        // Undefined column error code in Postgres is 42703
-        const msg = err instanceof Error ? err.message : String(err);
-        if (/42703/.test(msg) || /column .* does not exist/i.test(msg)) {
-          await prisma.$executeRaw(Prisma.sql`
-            INSERT INTO "Banner" ("name", "imageUrl", "linkUrl", "order")
-            VALUES (${b.name.trim()}, ${b.imageUrl.trim()}, ${b.linkUrl.trim()}, ${b.order})
-          `);
-        } else {
-          throw err;
-        }
-      }
+    const json = await req.json();
+    const parsed = BannerArraySchema.safeParse(json);
+    if (!parsed.success) {
+      const { formErrors, fieldErrors } = parsed.error.flatten();
+      // Provide a concise message plus details for clients that want to inspect
+      return NextResponse.json(
+        { error: { message: "Entrada inválida", formErrors, fieldErrors, issues: parsed.error.issues } },
+        { status: 400 }
+      );
     }
-    return new NextResponse(null, { status: 204 });
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : 'Unknown error';
-    return NextResponse.json({ error: 'Failed to save banners', detail: msg }, { status: 500 });
+
+    const input = parsed.data;
+
+    // Ensure table exists before writing
+    await ensureBannerTable();
+
+    // Replace the entire set to respect order
+    await prisma.$transaction(async (tx) => {
+      await tx.banner.deleteMany();
+      if (input.length > 0) {
+        await tx.banner.createMany({
+          data: input.map((b, i) => ({
+            id: randomUUID(),
+            name: b.name,
+            imageUrl: b.imageUrl,
+            linkUrl: b.linkUrl,
+            position: i,
+          })),
+        });
+      }
+    });
+
+    return NextResponse.json({ ok: true, count: input.length });
+  } catch (e) {
+    console.error("PUT /api/banners error", e);
+    return NextResponse.json({ error: "Erro interno ao salvar banners" }, { status: 500 });
   }
 }

@@ -284,15 +284,13 @@ model ChapterView {
   @@index([chapterId, userId, createdAt])
 }
 
-// Home page banner configuration (admin-managed)
+// Homepage banners
 model Banner {
   id        String   @id @default(cuid())
-  name      String   @db.VarChar(150)
-  imageUrl  String
-  linkUrl   String
-  order     Int      @default(0)
+  name      String   @db.VarChar(200)
+  imageUrl  String   @db.VarChar(1000)
+  linkUrl   String   @db.VarChar(1000)
+  position  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([order])
 }
