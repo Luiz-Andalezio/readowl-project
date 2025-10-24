@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/ui/modal/Modal';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
-import Image from 'next/image';
+import { BookPlus, X, Check } from 'lucide-react';
 import { CoverInput } from './CoverInput';
 import { BasicFields } from './BasicFields';
 import { GenreSelector } from './GenreSelector';
@@ -158,15 +158,8 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
     return (
     <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium p-8 shadow-2xl">
             <div className="flex items-center justify-center gap-3 mb-8">
-                <Image
-                    src="/img/svg/book/checkbook.svg"
-                    alt="Livro"
-                    width={50}
-                    height={50}
-                    className="w-10 h-10 mt-0.4"
-                    aria-hidden="true"
-                />
-                <h1 className="text-3xl font-yusei text-center font-semibold text-white">Registrar nova obra</h1>
+                <BookPlus className="w-10 h-10 text-white/90" aria-hidden="true" />
+                <h1 className="text-3xl font-ptserif text-center font-semibold text-white">Criar nova obra</h1>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <CoverInput
@@ -210,14 +203,14 @@ export default function CreateBookForm({ availableGenres, redirectAfter = '/libr
                 <ButtonWithIcon
                     variant="secondary"
                     onClick={() => untouched ? window.location.assign(redirectAfter) : setConfirmCancelOpen(true)}
-                    iconUrl="/img/svg/generics/purple/cancel.svg"
+                    icon={<X className="w-5 h-5" />}
                 >Cancelar</ButtonWithIcon>
                 <ButtonWithIcon
                     variant="primary"
                     disabled={!canSubmit || submitting}
                     onClick={() => setConfirmSaveOpen(true)}
-                    iconUrl="/img/svg/book/checkbook.svg"
-                >{submitting ? 'Salvando...' : 'Registrar'}</ButtonWithIcon>
+                    icon={<Check className="w-5 h-5" />}
+                >{submitting ? 'Salvando...' : 'Criar'}</ButtonWithIcon>
             </div>
 
             {/* Help modal: teach how to provide a cover URL */}

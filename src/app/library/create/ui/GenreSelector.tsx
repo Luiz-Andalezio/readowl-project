@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import Image from 'next/image';
+import { Tags } from 'lucide-react';
 
 export interface GenreSelectorProps {
   filteredGenres: string[];
@@ -15,7 +15,7 @@ export const GenreSelector: React.FC<GenreSelectorProps> = ({ filteredGenres, ge
   return (
     <div className="lg:col-span-3 w-full">
       <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-        <Image src="/img/svg/book/label.svg" alt="Gêneros" width={18} height={18} className="opacity-80" />
+        <Tags className="w-4 h-4 opacity-80" aria-hidden />
         Gêneros
       </label>
   <div className="w-full bg-readowl-purple-extradark/70 border border-white/10 p-3 max-h-48 overflow-y-auto">

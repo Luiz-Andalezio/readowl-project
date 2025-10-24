@@ -51,11 +51,20 @@ model User {
   // Ratings given by this user
   ratings BookRating[]
 
+  // Comments authored by this user
+  comments Comment[]
+
+  // Comment likes by this user
+  commentLikes CommentLike[]
+
   // Password recovery
   passwordResetTokens PasswordResetToken[]
 
   // Credential version: incremented when credentials change (forces JWT re-login)
   credentialVersion Int @default(0)
+
+  // Chapter views by this user
+  chapterViews ChapterView[]
 }
 
 // Literary genre model
@@ -95,6 +104,9 @@ model Book {
   // Volumes and chapters
   volumes  Volume[]
   chapters Chapter[]
+
+  // Comments on this book
+  comments Comment[]
 }
 
 // Auxiliary models for NextAuth
@@ -203,6 +215,82 @@ model Chapter {
   book     Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
   volume   Volume? @relation(fields: [volumeId], references: [id], onDelete: SetNull)
 
+  // Comments on this chapter
+  comments Comment[]
+
+  // Views for this chapter
+  views ChapterView[]
+
   @@index([bookId])
   @@index([volumeId])
+}
+
+// User comments on books and chapters. Replies are modeled via self-relation (parentId).
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Author
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Target book (required)
+  bookId String
+  book   Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // Optional chapter when the comment is for a specific chapter
+  chapterId String?
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  // Replies
+  parentId String?
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  likes CommentLike[]
+
+  @@index([bookId])
+  @@index([chapterId])
+  @@index([parentId])
+}
+
+// A user can like a comment at most once
+model CommentLike {
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+  @@index([commentId])
+}
+
+// Views per chapter, auth-only (no IP storage). This mirrors the shared DB table
+model ChapterView {
+  id        String   @id @default(cuid())
+  chapterId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([chapterId])
+  @@index([chapterId, createdAt])
+  @@index([chapterId, userId, createdAt])
+}
+
+// Homepage banners
+model Banner {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(200)
+  imageUrl  String   @db.VarChar(1000)
+  linkUrl   String   @db.VarChar(1000)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

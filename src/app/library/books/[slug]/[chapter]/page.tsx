@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
-import ReadChapterClient from './ui/ReadChapterClient';
+import ReadChapterClient from '../../../../client/chapter/ReadChapterClient';
 
 interface PageProps { params: Promise<{ slug: string; chapter: string }> }
 
@@ -69,7 +69,7 @@ export default async function ReadChapterPage({ params }: PageProps) {
 
   // DTO for client
   const payload = {
-    book: { id: book.id, title: book.title },
+    book: { id: book.id, title: book.title, authorName: book.author?.name || 'Autor desconhecido' },
     chapter: { id: current.id, title: current.title, content: current.content, createdAt: current.createdAt },
     prevSlug: prev ? slugify(prev.title) : null,
     nextSlug: next ? slugify(next.title) : null,

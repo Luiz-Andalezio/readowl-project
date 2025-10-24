@@ -3,14 +3,14 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { slugify } from '@/lib/slug';
-import BookHeader from '../../../../components/book/BookHeader';
-import RatingBox from '../../../../components/book/RatingBox';
-import BookActions from '../../../../components/book/BookActions';
-import BookTabs from '../../../../components/book/BookTabs';
-import CoverZoom from '@/components/book/CoverZoom';
+import BookHeader from './ui/BookHeader';
+import RatingBox from './ui/RatingBox';
+import BookActions from './ui/BookActions';
+import BookTabs from './ui/BookTabs';
+import CoverZoom from '@/app/library/books/[slug]/ui/CoverZoom';
 import type { BookWithAuthorAndGenres } from '@/types/book';
 import { sanitizeSynopsisHtml } from '@/lib/sanitize';
-import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
 
 interface PageProps { params: Promise<{ slug: string }> }
 
@@ -41,7 +41,15 @@ export default async function BookPage({ params }: PageProps) {
   return (
     <>
       <div className="w-full flex justify-center mt-14 sm:mt-16">
-        <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros' }} />
+        <Breadcrumb
+          anchor="static"
+          items={[
+            { label: 'Início', href: '/home' },
+            { label: 'Biblioteca', href: '/library' },
+            { label: 'Livros', href: '/library' },
+            { label: book.title }
+          ]}
+        />
       </div>
       <main className="pb-6 md:px-8">
         <section className="relative bg-readowl-purple-medium p-4 md:p-6 text-white shadow-lg max-w-6xl mx-auto">

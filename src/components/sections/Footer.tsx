@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import PolicyDropdown from '@/components/ui/PolicyDropdown';
+import PolicyDropdown from '@/components/sections/PolicyDropdown';
 
 const GithubIcon = () => (
   <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

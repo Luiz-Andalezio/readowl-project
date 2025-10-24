@@ -1,6 +1,5 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
 import Modal from '@/components/ui/modal/Modal';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
 import { BOOK_GENRES_MASTER, BOOK_COVER_RATIO, BOOK_COVER_RATIO_TOLERANCE, BOOK_STATUS, updateBookSchema, BOOK_COVER_MIN_WIDTH, BOOK_COVER_MIN_HEIGHT } from '@/types/book';
@@ -9,6 +8,7 @@ import { signIn } from 'next-auth/react';
 import CoverAndStatus from './CoverAndStatus';
 import BasicFieldsEdit from './BasicFieldsEdit';
 import GenreSelectorEdit from './GenreSelectorEdit';
+import { BookText, X, Check, BookX } from 'lucide-react';
 
 type Genre = { id: string; name: string };
 type Author = { id: string; name: string | null; image: string | null; role: string };
@@ -151,8 +151,8 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
         <>
             <div className="w-full max-w-6xl mx-auto bg-readowl-purple-medium p-8 shadow-2xl">
                 <div className="flex items-center justify-center gap-3 mb-8">
-                    <Image src="/img/svg/book/checkbook.svg" alt="Livro" width={50} height={50} className="w-10 h-10 mt-0.4" />
-                    <h1 className="text-3xl font-yusei text-center font-semibold text-white">Editar obra: {book.title}</h1>
+                    <BookText className="w-10 h-10 text-white/90" />
+                    <h1 className="text-3xl font-ptserif text-center font-semibold text-white">Editar obra: {book.title}</h1>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                     <CoverAndStatus
@@ -201,11 +201,11 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                     <ButtonWithIcon
                         variant="secondary"
                         onClick={() => (changed ? setConfirmCancelOpen(true) : (window.location.href = `/library/books/${encodeURIComponent(slugify(baseline.title))}`))}
-                        iconUrl="/img/svg/generics/purple/cancel.svg"
+                        icon={<X className="w-5 h-5" />}
                     >
                         Cancelar
                     </ButtonWithIcon>
-                    <ButtonWithIcon variant="primary" disabled={!canSubmit || submitting} onClick={() => setConfirmSaveOpen(true)} iconUrl="/img/svg/book/checkbook.svg">{submitting ? 'Salvando...' : 'Salvar'}</ButtonWithIcon>
+                    <ButtonWithIcon variant="primary" disabled={!canSubmit || submitting} onClick={() => setConfirmSaveOpen(true)} icon={<Check className="w-5 h-5" />}>{submitting ? 'Salvando...' : 'Salvar'}</ButtonWithIcon>
                 </div>
 
                 {/* Modals */}
@@ -261,7 +261,7 @@ export default function EditBookForm({ book, slug, hasLocalPassword }: Props) {
                 <ButtonWithIcon
                     className="!bg-red-700 !text-white !border-red-900 hover:!bg-red-600"
                     variant="secondary"
-                    iconUrl="/img/svg/book/book-delete.svg"
+                    icon={<BookX className="w-5 h-5" />}
                     iconAlt="Excluir"
                     onClick={() => setConfirmDeleteOpen(true)}
                 >

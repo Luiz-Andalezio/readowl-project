@@ -4,9 +4,10 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/ui/navbar/Navbar";
 import ButtonWithIcon from "@/components/ui/button/ButtonWithIcon";
 import BookCarousel from "@/components/book/BookCarousel";
+import { BookUser, BookMarked, BookPlus } from 'lucide-react';
 import { prisma } from "@/lib/prisma";
 import Link from 'next/link';
-import { BreadcrumbAuto } from "@/components/ui/Breadcrumb";
+import { BreadcrumbAuto } from "@/components/ui/navbar/Breadcrumb";
 
 export default async function Library() {
     const session = await getServerSession(authOptions);
@@ -17,6 +18,13 @@ export default async function Library() {
         where: { authorId: session.user.id },
         orderBy: { createdAt: 'asc' }, // oldest first per requirement
         select: { id: true, title: true, coverUrl: true }
+    });
+
+    // Load books followed by current user
+    const followed = await prisma.book.findMany({
+        where: { followers: { some: { userId: session.user.id } } },
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, title: true, coverUrl: true },
     });
 
     return (
@@ -30,19 +38,25 @@ export default async function Library() {
                     <Link href="/library/create">
                         <ButtonWithIcon
                             variant="primary"
-                            iconUrl="/img/svg/book/checkbook.svg"
-                            iconAlt="Livro"
+                            icon={<BookPlus size={20} />}
                         >
-                            Registrar uma obra
+                            Criar uma obra
                         </ButtonWithIcon>
                     </Link>
                 </div>
-                <div className="px-4 md:px-10 max-w-7xl mx-auto">
+                <div className="pb-6 md:px-10 max-w-7xl mx-auto">
                     <BookCarousel
                         books={myBooks}
                         title="Minha Autoria!"
-                        iconSrc="/img/svg/book/author.svg"
+                        icon={<BookUser size={20} />}
                         itemsPerView={5}
+                    />
+                    <BookCarousel
+                        books={followed}
+                        title="Seguidos!"
+                        icon={<BookMarked size={20} />}
+                        itemsPerView={5}
+                        emptyMessage="Nenhuma obra seguida."
                     />
                 </div>
             </main>

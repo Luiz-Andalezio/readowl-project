@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '../../../components/ui/button/Button';
-import PolicyDropdown from '../../../components/ui/PolicyDropdown';
+import PolicyDropdown from '../../../components/sections/PolicyDropdown';
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);

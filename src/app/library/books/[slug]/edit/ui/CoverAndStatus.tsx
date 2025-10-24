@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
+import { BookImage, Activity, CheckCheck, PauseCircle, Hourglass } from 'lucide-react';
 import { BOOK_COVER_MIN_HEIGHT, BOOK_COVER_MIN_WIDTH, BOOK_STATUS, BOOK_STATUS_LABEL } from '@/types/book';
 
 export interface CoverAndStatusProps {
@@ -33,7 +33,7 @@ export const CoverAndStatus: React.FC<CoverAndStatusProps> = ({
   return (
     <div>
       <label className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-        <Image src="/img/svg/book/book2.svg" alt="Capa" width={18} height={18} className="opacity-80" />
+        <BookImage className="w-4 h-4 opacity-80" aria-hidden />
         URL da Capa
   <button type="button" onClick={onHelp} className="w-5 h-5 bg-readowl-purple-dark text-white text-xs flex items-center justify-center">?</button>
       </label>
@@ -73,11 +73,12 @@ export default CoverAndStatus;
 // --- Internal components ---
 type StatusValue = typeof BOOK_STATUS[number];
 
-const statusIcon = (s: StatusValue) =>
-  s === 'ONGOING' ? '/img/svg/book/status/purple/active.svg'
-  : s === 'COMPLETED' ? '/img/svg/book/status/purple/finished.svg'
-  : s === 'PAUSED' ? '/img/svg/book/status/purple/paused.svg'
-  : '/img/svg/book/status/purple/hiatus.svg';
+const statusIconComp: Record<StatusValue, React.ComponentType<{ className?: string }>> = {
+  ONGOING: Activity,
+  COMPLETED: CheckCheck,
+  PAUSED: PauseCircle,
+  HIATUS: Hourglass,
+};
 
 const StatusDropdown: React.FC<{ status: StatusValue; onStatus: (s: StatusValue) => void }> = ({ status, onStatus }) => {
   const [open, setOpen] = useState(false);
@@ -88,7 +89,7 @@ const StatusDropdown: React.FC<{ status: StatusValue; onStatus: (s: StatusValue)
   const options = useMemo(() => BOOK_STATUS.map((s) => ({
     value: s,
     label: BOOK_STATUS_LABEL[s],
-    icon: statusIcon(s),
+    Icon: statusIconComp[s],
   })), []);
 
   const selectedIndex = useMemo(() => options.findIndex(o => o.value === status) ?? 0, [options, status]);
@@ -158,8 +159,7 @@ const StatusDropdown: React.FC<{ status: StatusValue; onStatus: (s: StatusValue)
         className="pr-8 pl-10 py-1.5 text-sm bg-white border-2 border-white/60 focus:ring-2 focus:ring-readowl-purple-dark text-readowl-purple inline-flex items-center gap-2 min-w-[11rem]"
       >
         {/* Left icon of selected */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={statusIcon(status)} alt="" className="absolute left-2 w-5 h-5" />
+        {(() => { const Icon = statusIconComp[status]; return <Icon className="absolute left-2 w-5 h-5 text-readowl-purple" />; })()}
         <span>{BOOK_STATUS_LABEL[status]}</span>
         {/* Animated caret */}
         <svg
@@ -195,8 +195,7 @@ const StatusDropdown: React.FC<{ status: StatusValue; onStatus: (s: StatusValue)
                 onClick={() => { onStatus(opt.value); setOpen(false); btnRef.current?.focus(); }}
                 className={`flex items-center gap-2 px-2 py-1.5 cursor-pointer ${active ? 'bg-readowl-purple-extralight/60' : ''} ${selected ? 'font-semibold' : ''}`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={opt.icon} alt="" className="w-5 h-5" />
+                <opt.Icon className="w-5 h-5 text-readowl-purple" />
                 <span className="text-readowl-purple">{opt.label}</span>
               </li>
             );

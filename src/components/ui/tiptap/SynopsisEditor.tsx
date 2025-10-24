@@ -9,7 +9,7 @@ import Link from '@tiptap/extension-link';
 import ImageExtension from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
-import NextImage from 'next/image';
+import { Undo2, Redo2, Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code as CodeIcon, Link as LinkIcon, Image as ImageIcon, List as ListIcon, ListOrdered, Eraser } from 'lucide-react';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
 import ResizableImage from './ResizableImage';
@@ -250,7 +250,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             onClick={() => editor?.chain().focus().undo().run()}
             className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
           >
-            <NextImage src="/img/svg/tiptap/arrow-undo.svg" width={20} height={20} alt="Desfazer" aria-hidden className="pointer-events-none select-none" />
+            <Undo2 size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <button
             type="button"
@@ -258,7 +258,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             onClick={() => editor?.chain().focus().redo().run()}
             className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
           >
-            <NextImage src="/img/svg/tiptap/arrow-redo.svg" width={20} height={20} alt="Refazer" aria-hidden className="pointer-events-none select-none" />
+            <Redo2 size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <span className="mx-1 opacity-40">|</span>
           <div className="relative">
@@ -297,7 +297,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''
               }`}
           >
-            <NextImage src="/img/svg/tiptap/bold.svg" width={20} height={20} alt="Negrito" aria-hidden className="pointer-events-none select-none" />
+            <Bold size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <button
             type="button"
@@ -306,7 +306,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('italic') ? 'bg-readowl-purple-extralight/60' : ''
               }`}
           >
-            <NextImage src="/img/svg/tiptap/italic.svg" width={20} height={20} alt="Itálico" aria-hidden className="pointer-events-none select-none" />
+            <Italic size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <button
             type="button"
@@ -315,7 +315,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('underline') ? 'bg-readowl-purple-extralight/60' : ''
               }`}
           >
-            <NextImage src="/img/svg/tiptap/underlined.svg" width={20} height={20} alt="Sublinhado" aria-hidden className="pointer-events-none select-none" />
+            <UnderlineIcon size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <button
             type="button"
@@ -324,7 +324,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''
               }`}
           >
-            <NextImage src="/img/svg/tiptap/strikethrough.svg" width={20} height={20} alt="Tachado" aria-hidden className="pointer-events-none select-none" />
+            <Strikethrough size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <button
             type="button"
@@ -333,7 +333,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''
               }`}
           >
-            <NextImage src="/img/svg/tiptap/code.svg" width={20} height={20} alt="Código" aria-hidden className="pointer-events-none select-none" />
+            <CodeIcon size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <span className="mx-1 opacity-40">|</span>
           <button
@@ -344,7 +344,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             }
             className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
           >
-            <NextImage src="/img/svg/tiptap/add-link.svg" width={20} height={20} alt="Link" aria-hidden className="pointer-events-none select-none" />
+            <LinkIcon size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <button
             type="button"
@@ -357,7 +357,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             }}
             className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
           >
-            <NextImage src="/img/svg/tiptap/add-image.svg" width={20} height={20} alt="Imagem" aria-hidden className="pointer-events-none select-none" />
+            <ImageIcon size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <span className="mx-1 opacity-40">|</span>
           <button
@@ -367,7 +367,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''
               }`}
           >
-            <NextImage src="/img/svg/tiptap/bulleted-list.svg" width={20} height={20} alt="Lista" aria-hidden className="pointer-events-none select-none" />
+            <ListIcon size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <button
             type="button"
@@ -376,7 +376,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             className={`px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30 ${editor?.isActive('orderedList') ? 'bg-readowl-purple-extralight/60' : ''
               }`}
           >
-            <NextImage src="/img/svg/tiptap/numbered-list.svg" width={20} height={20} alt="Lista numerada" aria-hidden className="pointer-events-none select-none" />
+            <ListOrdered size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
           <span className="mx-1 opacity-40">|</span>
           <button
@@ -471,7 +471,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
             onClick={() => editor?.chain().focus().clearNodes().unsetAllMarks().run()}
             className="px-1 py-0.5 rounded-none hover:bg-readowl-purple-extralight/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple/30"
           >
-            <NextImage src="/img/svg/tiptap/format-clear.svg" width={20} height={20} alt="Limpar formatação" aria-hidden className="pointer-events-none select-none" />
+            <Eraser size={11} aria-hidden className="pointer-events-none select-none" />
           </button>
         </div>
 
@@ -484,7 +484,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               onClick={() => editor?.chain().focus().undo().run()}
               className="px-2 py-1 rounded-md hover:bg-readowl-purple-extralight/40 bg-transparent"
             >
-              <NextImage src="/img/svg/tiptap/arrow-undo.svg" width={20} height={20} alt="Desfazer" aria-hidden className="pointer-events-none select-none readowl-icon" />
+              <Undo2 size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
             </button>
             <button
               type="button"
@@ -492,7 +492,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               onClick={() => editor?.chain().focus().redo().run()}
               className="px-2 py-1 rounded-md hover:bg-readowl-purple-extralight/40 bg-transparent"
             >
-              <NextImage src="/img/svg/tiptap/arrow-redo.svg" width={20} height={20} alt="Refazer" aria-hidden className="pointer-events-none select-none readowl-icon" />
+              <Redo2 size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
             </button>
             <span className="mx-1 opacity-40">|</span>
             <button
@@ -501,7 +501,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               onClick={() => editor?.chain().focus().toggleBold().run()}
               className={`px-2 py-1 rounded-md hover:bg-readowl-purple-extralight/40 bg-transparent ${editor?.isActive('bold') ? 'bg-readowl-purple-extralight/60' : ''}`}
             >
-              <NextImage src="/img/svg/tiptap/bold.svg" width={20} height={20} alt="Negrito" aria-hidden className="pointer-events-none select-none readowl-icon" />
+              <Bold size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
             </button>
             <button
               type="button"
@@ -509,7 +509,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               onClick={() => editor?.chain().focus().toggleItalic().run()}
               className={`px-2 py-1 rounded-md hover:bg-readowl-purple-extralight/40 bg-transparent ${editor?.isActive('italic') ? 'bg-readowl-purple-extralight/60' : ''}`}
             >
-              <NextImage src="/img/svg/tiptap/italic.svg" width={20} height={20} alt="Itálico" aria-hidden className="pointer-events-none select-none readowl-icon" />
+              <Italic size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
             </button>
             <button
               type="button"
@@ -517,7 +517,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               onClick={() => isLinkActive ? editor?.chain().focus().unsetLink().run() : (setLinkUrl(''), setLinkOpen(true))}
               className="px-2 py-1 rounded-md hover:bg-readowl-purple-extralight/40 bg-transparent"
             >
-              <NextImage src="/img/svg/tiptap/add-link.svg" width={20} height={20} alt="Link" aria-hidden className="pointer-events-none select-none readowl-icon" />
+              <LinkIcon size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
             </button>
             <button
               type="button"
@@ -525,7 +525,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
               onClick={() => { setImageUrl(''); setImageWidth(''); setImageHeight(''); setImageOpen(true); }}
               className="px-2 py-1 rounded-md hover:bg-readowl-purple-extralight/40 bg-transparent"
             >
-              <NextImage src="/img/svg/tiptap/add-image.svg" width={20} height={20} alt="Imagem" aria-hidden className="pointer-events-none select-none readowl-icon" />
+              <ImageIcon size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
             </button>
           </div>
           <button
@@ -616,7 +616,7 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                   </svg>
                 </button>
                 <button aria-label="Tachado" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('strike') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleStrike().run(); setMoreOpen(false); }}>
-                  <NextImage src="/img/svg/tiptap/strikethrough.svg" width={20} height={20} alt="Tachado" aria-hidden className="pointer-events-none select-none readowl-icon" />
+                  <Strikethrough size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
                 </button>
                 <button aria-label="Código" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('code') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleCode().run(); setMoreOpen(false); }}>
                   <svg className="text-[#836DBE]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -625,17 +625,17 @@ export default function SynopsisEditor({ value, onChange, maxChars, error, showE
                   </svg>
                 </button>
                 <button aria-label="Limpar formatação" className="p-2 border border-readowl-purple/20 rounded flex items-center justify-center hover:bg-readowl-purple-extralight/40" onClick={() => { editor?.chain().focus().clearNodes().unsetAllMarks().run(); setMoreOpen(false); }}>
-                  <NextImage src="/img/svg/tiptap/format-clear.svg" width={20} height={20} alt="Limpar" aria-hidden className="pointer-events-none select-none readowl-icon" />
+                  <Eraser size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
                 </button>
               </div>
 
               {/* Lists */}
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <button aria-label="Lista com marcadores" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('bulletList') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleBulletList().run(); setMoreOpen(false); }}>
-                  <NextImage src="/img/svg/tiptap/bulleted-list.svg" width={20} height={20} alt="Lista" aria-hidden className="pointer-events-none select-none readowl-icon" />
+                  <ListIcon size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
                 </button>
                 <button aria-label="Lista numerada" className={`p-2 border border-readowl-purple/20 rounded flex items-center justify-center ${editor?.isActive('orderedList') ? 'bg-readowl-purple-extralight/60' : ''} hover:bg-readowl-purple-extralight/40`} onClick={() => { editor?.chain().focus().toggleOrderedList().run(); setMoreOpen(false); }}>
-                  <NextImage src="/img/svg/tiptap/numbered-list.svg" width={20} height={20} alt="Lista numerada" aria-hidden className="pointer-events-none select-none readowl-icon" />
+                  <ListOrdered size={11} aria-hidden className="pointer-events-none select-none readowl-icon" />
                 </button>
               </div>
 

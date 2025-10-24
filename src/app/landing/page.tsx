@@ -5,7 +5,6 @@ import HowItHelps from '@/app/landing/about/HowItHelps';
 import HowToPost from '@/app/landing/about/HowToPost';
 import Features from '@/app/landing/about/Features';
 import Testimonials from '@/app/landing/about/Testimonials';
-import Navbar from '@/components/ui/navbar/Navbar';
 
 function App() {
   return (

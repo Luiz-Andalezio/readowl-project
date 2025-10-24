@@ -1,7 +1,7 @@
 import Navbar from "@/components/ui/navbar/Navbar";
 import LandingHeader from "@/app/landing/about/LandingHeader";
 import ErrorView from "@/components/ui/error/ErrorView";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Breadcrumb } from "@/components/ui/navbar/Breadcrumb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
