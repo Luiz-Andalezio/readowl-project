@@ -8,7 +8,7 @@ import { BookMarked, ChevronLeft, ChevronRight, Book } from 'lucide-react';
 // Minimal data needed to render a book card
 export interface CarouselBook { id: string; title: string; coverUrl: string | null; }
 // Component props (itemsPerView is a hint; layout recalculates responsively)
-interface BookCarouselProps { books: CarouselBook[]; title: string; icon?: React.ReactNode; itemsPerView?: number; emptyMessage?: string; }
+interface BookCarouselProps { books: CarouselBook[]; title: string; icon?: React.ReactNode; itemsPerView?: number; emptyMessage?: string; storageKey?: string }
 
 // Fallback placeholder used when a book has no cover
 const FALLBACK_PLACEHOLDER = (
@@ -22,10 +22,11 @@ function smoothScroll(el: HTMLElement, left: number, prefersReduced: boolean) {
     el.scrollTo({ left, behavior: prefersReduced ? 'auto' : 'smooth' });
 }
 
-export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon = <BookMarked size={20} />, itemsPerView = 5, emptyMessage = 'Nenhuma obra registrada.' }) => {
+export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon = <BookMarked size={20} />, itemsPerView = 5, emptyMessage = 'Nenhuma obra registrada.', storageKey }) => {
     // Refs to DOM nodes we need for measuring / event binding
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const didInitRef = useRef(false);
     // Arrow enablement state
     const [canPrev, setCanPrev] = useState(false);
     const [canNext, setCanNext] = useState(false);
@@ -33,14 +34,21 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
     const [activeIndex, setActiveIndex] = useState(0);
     // Whether autoplay is currently paused (hover / dragging)
     const [paused, setPaused] = useState(false);
+    const idleResumeTimer = useRef<number | null>(null);
     // Dynamic layout values
     const [cardWidth, setCardWidth] = useState(0);
     const [gap, setGap] = useState(18);
     const [visibleCount, setVisibleCount] = useState(itemsPerView);
+    const [peekPrev, setPeekPrev] = useState(24); // px of previous item visible on the left
+    const [peekNext, setPeekNext] = useState(20); // px of next items visible on the right
     // Whether content is wider than the viewport and can scroll
     const [isScrollable, setIsScrollable] = useState(false);
     // Respect prefers-reduced-motion to avoid smooth animations & autoplay movement
     const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Infinite looping with minimal edge clones to avoid visible duplicates
+    const loopEnabled = books.length > visibleCount + 1;
+    const cloneCount = loopEnabled ? Math.min(books.length, visibleCount + 2) : 0;
 
     // Compute responsive layout: how many cards fit, their width, and gap
     const computeLayout = useCallback(() => {
@@ -62,6 +70,11 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
         setCardWidth(clamped);                   // commit calculated width
         setGap(baseGap);                         // update gap
         setVisibleCount(target);                 // store actual count we will show
+        // Peeks: show a bit of previous on the left and a hint of next on the right
+        const prev = Math.round(clamped * (w < 480 ? 0.18 : w < 768 ? 0.22 : 0.26));
+        const next = Math.round(clamped * (w < 480 ? 0.18 : w < 768 ? 0.2 : 0.24));
+        setPeekPrev(prev);
+        setPeekNext(next);
     }, [itemsPerView]);
 
     useEffect(() => {
@@ -78,31 +91,97 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
     // Recalculate arrow enabled state + active snapped index
     const updateArrows = useCallback(() => {
         const el = scrollRef.current; if (!el) return;
-        setCanPrev(el.scrollLeft > 4); // small threshold to hide prev near start
-        setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); // near end hide next
-        setIsScrollable(el.scrollWidth > el.clientWidth + 4);
-        const snap = cardWidth + gap;  // snap distance between cards
-        if (snap > 0) {
-            const idx = Math.round(el.scrollLeft / snap); // nearest snapped index
-            if (idx !== activeIndex) setActiveIndex(Math.min(books.length - 1, Math.max(0, idx)));
+        const snap = cardWidth + gap;  // distance between cards
+        // With edge clones, normalize when leaving the real range
+        if (loopEnabled) {
+            const baseOffset = cloneCount * snap;
+            const min = 0;
+            const max = baseOffset + (books.length - 1) * snap;
+            const l = el.scrollLeft + peekPrev; // consider peek for right-aligned highlight
+            if (l < min + snap * 0.5) {
+                // jumped into left clones: send to equivalent on right side
+                el.scrollLeft = baseOffset + (books.length - 1) * snap - peekPrev;
+            } else if (l > max + snap * 0.5) {
+                // jumped into right clones: send to equivalent on left side
+                el.scrollLeft = baseOffset - peekPrev;
+            }
         }
-    }, [activeIndex, books.length, cardWidth, gap]);
+
+        // Arrows & scrollability
+    const origScrollable = books.length > visibleCount;
+        setIsScrollable(origScrollable);
+        if (origScrollable && loopEnabled) {
+            // Infinite: both arrows are always available
+            setCanPrev(true);
+            setCanNext(true);
+        } else {
+            // Non-infinite: compute edges normally
+            setCanPrev(el.scrollLeft > 4);
+            setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+        }
+
+        // Active index relative to the middle set
+        if (snap > 0) {
+            // Highlight: first fully visible card at right edge
+            if (loopEnabled) {
+                const baseOffset = cloneCount * snap;
+                const normalizedLeft = el.scrollLeft - baseOffset + peekPrev;
+                const idx = Math.round(normalizedLeft / snap);
+                const clamped = Math.min(books.length - 1, Math.max(0, idx));
+                if (clamped !== activeIndex) setActiveIndex(clamped);
+            } else {
+                const normalizedLeft = el.scrollLeft + peekPrev;
+                const idx = Math.round(normalizedLeft / snap);
+                const clamped = Math.min(books.length - 1, Math.max(0, idx));
+                if (clamped !== activeIndex) setActiveIndex(clamped);
+            }
+        }
+    }, [activeIndex, books.length, cardWidth, gap, visibleCount, peekPrev, cloneCount, loopEnabled]);
 
     useEffect(() => { updateArrows(); }, [books.length, cardWidth, updateArrows]);
 
     // Scroll relative (dir = +1 forward, -1 backward)
     const scrollByCards = useCallback((dir: number) => {
         const el = scrollRef.current; if (!el) return;
-        const delta = dir * (cardWidth + gap);
-        smoothScroll(el, el.scrollLeft + delta, prefersReducedMotion);
-    }, [cardWidth, gap, prefersReducedMotion]);
+        const snap = cardWidth + gap;
+        if (loopEnabled) {
+            // determine current logical index (relative to real set)
+            const baseOffset = cloneCount * snap;
+            const idx = Math.round((el.scrollLeft - baseOffset + peekPrev) / snap);
+            // pre-position across boundary to keep motion direction coherent
+            if (dir > 0 && idx >= books.length - 1) {
+                el.scrollLeft = el.scrollLeft - books.length * snap;
+            } else if (dir < 0 && idx <= 0) {
+                el.scrollLeft = el.scrollLeft + books.length * snap;
+            }
+            smoothScroll(el, el.scrollLeft + dir * snap, prefersReducedMotion);
+        } else {
+            smoothScroll(el, el.scrollLeft + dir * snap, prefersReducedMotion);
+        }
+    }, [cardWidth, gap, prefersReducedMotion, loopEnabled, cloneCount, peekPrev, books.length]);
 
     // Scroll to an absolute snapped index (used by bullets)
     const scrollToIndex = useCallback((index: number) => {
         const el = scrollRef.current; if (!el) return;
         const snap = cardWidth + gap;
-        smoothScroll(el, index * snap, prefersReducedMotion);
-    }, [cardWidth, gap, prefersReducedMotion]);
+        if (loopEnabled) {
+            const baseOffset = cloneCount * snap;
+            // Keep direction coherent on wrap edges when selecting bullets
+            const currentIdx = Math.round((el.scrollLeft - baseOffset + peekPrev) / snap);
+            // going from last -> 0: pre-position to left clones so scroll goes rightwards
+            if (currentIdx === books.length - 1 && index === 0) {
+                el.scrollLeft = el.scrollLeft - books.length * snap;
+            }
+            // going from 0 -> last: pre-position to right clones so scroll goes leftwards
+            if (currentIdx === 0 && index === books.length - 1) {
+                el.scrollLeft = el.scrollLeft + books.length * snap;
+            }
+            const target = baseOffset + index * snap - peekPrev;
+            smoothScroll(el, target, prefersReducedMotion);
+        } else {
+            smoothScroll(el, index * snap - peekPrev, prefersReducedMotion);
+        }
+    }, [cardWidth, gap, prefersReducedMotion, peekPrev, cloneCount, loopEnabled, books.length]);
 
     // Keyboard accessibility: arrow keys to navigate when section focused
     useEffect(() => {
@@ -118,7 +197,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
     useEffect(() => {
         const el = scrollRef.current; if (!el) return;
         // Pointer drag state
-    let isDown = false; let startX = 0; let startY = 0; let startLeft = 0; let lastT = 0; let didDrag = false;
+        let isDown = false; let startX = 0; let startY = 0; let startLeft = 0; let lastT = 0; let didDrag = false;
         const DRAG_THRESHOLD = 6; // pixels before we treat as drag and cancel click
         const onDown = (e: PointerEvent) => {
             if (!isScrollable) return;
@@ -142,13 +221,36 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
             if (!isDown) return; isDown = false; el.releasePointerCapture(e.pointerId); el.classList.remove('dragging');
             if (didDrag) {
                 const dx = e.clientX - startX; const dt = performance.now() - lastT; // distance & delta time
-                const velocity = Math.abs(dx) / dt; // simple velocity heuristic
-                // Swipe heuristic: velocity OR distance threshold triggers a page shift
-                if (velocity > 0.45 || Math.abs(dx) > cardWidth * 0.4) { scrollByCards(dx < 0 ? 1 : -1); }
-                else {
-                    // Otherwise snap back to nearest card
-                    const snap = cardWidth + gap; const index = Math.round(el.scrollLeft / snap);
-                    smoothScroll(el, index * snap, prefersReducedMotion);
+                const velocity = Math.abs(dx) / Math.max(1, dt); // px per ms
+                const dir = dx < 0 ? 1 : -1;
+                const snap = cardWidth + gap;
+                const loop = loopEnabled;
+                const swipe = Math.abs(dx) > cardWidth * 0.35 || velocity > 0.4;
+                if (swipe) {
+                    // Momentum scroll: extend a bit further with ease-out
+                    let remaining = snap * 0.6; // extra distance
+                    const step = () => {
+                        const delta = Math.min(remaining, Math.max(8, remaining * 0.2));
+                        el.scrollLeft += dir * delta;
+                        remaining -= delta;
+                        updateArrows();
+                        if (remaining > 2) requestAnimationFrame(step);
+                        else {
+                            // final snap to next page
+                            scrollByCards(dir);
+                        }
+                    };
+                    requestAnimationFrame(step);
+                } else {
+                    // Snap to nearest card
+                    if (loop) {
+                        const baseOffset = cloneCount * snap;
+                        const index = Math.round((el.scrollLeft - baseOffset + peekPrev) / snap);
+                        smoothScroll(el, baseOffset + index * snap - peekPrev, prefersReducedMotion);
+                    } else {
+                        const index = Math.round((el.scrollLeft + peekPrev) / snap);
+                        smoothScroll(el, index * snap - peekPrev, prefersReducedMotion);
+                    }
                 }
             } else {
                 // Not a drag: manually trigger click on the anchor under pointer
@@ -158,7 +260,9 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
                     (anchor as HTMLAnchorElement).click();
                 }
             }
-            setTimeout(() => setPaused(false), 800); // small delay after interaction end for stability
+            // resume autoplay after short idle
+            if (idleResumeTimer.current) window.clearTimeout(idleResumeTimer.current);
+            idleResumeTimer.current = window.setTimeout(() => setPaused(false), 3000);
         };
         const onWheel = (e: WheelEvent) => {
             if (!e.shiftKey) return; // only custom behavior when user holds Shift
@@ -166,6 +270,10 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
             e.preventDefault();
             el.scrollLeft += e.deltaY; // map vertical wheel to horizontal scroll
             updateArrows();
+            // pause & schedule resume
+            setPaused(true);
+            if (idleResumeTimer.current) window.clearTimeout(idleResumeTimer.current);
+            idleResumeTimer.current = window.setTimeout(() => setPaused(false), 3000);
         };
         // Listeners
         el.addEventListener('pointerdown', onDown, { passive: true });
@@ -180,7 +288,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
             el.removeEventListener('scroll', updateArrows);
             el.removeEventListener('wheel', onWheel);
         };
-    }, [cardWidth, gap, prefersReducedMotion, updateArrows, scrollByCards, isScrollable]);
+    }, [books.length, visibleCount, cardWidth, gap, prefersReducedMotion, updateArrows, scrollByCards, isScrollable, peekPrev, loopEnabled, cloneCount]);
 
     // Autoplay (pausa no hover / interação)
     // Autoplay cycle: every 4s move forward, loop to start. Disabled when:
@@ -190,19 +298,14 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
     useEffect(() => {
         if (prefersReducedMotion) return;
         if (books.length <= 1) return;
+        const canLoop = books.length > 1; // permitir loop mesmo com 2 itens
+        if (!canLoop) return; // autoplay só faz sentido no modo infinito
         if (paused) return;
         const interval = setInterval(() => {
-            const el = scrollRef.current; if (!el) return;
-            const snap = cardWidth + gap; if (snap <= 0) return;
-            const idx = Math.round(el.scrollLeft / snap);
-            if (idx >= books.length - 1) {
-                smoothScroll(el, 0, prefersReducedMotion); // loop back
-            } else {
-                scrollByCards(1); // advance
-            }
+            scrollByCards(1); // always move forward; normalization keeps loop infinite
         }, 4000);
         return () => clearInterval(interval);
-    }, [books.length, cardWidth, gap, paused, prefersReducedMotion, scrollByCards]);
+    }, [books.length, paused, prefersReducedMotion, scrollByCards]);
 
     // Hover pause handlers
     // Pause autoplay while hovering the scroll area, resume on leave
@@ -225,6 +328,34 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
         WebkitBoxOrient: 'vertical',
         overflow: 'hidden',
     };
+
+    // Build dataset using precomputed loopEnabled/cloneCount
+    const leftClones = loopEnabled ? books.slice(books.length - cloneCount) : [];
+    const rightClones = loopEnabled ? books.slice(0, cloneCount) : [];
+    const dataset = loopEnabled ? [...leftClones, ...books, ...rightClones] : books;
+    // Center on middle set at mount/layout changes
+    useEffect(() => {
+        const el = scrollRef.current; if (!el) return;
+        const snap = cardWidth + gap; if (snap <= 0) return;
+        if (!didInitRef.current) {
+            // restore from memory if available
+            const key = `bookCarousel:${storageKey || title}`;
+            let initialIndex = 0;
+            try { const saved = localStorage.getItem(key); if (saved) initialIndex = Math.max(0, Math.min(books.length - 1, parseInt(saved, 10) || 0)); } catch {}
+            if (loopEnabled) {
+                const baseOffset = cloneCount * snap;
+                el.scrollLeft = baseOffset + initialIndex * snap - peekPrev; // align to start of real set
+            } else {
+                el.scrollLeft = initialIndex * snap - peekPrev;
+            }
+            didInitRef.current = true;
+        }
+    }, [books.length, visibleCount, cardWidth, gap, peekPrev, title, storageKey, cloneCount, loopEnabled]);
+
+    // Persist position in memory whenever activeIndex changes
+    useEffect(() => {
+        try { localStorage.setItem(`bookCarousel:${storageKey || title}`, String(activeIndex)); } catch {}
+    }, [activeIndex, title, storageKey]);
 
     return (
         <section className="mt-8 w-full" ref={containerRef} tabIndex={0} aria-roledescription="carousel">
@@ -254,14 +385,32 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
                             'hide-scrollbar relative mx-9 flex overflow-x-auto scroll-smooth select-none',
                             isScrollable ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
                         )}
-                        style={{ gap }}
+                        style={{ gap, paddingLeft: peekPrev, paddingRight: peekNext }}
                     >
-            {books.map(b => (
+            {dataset.map((b, i) => {
+                // Map dataset index to original books index for highlight state
+                let localIndex = 0;
+                if (loopEnabled) {
+                    if (i < cloneCount) localIndex = (books.length - cloneCount + i) % books.length;
+                    else if (i >= cloneCount + books.length) localIndex = (i - (cloneCount + books.length)) % books.length;
+                    else localIndex = i - cloneCount;
+                } else {
+                    localIndex = i;
+                }
+                const isActive = localIndex === activeIndex;
+                const scaleCls = isActive ? 'scale-[1.06] shadow-xl ring-readowl-purple contrast-[1.05]' : 'scale-[0.96] opacity-95';
+                return (
                             <Link
-                                key={b.id}
+                                key={`${b.id}-${i}`}
                 href={`/library/books/${slugify(b.title)}`}
                                 aria-label={b.title}
-                                className="group relative flex-shrink-0 overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark"
+                                onClick={() => {
+                                    // pause autoplay, schedule resume after idle
+                                    setPaused(true);
+                                    if (idleResumeTimer.current) window.clearTimeout(idleResumeTimer.current);
+                                    idleResumeTimer.current = window.setTimeout(() => setPaused(false), 3000);
+                                }}
+                                className={`group relative flex-shrink-0 overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark transition-transform duration-300 ${scaleCls}`}
                                 style={{ width: cardWidth, aspectRatio: '3 / 4' }}
                             >
                                 {b.coverUrl ? (
@@ -288,7 +437,8 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
                                     </div>
                                 </div>
                             </Link>
-                        ))}
+                );
+                        })}
                     </div>
 
                     <button
@@ -304,7 +454,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
 
             {books.length > 0 && (() => {
                 // Number of scroll positions (sliding window of visibleCount)
-                const pages = Math.max(1, books.length > visibleCount ? (books.length - visibleCount + 1) : 1);
+                const pages = Math.max(1, books.length - 1 + 1); // highlight advances by one each time
                 if (pages <= 1) return null; // hide bullets if only one page
                 const activePage = Math.min(pages - 1, activeIndex); // guard against overflow
                 return (
@@ -323,15 +473,15 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
             })()}
 
             {/* Global styles inside component for scrollbar hiding & snapping */}
-            <style jsx global>{`
-        .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { scroll-snap-type: x mandatory; }
-        .hide-scrollbar > a { scroll-snap-align: center; }
-        .hide-scrollbar.dragging { cursor: grabbing; }
-        .hide-scrollbar > a { transition: transform 0.4s ease; }
-        @media (prefers-reduced-motion: reduce) { .hide-scrollbar > a { transition: none; } }
-      `}</style>
+                        <style jsx global>{`
+                .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .hide-scrollbar { scroll-snap-type: x mandatory; }
+                .hide-scrollbar > a { scroll-snap-align: start; }
+                .hide-scrollbar.dragging { cursor: grabbing; }
+                .hide-scrollbar > a { transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1); }
+                @media (prefers-reduced-motion: reduce) { .hide-scrollbar > a { transition: none; } }
+            `}</style>
         </section>
     );
 };
