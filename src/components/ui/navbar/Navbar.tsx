@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Bell, LibrarySquare, Search as SearchIcon, LogOut as LogOutIcon, User as UserIcon } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import Modal from '../modal/Modal';
@@ -66,21 +67,20 @@ export default function FloatingNavbar() {
                         <button onClick={() => go('/home')} className="flex items-center gap-2 group">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src="/img/mascot/logo.png" alt="Logo" className="h-9 w-9 sm:h-10 sm:w-10 object-contain drop-shadow" />
-                            <span className="hidden md:inline text-white font-yusei tracking-wide text-sm sm:text-base group-hover:opacity-90">Readowl</span>
+                            <span className="hidden md:inline text-white font-ptserif tracking-wide text-sm sm:text-base group-hover:opacity-90">Readowl</span>
                         </button>
 
                         {/* Center nav (desktop) */}
                         <nav className="hidden md:flex items-center gap-6 text-sm font-medium ml-4">
                             {links.map(l => {
-                                const iconSrc = l.href.startsWith('/notifications') ? '/img/svg/navbar/notification.svg' : '/img/svg/navbar/book1.svg';
+                                const Icon = l.href.startsWith('/notifications') ? Bell : LibrarySquare;
                                 return (
                                     <button
                                         key={l.href}
                                         onClick={() => go(l.href)}
                                         className={`relative flex items-center gap-1.5 px-1 text-readowl-purple-extralight/80 hover:text-white transition-colors after:transition-opacity after:duration-300 after:ease-out after:bg-white/70 after:h-[2px] after:w-full after:absolute after:left-0 after:-bottom-1 ${pathname?.startsWith(l.href) ? activeClass : 'after:opacity-0 hover:after:opacity-60'}`}
                                     >
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={iconSrc} alt="" className="w-4 h-4 opacity-90" />
+                                        <Icon className="w-4 h-4 opacity-90" />
                                         <span>{l.label}</span>
                                     </button>
                                 );
@@ -102,8 +102,7 @@ export default function FloatingNavbar() {
                                     defaultValue={''}
                                 />
                                 <button aria-label="Buscar" className="px-3 text-readowl-purple-dark/70 hover:text-readowl-purple-dark">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src="/img/svg/navbar/search.svg" alt="" className="w-5 h-5" />
+                                    <SearchIcon className="w-5 h-5" />
                                 </button>
                             </form>
                         </div>
@@ -112,13 +111,18 @@ export default function FloatingNavbar() {
                         <div className="hidden md:flex items-center gap-4">
                             {/* Avatar */}
                             <button onClick={() => go('/user')} className="relative ring-2 ring-transparent hover:ring-readowl-purple-light/60 focus:outline-none focus-visible:ring-readowl-purple-light/80 transition" aria-label="Perfil">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={session?.user?.image || '/img/svg/navbar/account-box.svg'} alt="Perfil" className="w-9 h-9 object-cover" />
+                                {session?.user?.image ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={session.user.image} alt="Perfil" className="w-9 h-9 object-cover rounded-full" />
+                                ) : (
+                                    <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-white">
+                                        <UserIcon className="w-5 h-5" />
+                                    </div>
+                                )}
                             </button>
                             {/* Logout */}
                             <button onClick={() => setLogoutOpen(true)} className="flex items-center gap-1.5 text-readowl-purple-extralight/80 hover:text-white text-sm font-medium transition-colors" aria-label="Sair">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/img/svg/navbar/logout.svg" alt="" className="w-4 h-4" />
+                                <LogOutIcon className="w-4 h-4" />
                                 <span>Sair</span>
                             </button>
                         </div>
@@ -141,29 +145,32 @@ export default function FloatingNavbar() {
                         <form role="search" onSubmit={(e) => { e.preventDefault(); const data = new FormData(e.currentTarget); const q = (data.get('q') as string) || ''; setMenuOpen(false); if (q.trim()) router.push('/search?query=' + encodeURIComponent(q.trim())); }} className="flex items-center bg-white overflow-hidden shadow">
                             <input name="q" placeholder="Pesquisar..." className="flex-1 px-4 py-2 text-sm text-readowl-purple-dark placeholder:text-readowl-purple-dark/60 focus:outline-none" />
                             <button aria-label="Buscar" className="px-3 text-readowl-purple-dark/70">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/img/svg/navbar/search.svg" alt="" className="w-5 h-5" />
+                                <SearchIcon className="w-5 h-5" />
                             </button>
                         </form>
                         <nav className="flex flex-col gap-1">
                             {links.map(l => {
-                                const iconSrc = l.href.startsWith('/notifications') ? '/img/svg/navbar/notification.svg' : '/img/svg/navbar/book1.svg';
+                                const Icon = l.href.startsWith('/notifications') ? Bell : LibrarySquare;
                                 return (
                                     <button key={l.href} onClick={() => go(l.href)} className={`flex items-center gap-2 text-left px-3 py-2 text-sm font-medium transition-colors ${pathname?.startsWith(l.href) ? 'bg-readowl-purple-dark/40 text-white' : 'text-readowl-purple-extralight/85 hover:bg-readowl-purple-light/20 hover:text-white'}`}>
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={iconSrc} alt="" className="w-5 h-5" />
+                                        <Icon className="w-5 h-5" />
                                         <span>{l.label}</span>
                                     </button>
                                 );
                             })}
                             <button onClick={() => go('/user')} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors ${pathname?.startsWith('/user') ? 'bg-readowl-purple-dark/40 text-white' : 'text-readowl-purple-extralight/85 hover:bg-readowl-purple-light/20 hover:text-white'}`}>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={session?.user?.image || '/img/svg/navbar/account-box.svg'} alt="Avatar" className="w-8 h-8 object-cover" />
+                                {session?.user?.image ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={session.user.image} alt="Avatar" className="w-8 h-8 object-cover rounded-full" />
+                                ) : (
+                                    <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-white">
+                                        <UserIcon className="w-4 h-4" />
+                                    </div>
+                                )}
                                 <span>Perfil</span>
                             </button>
                             <button onClick={() => { setMenuOpen(false); setLogoutOpen(true); }} className="flex items-center gap-2 text-left px-3 py-2 text-sm font-medium text-readowl-purple-extralight/85 hover:bg-red-500/20 hover:text-white transition-colors">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/img/svg/navbar/logout.svg" alt="" className="w-5 h-5" />
+                                <LogOutIcon className="w-5 h-5" />
                                 <span>Sair</span>
                             </button>
                         </nav>
@@ -184,7 +191,7 @@ export default function FloatingNavbar() {
                             className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 text-white transition"
                         >Cancelar</button>
                         <button
-                            onClick={() => { setLogoutOpen(false); signOut({ callbackUrl: '/login' }); }}
+                            onClick={() => { setLogoutOpen(false); signOut({ callbackUrl: '/landing' }); }}
                             className="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-500 text-white shadow transition"
                         >Sair</button>
                     </>

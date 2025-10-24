@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import InputWithIcon from "@/components/ui/input/InputWithIcon";
 import Button from "@/components/ui/button/Button";
@@ -8,6 +7,7 @@ import GoogleButton from "@/components/ui/button/GoogleButton";
 import { useState } from "react";
 import MagicNotification, { MagicNotificationProps } from "@/components/ui/modal/MagicNotification";
 import { signIn } from "next-auth/react";
+import { User as UserIcon, Key, Eye, EyeOff } from "lucide-react";
 
 function Login() {
   // State for form fields
@@ -70,7 +70,8 @@ function Login() {
   <div className="bg-readowl-purple-medium shadow-lg p-8 w-full max-w-md">
         {/* Logo and title */}
         <div className="flex flex-col items-center mb-6">
-          <Image src="/icon.png" alt="Readowl Logo" width={64} height={64} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon.png" alt="Readowl Logo" width={64} height={64} />
           <span className="text-2xl font-bold text-white mt-2">Readowl</span>
         </div>
         {/* Google authentication button */}
@@ -86,7 +87,7 @@ function Login() {
           {/* Email input */}
           <InputWithIcon
             placeholder="Email"
-            icon={<Image src="/img/svg/auth/person.svg" alt="User icon" className="opacity-50" width={25} height={25} />}
+            icon={<UserIcon className="opacity-50 w-6 h-6" />}
             name="email"
             autoComplete="username"
             value={form.email}
@@ -97,7 +98,7 @@ function Login() {
           {/* Password input with show/hide toggle */}
           <InputWithIcon
             placeholder="Senha"
-            icon={<Image src="/img/svg/auth/key.svg" alt="Passkey icon" className="opacity-50" width={25} height={25} />}
+            icon={<Key className="opacity-50 w-6 h-6" />}
             type={showPassword ? "text" : "password"}
             name="password"
             autoComplete="current-password"
@@ -107,7 +108,7 @@ function Login() {
             hideErrorText
             rightIcon={
               <span onClick={() => setShowPassword(v => !v)}>
-                <Image src={showPassword ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Show password" width={22} height={22} />
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </span>
             }
           />

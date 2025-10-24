@@ -2,9 +2,9 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import InputWithIcon from "@/components/ui/input/InputWithIcon";
-import Image from "next/image";
 import Button from "@/components/ui/button/Button";
-import PasswordStrengthBar from "@/components/animation/PasswordStrengthBar";
+import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
+import { Key, Eye, EyeOff } from "lucide-react";
 
 function ResetPasswordInner() {
   const search = useSearchParams();
@@ -79,28 +79,28 @@ function ResetPasswordInner() {
             {error && <p className="text-red-300 mb-2">{error}</p>}
             <InputWithIcon
               placeholder="Nova senha"
-              icon={<Image src="/img/svg/auth/key.svg" alt="senha" width={22} height={22} />}
+              icon={<Key className="w-5 h-5" />}
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               rightIcon={
                 <span onClick={() => setShowPassword(v => !v)}>
-                  <Image src={showPassword ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Mostrar senha" width={22} height={22} />
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </span>
               }
             />
             <PasswordStrengthBar password={password} tipTextColor="text-white" showPercent />
             <InputWithIcon
               placeholder="Confirmar senha"
-              icon={<Image src="/img/svg/auth/key.svg" alt="senha" width={22} height={22} />}
+              icon={<Key className="w-5 h-5" />}
               type={showConfirm ? "text" : "password"}
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
               rightIcon={
                 <span onClick={() => setShowConfirm(v => !v)}>
-                  <Image src={showConfirm ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Mostrar senha" width={22} height={22} />
+                  {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </span>
               }
             />

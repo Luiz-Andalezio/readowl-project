@@ -3,13 +3,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Modal from '@/components/ui/modal/Modal';
 import ButtonWithIcon from '@/components/ui/button/ButtonWithIcon';
-import ChapterEditor from '@/components/chapter/ChapterEditor';
-import VolumeCreateInput from '@/components/chapter/VolumeCreateInput';
-import VolumeDropdown from '@/components/chapter/VolumeDropdown';
+import ChapterEditor from '@/app/library/books/[slug]/[chapter]/edit-chapter/ui/ChapterEditor';
+import VolumeCreateInput from '@/components/volume/VolumeCreateInput';
+import VolumeDropdown from '@/components/volume/VolumeDropdown';
 import type { Volume } from '@/types/volume';
-import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
 import { slugify } from '@/lib/slug';
 import { getPlainTextLength } from '@/lib/sanitize';
+import { X, BookText } from 'lucide-react';
 
 export default function PostChapterPage() {
   const params = useParams<{ slug: string }>();
@@ -184,13 +185,22 @@ export default function PostChapterPage() {
     <>
       {/* Breadcrumb with top offset so content doesn't sit under the fixed navbar */}
       <div className="w-full flex justify-center mt-14 sm:mt-16">
-        <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros', 'post-chapter': 'Adicionar capítulo' }} />
+        <Breadcrumb
+          anchor="static"
+          items={[
+            { label: 'Início', href: '/home' },
+            { label: 'Biblioteca', href: '/library' },
+            { label: 'Livros', href: '/library' },
+            { label: bookTitle || decodeURIComponent(slug).replace(/-/g, ' '), href: `/library/books/${slug}` },
+            { label: 'Adicionar capítulo' }
+          ]}
+        />
       </div>
 
       <div className="pb-6">
         <div className="max-w-4xl mx-auto">
           {/* Header text exactly as requested */}
-          <h2 className="text-white text-center font-yusei text-xl mb-3">Adicionar capítulo em: “{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}”</h2>
+          <h2 className="text-white text-center font-ptserif text-xl mb-3">Adicionar capítulo em: “{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}”</h2>
           <div className="bg-readowl-purple-extralight text-readowl-purple-extradark p-5 shadow-md font-ptserif">
             <h1 className="text-2xl font-bold text-center mb-4">{bookTitle || decodeURIComponent(slug).replace(/-/g, ' ')}</h1>
 
@@ -260,7 +270,7 @@ export default function PostChapterPage() {
                     setConfirmCancelOpen(true);
                   }
                 }}
-                iconUrl="/img/svg/generics/purple/cancel.svg"
+                icon={<X className="w-5 h-5" />}
               >Cancelar</ButtonWithIcon>
               <ButtonWithIcon
                 variant="primary"
@@ -304,8 +314,8 @@ export default function PostChapterPage() {
                   }
                   setConfirmSaveOpen(true);
                 }}
-                iconUrl="/img/svg/book/checkbook.svg"
-              >{submitting ? 'Salvando...' : 'Registrar'}</ButtonWithIcon>
+                icon={<BookText className="w-5 h-5" />}
+              >{submitting ? 'Salvando...' : 'Criar'}</ButtonWithIcon>
             </div>
           </div>
 

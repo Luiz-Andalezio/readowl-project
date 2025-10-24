@@ -5,7 +5,8 @@ import Image from 'next/image';
 type Size = 'sm' | 'md' | 'lg';
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  iconUrl: string;
+  icon?: React.ReactNode;
+  iconUrl?: string;
   iconAlt?: string;
   iconSize?: number;
   selected?: boolean;                 // controlled
@@ -18,6 +19,7 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export default function SelectableIconButton({
+  icon,
   iconUrl,
   iconAlt = 'Ícone',
   iconSize = 20,
@@ -50,7 +52,7 @@ export default function SelectableIconButton({
     lg: 'text-xl px-7 py-3',
   };
 
-  const baseStyle = `font-yusei font-semibold border-2 border-readowl-purple transition-colors duration-300 flex items-center justify-start gap-2 ${fullWidth ? 'w-full' : ''} ${sizeClasses[size]}`;
+  const baseStyle = `font-ptserif font-semibold border-2 border-readowl-purple rounded-md transition-colors duration-300 flex items-center justify-start gap-2 ${fullWidth ? 'w-full' : ''} ${sizeClasses[size]}`;
 
   const style = isSelected
     ? 'bg-readowl-purple-dark text-readowl-purple-light'
@@ -67,8 +69,12 @@ export default function SelectableIconButton({
       className={`${baseStyle} ${style} ${className || ''}`}
       {...rest}
     >
-      <Image src={iconUrl} alt={iconAlt} width={iconSize} height={iconSize}
-             className={isSelected ? 'invert-0' : 'invert-[100%] brightness-0'} />
+      {icon ? (
+        <span className="inline-flex items-center justify-center" style={{ width: iconSize, height: iconSize }}>{icon}</span>
+      ) : iconUrl ? (
+        <Image src={iconUrl} alt={iconAlt} width={iconSize} height={iconSize}
+               className={isSelected ? 'invert-0' : 'invert-[100%] brightness-0'} />
+      ) : null}
       <span className="select-none">{isSelected ? (selectedChildren ?? children) : children}</span>
     </button>
   );

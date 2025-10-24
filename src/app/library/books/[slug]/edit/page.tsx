@@ -4,7 +4,7 @@ import { slugify } from '@/lib/slug';
 import EditBookForm from './ui/EditBookForm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
 
 interface PageProps { params: Promise<{ slug: string }> }
 
@@ -31,7 +31,16 @@ export default async function EditBookPage({ params }: PageProps) {
   return (
     <>
       <div className="w-full flex justify-center mt-14 sm:mt-16">
-        <BreadcrumbAuto anchor="static" base="/home" labelMap={{ library: 'Biblioteca', books: 'Livros', edit: 'Editar' }} />
+        <Breadcrumb
+          anchor="static"
+          items={[
+            { label: 'Início', href: '/home' },
+            { label: 'Biblioteca', href: '/library' },
+            { label: 'Livros', href: '/library' },
+            { label: book.title, href: `/library/books/${slug}` },
+            { label: 'Editar' }
+          ]}
+        />
       </div>
       <main className="pb-6 md:px-8">
         <EditBookForm book={book} slug={slug} hasLocalPassword={hasLocalPassword} />

@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import InputWithIcon from "@/components/ui/input/InputWithIcon";
-import Image from "next/image";
 import Button from "@/components/ui/button/Button";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
             <p className="text-sm text-readowl-purple-extralight mb-2">Informe seu email para receber um link de redefinição. Por segurança, não indicamos se o email existe ou não.</p>
             <InputWithIcon
               placeholder="Seu email"
-              icon={<Image src="/img/svg/auth/mail.svg" alt="mail" width={22} height={22} />}
+              icon={<Mail className="w-5 h-5" />}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

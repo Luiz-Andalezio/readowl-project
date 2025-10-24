@@ -59,6 +59,27 @@ The platform aims to solve common issues found in other systems, such as ineffic
 - **Password Strength**: `PasswordStrengthBar` uses a local heuristic and optionally loads `zxcvbn` for enhanced feedback.
 - **Environment Variables**: See `.env.example` for required settings.
 
+### 👀 Views (Chapter reads)
+
+- Auth-only: only logged-in reads are counted. No IP collection or storage.
+- Bot filter: common crawler user-agents are ignored.
+- Author skip: the book author’s own reads don’t count.
+- Dedupe: one view per user per chapter is counted at most once every 2 minutes (Redis SET NX PX; in-memory fallback).
+- Endpoints:
+        - POST `/api/books/:slug/chapters/:chapterSlug/view` — record a view.
+        - GET `/api/books/:slug/chapters/:chapterSlug/views` — returns `{ count }` for the chapter.
+        - GET `/api/books/:slug/views` — returns `{ count }` across all chapters of the book.
+- UI integration:
+        - The chapter reading page posts a view on mount and shows the live count.
+        - The book header shows total views via a small client fetcher.
+
+Note: In monorepo workspaces with multiple lockfiles, set `outputFileTracingRoot` in `next.config.ts` to the workspace root to silence the Next.js warning.
+### Rules for views
+
+- Chapter: view count visible only to the book author and administrators (403 for others).
+- Book: total views are public and displayed in the book header.
+- Views are recorded only for authenticated users; the author's own views are not counted; deduplication enforces at most one view per user per chapter every 2 minutes.
+
 #### **Database**
 - **PostgreSQL**: Data storage.
 
@@ -77,7 +98,7 @@ This guide walks you from zero to running the app locally with a Dockerized Post
 
 ### 1) Prerequisites
 
-- Node.js 18+ and pnpm or npm
+- Node.js 20+ and pnpm or npm
 - Docker Desktop or Docker Engine
 - A PostgreSQL instance (local/native or in Docker). If you already have one, you can keep using it.
 - Optional: Google Cloud project for OAuth2 (we provide example credentials for local dev)
@@ -90,12 +111,26 @@ cd readowl-next
 npm install
 ```
 
+Tip: if your Node is below 20, install Node 20 LTS with nvm:
+
+```bash
+# Install nvm (once)
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# Install and use Node 20 LTS
+nvm install 20
+nvm use 20
+node -v
+npm -v
+```
+
 ### 3) Environment variables
 
 Copy `.env.example` to `.env` and fill values. For local development, an example:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/readowl-next_db?schema=public"
+DATABASE_URL="postgresql://readowl:readowl@localhost:5433/readowl?schema=public"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="<a-strong-random-secret>"
 
@@ -122,8 +157,36 @@ We ship a dedicated Postgres service for this project via Docker Compose. It exp
 Bring it up:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d
 ```
+>If you want to use pgadmin web, run: "docker compose up -d postgres"
+
+If you get errors like "docker: 'compose' is not a docker command" or "unknown shorthand flag: 'd' in -d", your Docker does not have the Compose v2 plugin. Fix it using the official Docker repository (Ubuntu/Mint based on Ubuntu 24.04 "Noble"):
+
+1. Prereqs and Docker GPG key
+
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates curl gnupg
+        sudo install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.asc >/dev/null
+        sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+2. Add the Docker apt repository (uses the Ubuntu base codename on Mint via $UBUNTU_CODENAME)
+
+        source /etc/os-release
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${UBUNTU_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+        sudo apt-get update
+
+3. Install Compose v2 and verify
+
+        sudo apt-get install -y docker-compose-plugin
+        docker compose version
+
+If you prefer the legacy binary and already have it installed:
+
+        docker-compose up -d
+
+Both commands target the same `postgres` service defined in `docker-compose.yml`.
 
 Details:
 - Container name: `readowl_next_db`
@@ -133,7 +196,40 @@ Details:
 
 Your `.env` should already point `DATABASE_URL` to `postgresql://readowl:readowl@localhost:5433/readowl?schema=public`.
 
-If you want to manage the DB via GUI, reuse the existing pgAdmin from the React project (container `readowl_pgadmin`) at http://localhost:5050.
+If you want to manage the DB via GUI, you have two options:
+
+- Reuse the existing pgAdmin from the React project (container `readowl_pgadmin`) at http://localhost:5050; or
+- Use the built-in pgAdmin service included in this project's docker-compose at http://localhost:5051.
+
+#### Using the built-in pgAdmin (Option 3)
+
+We include a `pgadmin` service in `docker-compose.yml`. To start it alongside Postgres:
+
+```bash
+docker compose up -d postgres pgadmin
+```
+
+Access http://localhost:5051 and log in using the credentials defined in your `.env`:
+
+```env
+PGADMIN_DEFAULT_EMAIL=admin@example.com
+PGADMIN_DEFAULT_PASSWORD=admin
+```
+
+Notes:
+- These variables are optional; if not set, the defaults above are used.
+- On Linux, we map `host.docker.internal` inside the container to reach the Postgres running on the host ports.
+
+Create the server inside pgAdmin:
+1. Right-click “Servers” > Create > Server…
+2. General tab: Name: `readowl-local`
+3. Connection tab:
+        - Host: `host.docker.internal` (from inside pgAdmin container)
+        - Port: `5433`
+        - Maintenance DB: `readowl`
+        - Username: `readowl`
+        - Password: `readowl`
+4. Save
 
 #### Create a server in pgAdmin (GUI steps)
 
@@ -190,6 +286,51 @@ Open http://localhost:3000
 - Prisma fails to connect: verify DB exists and credentials are correct.
 - Gmail EAUTH/535: use an App Password, not the normal password. Consider port 465 with `SMTP_PORT=465` for SSL.
 
+### 10) Full reset (Docker + Prisma)
+
+Use these steps if you want to completely reset containers, volumes and Prisma migrations/state for this Next.js project only.
+
+1. Stop and remove containers (pgAdmin and Postgres):
+
+        ```bash
+        docker rm -f readowl_next_pgadmin readowl_next_db 2>/dev/null || true
+        ```
+
+2. Remove volumes (wipes data):
+
+        ```bash
+        docker volume rm -f readowl-next_readowl_next_pgdata 2>/dev/null || true
+        ```
+
+3. Clear Prisma migrations (squash to a fresh baseline):
+
+        ```bash
+        rm -rf prisma/migrations/*
+        ```
+
+4. Bring Postgres back and recreate migrations:
+
+        ```bash
+        docker compose up -d postgres
+        npx prisma generate
+        npx prisma migrate dev --name init
+        ```
+
+5. (Optional) Bring up pgAdmin again:
+
+        ```bash
+        docker compose up -d pgadmin
+        ```
+
+6. Log into pgAdmin (http://localhost:5051) with `.env` credentials:
+
+        ```env
+        PGADMIN_DEFAULT_EMAIL=admin@example.com
+        PGADMIN_DEFAULT_PASSWORD=admin
+        ```
+
+If login fails with "incorrect password", remove the existing pgAdmin container to allow the new credentials to take effect and start it again (step 1 then 5).
+
 -----
 
 ## 🧰 Development notes
@@ -201,13 +342,14 @@ Open http://localhost:3000
 
 | ✅ **Completed Screens** | Details |
 |---|---|
-| 🏠 Landing Page | Fully completed |
-| 🔐 Login & Registration | Fully completed |
+| 🏠 Landing Page | Header, terms, and infos |
+| 🔐 Login & Registration | Simple login/registration with passoword recovery and Google sign in option |
 | 📖 Book Index | Book details, follow option, rating, volumes dropdown with chapter list |
+| 📄 Chapter Index | Principal content and crud buttons |
 | 📚 Library | Carousel of created books |
 | 📝 Book CRUD | Full create, view, edit, delete |
 | 📦 Volume & Chapter CRUD | Create, edit, delete volumes and chapters |
-| ⚠️ Error Pages | Fully completed |
+| ⚠️ Error Pages | 403, 404, 500 and generic errors |
 
 | 🚧 **Screens To-Do** | Details |
 |---|---|
@@ -220,7 +362,7 @@ Open http://localhost:3000
 | 👤 User Profile Edit | User self-edit screen |
 | 🛠️ Admin User Edit | General user management for admins |
 
-> 60% complete
+> 62% complete
 
 ### 📁 Suggested Project Structure
 

@@ -36,6 +36,37 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build readowl-next",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-readowl-next",
+			"type": "shell",
+			"command": "npm run -s build",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "build-next",
+			"type": "shell",
+			"command": "npm run -s build",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }

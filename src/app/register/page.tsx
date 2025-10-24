@@ -7,8 +7,9 @@ import GoogleButton from "@/components/ui/button/GoogleButton";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PasswordStrengthBar from "@/components/animation/PasswordStrengthBar";
+import PasswordStrengthBar from "@/components/ui/PasswordStrengthBar";
 import { signIn } from "next-auth/react";
+import { User as UserIcon, Mail, Key, Eye, EyeOff } from "lucide-react";
 
 function Register() {
     const router = useRouter();
@@ -75,11 +76,24 @@ function Register() {
                 }
                 return;
             }
-            // Registration successful
-            setNotice({ type: "success", message: "Cadastro concluído! Faça login." });
-            setForm({ username: "", email: "", password: "", confirmPassword: "" });
-            // Redirect immediately to login page
-            router.push("/login");
+            // Registration successful -> auto sign-in with the same credentials
+            // Prefer non-redirect signIn to capture outcome, then route manually
+            const result = await signIn("credentials", {
+                redirect: false,
+                email: form.email,
+                password: form.password,
+                // persist session similar to OAuth default
+                remember: "true",
+                callbackUrl: "/home",
+            });
+            if (result?.error) {
+                // Fallback: if for algum motivo falhar o sign-in automático, direciona para login
+                setNotice({ type: "success", message: "Cadastro concluído! Faça login." });
+                router.push("/login");
+                return;
+            }
+            // Go to home (or whatever URL NextAuth suggests)
+            router.push(result?.url || "/home");
     } catch {
             // Handle unexpected errors
             setError({ password: "Ocorreu um erro desconhecido." });
@@ -117,7 +131,7 @@ function Register() {
                     {/* Username input */}
                     <InputWithIcon
                         placeholder="Nome de usuário"
-                        icon={<Image src="/img/svg/auth/person.svg" alt="User icon" className="opacity-50" width={25} height={25} />}
+                        icon={<UserIcon className="opacity-50 w-6 h-6" />}
                         name="username"
                         autoComplete="username"
                         value={form.username}
@@ -128,7 +142,7 @@ function Register() {
                     {/* Email input */}
                     <InputWithIcon
                         placeholder="Email"
-                        icon={<Image src="/img/svg/auth/mail.svg" alt="Mail icon" className="opacity-50" width={25} height={25} />}
+                        icon={<Mail className="opacity-50 w-6 h-6" />}
                         type="email"
                         name="email"
                         autoComplete="email"
@@ -140,7 +154,7 @@ function Register() {
                     {/* Password input with show/hide toggle */}
                     <InputWithIcon
                         placeholder="Senha"
-                        icon={<Image src="/img/svg/auth/key.svg" alt="User icon" className="opacity-50" width={25} height={25} />}
+                        icon={<Key className="opacity-50 w-6 h-6" />}
                         type={showPassword ? "text" : "password"}
                         name="password"
                         autoComplete="new-password"
@@ -150,7 +164,7 @@ function Register() {
                         hideErrorText
                         rightIcon={
                             <span onClick={() => setShowPassword(v => !v)}>
-                                <Image src={showPassword ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Show password" width={22} height={22} />
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </span>
                         }
                     />
@@ -159,7 +173,7 @@ function Register() {
                     {/* Confirm password input with show/hide toggle */}
                     <InputWithIcon
                         placeholder="Confirmar senha"
-                        icon={<Image src="/img/svg/auth/passkey.svg" alt="User icon" className="opacity-50" width={25} height={25} />}
+                        icon={<Key className="opacity-50 w-6 h-6" />}
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         autoComplete="new-password"
@@ -169,7 +183,7 @@ function Register() {
                         hideErrorText
                         rightIcon={
                             <span onClick={() => setShowConfirmPassword(v => !v)}>
-                                <Image src={showConfirmPassword ? "/img/svg/auth/eye-off.svg" : "/img/svg/auth/mystery.svg"} alt="Show password" width={22} height={22} />
+                                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </span>
                         }
                     />

@@ -3,8 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
-import { BreadcrumbAuto } from '@/components/ui/Breadcrumb';
-import EditChapterClient from './ui/EditChapterClient';
+import { Breadcrumb } from '@/components/ui/navbar/Breadcrumb';
+import EditChapterClient from '../../../../../client/chapter/EditChapterClient';
 
 interface PageProps { params: Promise<{ slug: string; chapter: string }> }
 
@@ -30,10 +30,16 @@ export default async function EditChapterPage({ params }: PageProps) {
   return (
     <>
       <div className="w-full flex justify-center mt-14 sm:mt-16">
-        <BreadcrumbAuto
+        <Breadcrumb
           anchor="static"
-          base="/home"
-          labelMap={{ library: 'Biblioteca', books: 'Livros', 'edit-chapter': 'Editar capítulo' }}
+          items={[
+            { label: 'Início', href: '/home' },
+            { label: 'Biblioteca', href: '/library' },
+            { label: 'Livros', href: '/library' },
+            { label: book.title, href: `/library/books/${slug}` },
+            { label: ch.title, href: `/library/books/${slug}/${chapter}` },
+            { label: 'Editar capítulo' }
+          ]}
         />
       </div>
       <EditChapterClient
