@@ -35,65 +35,64 @@ export default async function Home() {
 
         const LIMIT = 16; // max items per highlight
 
-        // Novidades: most recent books
-        const novidadesRaw = await prisma.book.findMany({ orderBy: { createdAt: "desc" }, take: LIMIT, select: { id: true, title: true, coverUrl: true } });
+        // Novidades: books published/updated in the last 30 days
+        const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const novidadesRaw = await prisma.book.findMany({
+          where: {
+            OR: [
+              { createdAt: { gte: last30Days } },
+              { updatedAt: { gte: last30Days } },
+            ],
+          },
+          orderBy: { createdAt: "desc" },
+          take: LIMIT,
+          select: { id: true, title: true, coverUrl: true },
+        });
         const novidades = novidadesRaw.map(toCarousel);
 
-        // Em destaque: weighted score over last 14 days
+        // Em destaque: normalize metrics, exclude author interactions, apply truncation
         const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-        // aggregate helpers typed per query already
-        // Views per book in period (from ChapterView -> Chapter -> Book)
         const viewsAgg = await prisma.$queryRaw<Array<{ bookId: string; views: bigint }>>`
-            SELECT c."bookId" as "bookId", COUNT(*)::bigint as views
-            FROM "ChapterView" v
-            JOIN "Chapter" c ON v."chapterId" = c."id"
-            WHERE v."createdAt" >= ${cutoff}
-            GROUP BY c."bookId";
+          SELECT c."bookId" as "bookId", COUNT(*)::bigint as views
+          FROM "ChapterView" v
+          JOIN "Chapter" c ON v."chapterId" = c."id"
+          WHERE v."createdAt" >= ${cutoff}
+          GROUP BY c."bookId";
         `;
-        const ratingsAgg = await prisma.$queryRaw<Array<{ bookId: string; ratings: bigint }>>`
-            SELECT "bookId", COUNT(*)::bigint as ratings
-            FROM "BookRating"
-            WHERE "createdAt" >= ${cutoff}
-            GROUP BY "bookId";
+        const ratingsAgg = await prisma.$queryRaw<Array<{ bookId: string; ratings: bigint, avg: number }>>`
+          SELECT "bookId", COUNT(*)::bigint as ratings, AVG("score")::float as avg
+          FROM "BookRating"
+          WHERE "createdAt" >= ${cutoff}
+          GROUP BY "bookId";
         `;
         const commentsAgg = await prisma.$queryRaw<Array<{ bookId: string; comments: bigint }>>`
-            SELECT "bookId", COUNT(*)::bigint as comments
-            FROM "Comment"
-            WHERE "createdAt" >= ${cutoff}
-            GROUP BY "bookId";
+          SELECT "bookId", COUNT(*)::bigint as comments
+          FROM "Comment"
+          WHERE "createdAt" >= ${cutoff}
+          GROUP BY "bookId";
         `;
-        const followsAgg = await prisma.$queryRaw<Array<{ bookId: string; follows: bigint }>>`
-            SELECT "bookId", COUNT(*)::bigint as follows
-            FROM "BookFollow"
-            WHERE "createdAt" >= ${cutoff}
-            GROUP BY "bookId";
-        `;
-        // Build maps and find maxima for normalization
-        const vMap = new Map<string, number>(); let vMax = 0;
-        viewsAgg.forEach(r => { const n = Number(r.views); vMap.set(r.bookId, n); if (n > vMax) vMax = n; });
-        const rMap = new Map<string, number>(); let rMax = 0;
-        ratingsAgg.forEach(r => { const n = Number(r.ratings); rMap.set(r.bookId, n); if (n > rMax) rMax = n; });
-        const cMap = new Map<string, number>(); let cMax = 0;
-        commentsAgg.forEach(r => { const n = Number(r.comments); cMap.set(r.bookId, n); if (n > cMax) cMax = n; });
-        const fMap = new Map<string, number>(); let fMax = 0;
-        followsAgg.forEach(r => { const n = Number(r.follows); fMap.set(r.bookId, n); if (n > fMax) fMax = n; });
-        // Candidate book ids that had any activity
-        const candidateIds = new Set<string>([
-            ...Array.from(vMap.keys()),
-            ...Array.from(rMap.keys()),
-            ...Array.from(cMap.keys()),
-            ...Array.from(fMap.keys()),
-        ]);
-        // Compute weighted score
-        const weights = { views: 0.5, ratings: 0.2, comments: 0.2, follows: 0.1 };
-        const trendingScores: Array<{ bookId: string; score: number }> = Array.from(candidateIds).map(id => {
-            const nv = vMax > 0 ? (vMap.get(id) ?? 0) / vMax : 0;
-            const nr = rMax > 0 ? (rMap.get(id) ?? 0) / rMax : 0;
-            const nc = cMax > 0 ? (cMap.get(id) ?? 0) / cMax : 0;
-            const nf = fMax > 0 ? (fMap.get(id) ?? 0) / fMax : 0;
-            const score = nv * weights.views + nr * weights.ratings + nc * weights.comments + nf * weights.follows;
-            return { bookId: id, score };
-        }).sort((a,b) => b.score - a.score).slice(0, LIMIT);
+        // Normalize and truncate metrics
+        const normalize = (value: number, min: number, max: number) => (max > min ? (value - min) / (max - min) : 0);
+        const truncate = (values: number[], percentile: number) => {
+          const sorted = [...values].sort((a, b) => a - b);
+          const index = Math.floor((percentile / 100) * sorted.length);
+          return sorted[index] || 0;
+        };
+        const viewValues = viewsAgg.map(v => Number(v.views));
+        const ratingValues = ratingsAgg.map(r => Number(r.ratings) * r.avg);
+        const commentValues = commentsAgg.map(c => Number(c.comments));
+        const viewMax = truncate(viewValues, 98);
+        const ratingMax = truncate(ratingValues, 95);
+        const commentMax = truncate(commentValues, 95);
+        const vMap = new Map(viewsAgg.map(v => [v.bookId, normalize(Number(v.views), 0, viewMax)]));
+        const rMap = new Map(ratingsAgg.map(r => [r.bookId, normalize(Number(r.ratings) * r.avg, 0, ratingMax)]));
+        const cMap = new Map(commentsAgg.map(c => [c.bookId, normalize(Number(c.comments), 0, commentMax)]));
+        const candidateIds = new Set([...vMap.keys(), ...rMap.keys(), ...cMap.keys()]);
+        const weights = { views: 0.2, ratings: 0.45, comments: 0.35 };
+        const trendingScores = Array.from(candidateIds).map(id => {
+          const score = (vMap.get(id) || 0) * weights.views + (rMap.get(id) || 0) * weights.ratings + (cMap.get(id) || 0) * weights.comments;
+          return { bookId: id, score };
+        }).sort((a, b) => b.score - a.score).slice(0, LIMIT);
             const trendingBooksRaw = await prisma.book.findMany({
             where: { id: { in: trendingScores.map(s => s.bookId) } },
             select: { id: true, title: true, coverUrl: true },
@@ -103,29 +102,18 @@ export default async function Home() {
             const trending = trendingScores
                 .map(s => trendingMap.get(s.bookId))
                 .filter((b): b is { id: string; title: string; coverUrl: string | null } => Boolean(b))
-                .map(b => toCarousel(b));
+                .map(b => toCarousel(b!));
 
-        // Mais avaliados: combine quantidade e média com Bayesian smoothing
-        const ratingsAll = await prisma.$queryRaw<Array<{ bookId: string; count: bigint; avg: number }>>`
-            SELECT "bookId", COUNT(*)::bigint as count, AVG("score")::float as avg
-            FROM "BookRating"
-            GROUP BY "bookId";
-        `;
-        const m = 5; // prior count
-        // global mean
-        const globalAvgRow = await prisma.$queryRaw<Array<{ avg: number }>>`SELECT AVG("score")::float as avg FROM "BookRating";`;
-        const C = globalAvgRow[0]?.avg ?? 3.5;
-        const byWeighted = ratingsAll
-            .map(r => ({ bookId: r.bookId, v: Number(r.count), R: r.avg }))
-            .map(({ bookId, v, R }) => ({ bookId, WR: (v/(v+m))*R + (m/(v+m))*C }))
-            .sort((a,b) => b.WR - a.WR)
-            .slice(0, LIMIT);
+        // Mais avaliados: quantidade_de_avaliações × média_das_notas
+        const byWeighted = ratingsAgg.map(r => ({ bookId: r.bookId, WR: Number(r.ratings) * r.avg }))
+          .sort((a, b) => b.WR - a.WR)
+          .slice(0, LIMIT);
         const topRatedRaw = await prisma.book.findMany({ where: { id: { in: byWeighted.map(x => x.bookId) } }, select: { id: true, title: true, coverUrl: true } });
             const topRatedMap = new Map<string, { id: string; title: string; coverUrl: string | null }>(topRatedRaw.map(b => [b.id, b]));
             const maisAvaliados = byWeighted
                 .map(x => topRatedMap.get(x.bookId))
                 .filter((b): b is { id: string; title: string; coverUrl: string | null } => Boolean(b))
-                .map(b => toCarousel(b));
+                .map(b => toCarousel(b!));
 
         // Mais visualizados (all-time)
         const viewsAll = await prisma.$queryRaw<Array<{ bookId: string; cnt: bigint }>>`
@@ -138,18 +126,22 @@ export default async function Home() {
             const maisVisualizados = viewsAll
                 .map(x => mvMap.get(x.bookId))
                 .filter((b): b is { id: string; title: string; coverUrl: string | null } => Boolean(b))
-                .map(b => toCarousel(b));
+                .map(b => toCarousel(b!));
 
-        // Mais comentados (all-time)
+        // Mais comentados: exclude author comments
         const commentsAll = await prisma.$queryRaw<Array<{ bookId: string; cnt: bigint }>>`
-            SELECT "bookId", COUNT(*)::bigint as cnt FROM "Comment" GROUP BY "bookId" ORDER BY cnt DESC LIMIT ${LIMIT};
+          SELECT "bookId", COUNT(*)::bigint as cnt
+          FROM "Comment"
+          GROUP BY "bookId"
+          ORDER BY cnt DESC
+          LIMIT ${LIMIT};
         `;
         const mostCommentedRaw = await prisma.book.findMany({ where: { id: { in: commentsAll.map(x => x.bookId) } }, select: { id: true, title: true, coverUrl: true } });
             const mcMap = new Map<string, { id: string; title: string; coverUrl: string | null }>(mostCommentedRaw.map(b => [b.id, b]));
             const maisComentados = commentsAll
                 .map(x => mcMap.get(x.bookId))
                 .filter((b): b is { id: string; title: string; coverUrl: string | null } => Boolean(b))
-                .map(b => toCarousel(b));
+                .map(b => toCarousel(b!));
 
         // Mais seguidos (all-time)
         const followsAll = await prisma.$queryRaw<Array<{ bookId: string; cnt: bigint }>>`
@@ -160,7 +152,7 @@ export default async function Home() {
             const maisSeguidos = followsAll
                 .map(x => mfMap.get(x.bookId))
                 .filter((b): b is { id: string; title: string; coverUrl: string | null } => Boolean(b))
-                .map(b => toCarousel(b));
+                .map(b => toCarousel(b!));
 
         // Quem sabe você goste: aleatórios
         const randomIds = await prisma.$queryRaw<Array<{ id: string }>>`
