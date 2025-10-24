@@ -6,6 +6,7 @@ import { Breadcrumb } from "@/components/ui/navbar/Breadcrumb";
 import prisma from "@/lib/prisma";
 import BannerCarousel from "@/components/sections/BannerCarousel";
 import BookCarousel, { type CarouselBook } from "@/components/book/BookCarousel";
+import LatestReleasesTable from '@/components/sections/LatestReleasesTable';
 import { AppRole } from "@/types/user";
 import {
     Sparkles,
@@ -202,6 +203,8 @@ export default async function Home() {
                 <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 pb-8">
                     <BookCarousel title="Quem sabe você goste!" icon={<Wand2 size={18} />} books={quemSabe} itemsPerView={6} />
                 </div>
+                {/* Latest releases table */}
+                <LatestReleasesTable />
             </main>
         </>
     );
