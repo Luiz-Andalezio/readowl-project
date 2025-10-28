@@ -71,6 +71,15 @@ interface Props {
 }
 
 export default function NotificationCard({ notification, onClick, onDelete, onCheck }: Props) {
+  // Função para extrair texto limpo de HTML
+  function stripHtml(html?: string) {
+    if (!html) return "";
+    if (typeof window === "undefined") return html;
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  }
+
   const config = typeConfig[notification.type];
   return (
     <div
@@ -82,11 +91,17 @@ export default function NotificationCard({ notification, onClick, onDelete, onCh
       aria-label={config.title(notification)}
     >
       {/* Left: Book cover */}
-      <img
-        src={notification.bookCoverUrl}
-        alt={`Capa de ${notification.bookTitle}`}
-        className="w-16 h-20 object-cover rounded-md mr-4 border border-readowl-purple-extralight shadow-sm"
-      />
+      {notification.bookCoverUrl && notification.bookCoverUrl.trim() !== "" ? (
+        <img
+          src={notification.bookCoverUrl}
+          alt={`Capa de ${notification.bookTitle}`}
+          className="w-16 h-20 object-cover rounded-md mr-4 border border-readowl-purple-extralight shadow-sm"
+        />
+      ) : (
+        <div className="w-16 h-20 rounded-md mr-4 bg-readowl-purple-extralight flex items-center justify-center border border-readowl-purple-extralight shadow-sm">
+          <BookOpen className="text-readowl-purple-medium" size={32} />
+        </div>
+      )}
       {/* Body */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -102,12 +117,12 @@ export default function NotificationCard({ notification, onClick, onDelete, onCh
         )}
         {notification.originalComment && (
           <div className="text-xs text-gray-500 italic mt-1 truncate">
-            “{notification.originalComment}”
+            “{stripHtml(notification.originalComment)}”
           </div>
         )}
         {config.snippet && (
           <div className="text-sm text-gray-700 mt-1 truncate">
-            {config.snippet(notification)}
+            {stripHtml(config.snippet(notification))}
           </div>
         )}
       </div>
