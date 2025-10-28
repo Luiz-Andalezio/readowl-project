@@ -108,7 +108,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
         }
 
         // Arrows & scrollability
-    const origScrollable = books.length > visibleCount;
+        const origScrollable = books.length > visibleCount;
         setIsScrollable(origScrollable);
         if (origScrollable && loopEnabled) {
             // Infinite: both arrows are always available
@@ -341,7 +341,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
             // restore from memory if available
             const key = `bookCarousel:${storageKey || title}`;
             let initialIndex = 0;
-            try { const saved = localStorage.getItem(key); if (saved) initialIndex = Math.max(0, Math.min(books.length - 1, parseInt(saved, 10) || 0)); } catch {}
+            try { const saved = localStorage.getItem(key); if (saved) initialIndex = Math.max(0, Math.min(books.length - 1, parseInt(saved, 10) || 0)); } catch { }
             if (loopEnabled) {
                 const baseOffset = cloneCount * snap;
                 el.scrollLeft = baseOffset + initialIndex * snap - peekPrev; // align to start of real set
@@ -354,7 +354,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
 
     // Persist position in memory whenever activeIndex changes
     useEffect(() => {
-        try { localStorage.setItem(`bookCarousel:${storageKey || title}`, String(activeIndex)); } catch {}
+        try { localStorage.setItem(`bookCarousel:${storageKey || title}`, String(activeIndex)); } catch { }
     }, [activeIndex, title, storageKey]);
 
     return (
@@ -387,57 +387,57 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
                         )}
                         style={{ gap, paddingLeft: peekPrev, paddingRight: peekNext }}
                     >
-            {dataset.map((b, i) => {
-                // Map dataset index to original books index for highlight state
-                let localIndex = 0;
-                if (loopEnabled) {
-                    if (i < cloneCount) localIndex = (books.length - cloneCount + i) % books.length;
-                    else if (i >= cloneCount + books.length) localIndex = (i - (cloneCount + books.length)) % books.length;
-                    else localIndex = i - cloneCount;
-                } else {
-                    localIndex = i;
-                }
-                const isActive = localIndex === activeIndex;
-                const scaleCls = isActive ? 'scale-[1.06] shadow-xl ring-readowl-purple contrast-[1.05]' : 'scale-[0.96] opacity-95';
-                return (
-                            <Link
-                                key={`${b.id}-${i}`}
-                href={`/library/books/${slugify(b.title)}`}
-                                aria-label={b.title}
-                                onClick={() => {
-                                    // pause autoplay, schedule resume after idle
-                                    setPaused(true);
-                                    if (idleResumeTimer.current) window.clearTimeout(idleResumeTimer.current);
-                                    idleResumeTimer.current = window.setTimeout(() => setPaused(false), 3000);
-                                }}
-                                className={`group relative flex-shrink-0 overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark transition-transform duration-300 ${scaleCls}`}
-                                style={{ width: cardWidth, aspectRatio: '3 / 4' }}
-                            >
-                                {b.coverUrl ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={b.coverUrl}
-                                        alt={b.title}
-                                        draggable={false}
-                                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07]"
-                                        loading="lazy"
-                                    />
-                                ) : (
-                                    FALLBACK_PLACEHOLDER
-                                )}
-                                <div className="absolute inset-0 flex flex-col justify-end">
-                                    <div className="pointer-events-none mt-auto w-full px-2 pb-1 pt-8 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
-                                        <p
-                                            title={b.title}
-                                            className="text-[11px] sm:text-xs font-medium text-white leading-snug drop-shadow-md text-center"
-                                            style={clamp3}
-                                        >
-                                            {b.title}
-                                        </p>
+                        {dataset.map((b, i) => {
+                            // Map dataset index to original books index for highlight state
+                            let localIndex = 0;
+                            if (loopEnabled) {
+                                if (i < cloneCount) localIndex = (books.length - cloneCount + i) % books.length;
+                                else if (i >= cloneCount + books.length) localIndex = (i - (cloneCount + books.length)) % books.length;
+                                else localIndex = i - cloneCount;
+                            } else {
+                                localIndex = i;
+                            }
+                            const isActive = localIndex === activeIndex;
+                            const scaleCls = isActive ? 'opacity-100' : 'opacity-95';
+                            return (
+                                <Link
+                                    key={`${b.id}-${i}`}
+                                    href={`/library/books/${slugify(b.title)}`}
+                                    aria-label={b.title}
+                                    onClick={() => {
+                                        // pause autoplay, schedule resume after idle
+                                        setPaused(true);
+                                        if (idleResumeTimer.current) window.clearTimeout(idleResumeTimer.current);
+                                        idleResumeTimer.current = window.setTimeout(() => setPaused(false), 3000);
+                                    }}
+                                    className={`group relative flex-shrink-0 overflow-hidden shadow-md ring-1 ring-readowl-purple-light/40 hover:ring-readowl-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-readowl-purple-dark transition-transform duration-300 ${scaleCls}`}
+                                    style={{ width: cardWidth, aspectRatio: '3 / 4' }}
+                                >
+                                    {b.coverUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={b.coverUrl}
+                                            alt={b.title}
+                                            draggable={false}
+                                            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07]"
+                                            loading="lazy"
+                                        />
+                                    ) : (
+                                        FALLBACK_PLACEHOLDER
+                                    )}
+                                    <div className="absolute inset-0 flex flex-col justify-end">
+                                        <div className="pointer-events-none mt-auto w-full px-2 pb-1 pt-8 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+                                            <p
+                                                title={b.title}
+                                                className="text-[11px] sm:text-xs font-medium text-white leading-snug drop-shadow-md text-center"
+                                                style={clamp3}
+                                            >
+                                                {b.title}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            </Link>
-                );
+                                </Link>
+                            );
                         })}
                     </div>
 
@@ -473,7 +473,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({ books, title, icon =
             })()}
 
             {/* Global styles inside component for scrollbar hiding & snapping */}
-                        <style jsx global>{`
+            <style jsx global>{`
                 .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
                 .hide-scrollbar::-webkit-scrollbar { display: none; }
                 .hide-scrollbar { scroll-snap-type: x mandatory; }
