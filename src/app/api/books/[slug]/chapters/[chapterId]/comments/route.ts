@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/authOptions';
 import { slugify } from '@/lib/slug';
 
 async function findBookAndChapter(slug: string, chapterSlug: string) {
-  const books = await prisma.book.findMany({ select: { id: true, title: true } });
+  const books = await prisma.book.findMany({ select: { id: true, title: true, authorId: true, coverUrl: true } });
   const book = books.find((b) => slugify(b.title) === slug) || null;
   if (!book) return { book: null, chapter: null } as const;
   const chapters = await prisma.chapter.findMany({ where: { bookId: book.id }, select: { id: true, title: true } });
@@ -62,5 +62,45 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
   }
 
   const created = await prisma.comment.create({ data: { userId: session.user.id, bookId: book.id, chapterId: chapter.id, content, parentId } });
+
+  // Notificar o autor do livro para novo comentário em capítulo
+  if (!parentId && book.id && session.user.id !== book.authorId) {
+    try {
+      await prisma.notification.create({
+        data: {
+          userId: book.authorId,
+          type: "CHAPTER_COMMENT",
+          bookId: book.id,
+          chapterId: chapter.id,
+          bookTitle: book.title,
+          chapterTitle: chapter.title,
+          bookCoverUrl: book.coverUrl,
+          commenterName: session.user.name,
+          commentContent: content,
+        }
+      });
+    } catch {}
+  }
+
+  // Notificar o autor do comentário original para resposta
+  if (parentId) {
+    const parentComment = await prisma.comment.findUnique({ where: { id: parentId }, select: { userId: true, content: true } });
+    if (parentComment && parentComment.userId !== session.user.id) {
+      await prisma.notification.create({
+        data: {
+          userId: parentComment.userId,
+          type: "COMMENT_REPLY",
+          bookId: book.id,
+          chapterId: chapter.id,
+          bookTitle: book.title,
+          chapterTitle: chapter.title,
+          bookCoverUrl: book.coverUrl,
+          commenterName: session.user.name,
+          commentContent: content,
+          originalComment: parentComment.content,
+        }
+      });
+    }
+  }
   return NextResponse.json({ comment: created }, { status: 201 });
 }

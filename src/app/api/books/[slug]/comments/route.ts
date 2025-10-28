@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/authOptions';
 import { slugify } from '@/lib/slug';
 
 async function findBookBySlug(slug: string) {
-  const all = await prisma.book.findMany({ select: { id: true, title: true } });
+  const all = await prisma.book.findMany({ select: { id: true, title: true, authorId: true, coverUrl: true } });
   return all.find((b) => slugify(b.title) === slug) || null;
 }
 
@@ -61,5 +61,22 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
   }
 
   const created = await prisma.comment.create({ data: { userId: session.user.id, bookId: book.id, content, parentId } });
+
+  // Notificar o autor do livro (exceto se o próprio autor comentou)
+  if (book.id && session.user.id !== book.authorId) {
+    try {
+      await prisma.notification.create({
+        data: {
+          userId: book.authorId,
+          type: "BOOK_COMMENT",
+          bookId: book.id,
+          bookTitle: book.title,
+          bookCoverUrl: undefined, // Adapte se tiver cover
+          commenterName: session.user.name,
+          commentContent: content,
+        }
+      });
+    } catch {}
+  }
   return NextResponse.json({ comment: created }, { status: 201 });
 }

@@ -44,7 +44,27 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
 		const existingTitles = await prisma.chapter.findMany({ where: { bookId: book.id }, select: { id: true, title: true } });
 		const conflict = existingTitles.some((c) => slugify(c.title) === newSlug);
 		if (conflict) return NextResponse.json({ error: 'O título informado gera uma URL já existente para esta obra.' }, { status: 409 });
-	const chapter = await prisma.chapter.create({ data: { title, content, bookId: book.id, volumeId: volumeId || null } });
-	return NextResponse.json({ chapter }, { status: 201 });
+		const chapter = await prisma.chapter.create({ data: { title, content, bookId: book.id, volumeId: volumeId || null } });
+
+		// Notificar seguidores do livro sobre novo capítulo
+		const followers = await prisma.bookFollow.findMany({ where: { bookId: book.id }, select: { userId: true } });
+		for (const follower of followers) {
+			if (follower.userId !== book.authorId) {
+				await prisma.notification.create({
+					data: {
+						userId: follower.userId,
+						type: "NEW_CHAPTER",
+						bookId: book.id,
+						chapterId: chapter.id,
+						bookTitle: book.title,
+						chapterTitle: chapter.title,
+						bookCoverUrl: undefined,
+						authorName: session.user.name,
+						chapterSnippet: content.slice(0, 300),
+					}
+				});
+			}
+		}
+		return NextResponse.json({ chapter }, { status: 201 });
 }
 
